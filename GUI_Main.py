@@ -68,7 +68,7 @@ class GUI_Main(Tk):
 
         self.tools_menu = Menu(self.menu)
         self.move_viewer = None
-        self.tools_menu.add_command(label="Launch Move Viewer", command=self.launch_move_viewer)
+        self.tools_menu.add_command(label="Launch Move Editor", command=self.launch_move_viewer)
 
         self.move_id_ometer = None
         self.tools_menu.add_command(label="Launch Move-Id-Ometer", command=self.launch_move_id_ometer)

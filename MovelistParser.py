@@ -5,11 +5,16 @@ see HowTheMovelistBytesWork.md for a full description of how the movelist is par
 
 
 import struct
+import MovelistEnums as mve
 from MovelistEnums import *
 import GameplayEnums
 import copy
+import math
 
 def b4i (bytes, index : int):
+    return struct.unpack('I', bytes[index: index + 4])[0]
+
+def bs4i (bytes, index : int):
     return struct.unpack('I', bytes[index: index + 4])[0]
 
 def b2i (bytes, index : int , big_endian = False):
@@ -17,9 +22,18 @@ def b2i (bytes, index : int , big_endian = False):
         return struct.unpack('H', bytes[index: index + 2])[0]
     else:
         return struct.unpack('>H', bytes[index: index + 2])[0]
+    
+def bs2i (bytes, index : int , big_endian = False):
+    if not big_endian:
+        return struct.unpack('h', bytes[index: index + 2])[0]
+    else:
+        return struct.unpack('>h', bytes[index: index + 2])[0]
 
 def b1i (bytes, index : int):
     return struct.unpack('B', bytes[index: index + 1])[0]
+
+def bs1i (bytes, index : int):
+    return struct.unpack('b', bytes[index: index + 1])[0]
 
 def b4f (bytes, index : int):
     return struct.unpack('f', bytes[index: index + 4])[0]
@@ -224,13 +238,16 @@ class Move:
 
     def get_gui_guide(self):
         guide = [
-            (0x00, 0x04, b4i, "animation id"),
-            (0x04, 0x08, b4i, "???"),
+            (0x00, 0x02, b2i, "animation id"),
+            (0x02, 0x04, bs2i,"animation start frame"),
+            (0x04, 0x06, b2i, "animation max frame override"),
+            (0x06, 0x08, b2i, "???"),
             (0x08, 0x0c, b4f, "weapon(?) motion(?) multiplier"),
             (0x0c, 0x10, b4f, "animation speed multiplier (no change in total frames)"),
 
-            (0x10, 0x14, b4i, "transition/blending animation"),
-            (0x14, 0x16, b2i, "???"),
+            (0x10, 0x12, bs2i, "transition/blending animation"),
+            (0x12, 0x14, b2i, "blending animation start frame"),
+            (0x14, 0x16, b2i, "blending animation max frame override"),
             (0x16, 0x18, b2i, "???"),
             (0x18, 0x1c, b4f, "?float?transition?"),
             (0x1c, 0x20, b4f, "?float?transition?"),
@@ -242,7 +259,7 @@ class Move:
             (0x30, 0x34, b4f, "move speed multiplier (multiplies total frames)"),
             (0x34, 0x36, b2i, "total animation frames"),
             (0x36, 0x38, b2i, "???"),
-            (0x38, 0x3C, lambda x, y: '{:04x}'.format(b4i(x, y)), "address of cancel information"),
+            (0x38, 0x3C, lambda x, y: '{:04x}'.format(b4i(x, y)), "address of script information"),
 
             (0x3C, 0x3E, b2i, "hitbox 1 index"),
             (0x3E, 0x40, b2i, "hitbox 2 index"),
@@ -344,43 +361,46 @@ class Attack:
             (0x14, 0x1a, b2i, "physics on counter (pushback?)"),
             (0x1a, 0x20, b2i, "physics on counter (launch?)"),
             (0x20, 0x26, b2i, "physics on airborne"),
-            (0x26, 0x2c, b2i, "physics on block "),
+            (0x26, 0x2c, b2i, "physics on block"),
             (0x2c, 0x32, b2i, "physics on grounded"),
-
-
 
             (0x32, 0x33, b1i, "hit level (high/low/unblockable/etc.)"),
             (0x33, 0x34, b1i, "???"),
             (0x34, 0x36, b2i, "hit spark type (contributes to guard damage)"),
             (0x36, 0x38, b2i, "begin active frames (startup)"),
             (0x38, 0x3A, b2i, "end active frames"),
+            
             (0x3A, 0x3C, b2i, "damage"),
+            (0x3C, 0x3E, b2i, "chip damage"),
+            (0x3E, 0x40, b2i, "chip damage related?"),
 
-            (0x3C, 0x40, b4i, "???"),
-            (0x40, 0x44, b4i, "???"),
+            (0x40, 0x42, lambda x, y: f'{bs2i(x, y)}%', "combo scaling"),
+            (0x42, 0x44, lambda x, y: f'{bs2i(x, y)}%', "guard break scaling"),
+
             (0x44, 0x46, b2i, "frames of block stun"),
             (0x46, 0x48, b2i, "frames of hit stun"),
             (0x48, 0x4a, b2i, "frames of counterhit stun"),
-            (0x4a, 0x4c, b2i, "???"),
-            (0x4c, 0x4e, b2i, "???"),
+            (0x4a, 0x4c, b2i, "repeat of block stun"),
+            (0x4c, 0x4e, b2i, "repeat of hit stun"),
+            (0x4e, 0x50, b2i, "repeat of counterhit stun"),
 
-            (0x4e, 0x50, b2i, "???"),
             (0x50, 0x52, b2i, "hit effect (type of launch/crouching recovery/etc.)"),
-            (0x52, 0x54, b2i, "counter effect"),
-            (0x54, 0x56, b2i, "block effect"),
-            (0x56, 0x58, b2i, "???"),
-            (0x58, 0x5a, b2i, "???"),
-            (0x5a, 0x5c, b2i, "guard damage override (otherwise uses hit spark size and type calc)"),
-            (0x5c, 0x5e, b2i, "???"),
-            (0x5e, 0x60, b2i, "guard damage contributor"),
-            (0x60, 0x62, b2i, "???"),
+            (0x52, 0x54, b2i, "counter hit effect"),
+            (0x54, 0x56, b2i, "grounded hit effect"),
+            (0x56, 0x58, b2i, "standing block hit effect"),
+            (0x58, 0x5a, b2i, "crouching block hit effect"),
+            (0x5a, 0x5c, lambda x, y: f'{math.floor(bs2i(x, y)*100/240)}%' if bs2i(x,y) >= 0 else 'disabled' , "guard damage override (otherwise uses hit spark size and type calc)"),
+            (0x5c, 0x5e, b2i, "combo condition flag(s) [0x01 = counterhit, 0x08 = won't chain, 0x20 = jails on block]"),
+            (0x5e, 0x60, b2i, "attack intensity"),
+            (0x60, 0x62, b2i, "same as above"),
 
             (0x62, 0x64, b2i, "hit spark size (contributes to guard damage)"),
+            
             (0x64, 0x66, b2i, "???"),
-
             (0x66, 0x68, b2i, "???"),
-            (0x68, 0x6c, b2i, "???"),
-            (0x6c, 0x70, b2i, "???"),
+
+            (0x68, 0x6c, lambda x, y: f'[{b2i(x,y)}][{bs2i(x,y+2)}]' if bs2i(x,y+2) > -1 else 'None',  "VFX addition on block - [VFX type (00:Common 01:Character 03:Stage)] [VFX ID]"),
+            (0x6c, 0x70, lambda x, y: f'[{b2i(x,y)}][{bs2i(x,y+2)}]' if bs2i(x,y+2) > -1 else 'None',  "VFX addition on hit - [VFX type (00:Common 01:Character 03:Stage)] [VFX ID]"),
         ]
         return self.bytes, guide
 
@@ -713,6 +733,9 @@ class Cancel:
         list_of_bytes = []
         goto_blocks = []
         current_bytes = b''
+        label = ''
+        last_bool = 'last A5'
+        button_states = [0x06, 0x0020]
 
         while index < len(self.bytes):
             current_bytes += self.bytes[index: index + 1]
@@ -738,7 +761,64 @@ class Cancel:
                     list_of_bytes.append((current_bytes, 'START (type {})'.format(args), index))
                     current_bytes = b''
                 if inst == CC.EXE_A5:
-                    list_of_bytes.append((current_bytes, 'SET A5 (condition {})'.format(first_arg), index))
+                    try:
+                        label = 'SET A5 (condition {})'.format(first_arg)
+                        last_bool = 'last a5'
+                        state_index = (index - 3) - (second_arg * 3)
+                        state = b2i(self.bytes, state_index + 1, big_endian=True)
+                        state_args = Movelist.bytes_as_string(self.bytes[state_index + 3: index - 3])
+                    except:
+                        state = 'ERROR'
+                        state_args = 'ERROR'
+
+                    if first_arg == 0x01:
+                            #if hex(b1i(self.bytes, state_index)) == 0x8b:
+                            try:
+                                if state in button_states:
+                                    
+                                    if state == 0x0006: 
+                                       label = f'BUTTON INPUT CHECK: {InputType(state).name} {mve.PaddedButton(b2i(self.bytes, state_index + 4, big_endian=True)).name.replace("_", "+")}'
+                                       last_bool = 'BUTTON INPUT CHECK'
+
+                                    if state == 0x20: # hold input with frame duration check?
+                                        label = f'BUTTON INPUT CHECK: {InputType(state).name} {mve.PaddedButton(b2i(self.bytes, state_index + 4, big_endian=True)).name.replace("_", "+")} for {b2i(self.bytes, state_index + 7, big_endian=True)} frames'
+                                        last_bool = 'BUTTON INPUT CHECK'
+                                
+                                if state == 0x66:
+                                    label = f'HIT CHECK <{b2i(self.bytes, state_index + 4, big_endian=True )}>'
+                                    last_bool = 'HIT CHECK'
+
+                                if state == 0x13ae or state == 0x13af:
+                                    label = f'DIRECTION INPUT CHECK: {InputType(state).name.split("_")[1].capitalize()} {mve.PaddedButton(b2i(self.bytes, state_index + 4, big_endian=True)).name.split("_")[0]}'
+                                    last_bool = 'DIRECTION INPUT CHECK'
+                                    
+
+                                
+                            except:
+                                state = 'ERROR'
+
+                    if first_arg == 0x25:
+                        try:
+                            if second_arg == 0x02:
+                                if b1i(self.bytes, state_index + 1) == 0x74:
+                                    label = f'RELATIVE FRAME WINDOW CHECK <ENTRY>: frame {b1i(self.bytes, state_index + 2)} to {b1i(self.bytes, state_index + 5)}'
+                                    last_bool = 'RELATIVE FRAME WINDOW CHECK <ENTRY>'
+                                else:   
+                                    label = f'FRAME WINDOW CHECK: frame {state} to {b2i(self.bytes, state_index + 4, big_endian=True)}'
+                                    last_bool = 'FRAME WINDOW CHECK'
+                            elif b1i(self.bytes, state_index + 1) == 0x74:
+                                label = f'RELATIVE FRAME CHECK <ENTRY>: frame {b1i(self.bytes, state_index + 2)}'
+                                last_bool = 'RELATIVE FRAME CHECK <ENTRY>'
+                            else:
+                                label = f'FRAME CHECK: frame {state}'
+                                last_bool = 'FRAME CHECK'
+
+                                    
+                        except:
+                            state = 'ERROR'
+
+                           
+                    list_of_bytes.append((current_bytes, label, index))
                     current_bytes = b''
                 if inst == CC.EXE_25:
                     try:
@@ -758,6 +838,7 @@ class Cancel:
                             tag = '<sc>'
                         else:
                             tag = '<b>'
+                        state_id = state
                         state = '{}[id:{}{}{}]'.format(state, tag, alias, tag)
                     except:
                         state = 'ERROR'
@@ -767,12 +848,62 @@ class Cancel:
                     if first_arg == 0x07:
                         list_of_bytes.append((current_bytes, 'SWITCH {} ({})'.format(state, state_args), index))
                     elif first_arg == 0x0d:
-                        list_of_bytes.append((current_bytes, 'ADD {} ({})'.format(state, state_args), index))
+                        try:
+                            label = ''
+                            if state_id == 0x305d:
+                                label = f'SPECIAL STATE <{b2i(self.bytes, state_index + 4, big_endian=True )}> [start:frame {b2i(self.bytes, state_index + 7, big_endian=True )} end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
+                                if b2i(self.bytes, state_index + 4, big_endian=True ) == 0x02:
+                                    label = f'SPECIAL STATE <TECH CROUCH> [start:frame {b2i(self.bytes, state_index + 7, big_endian=True )} end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
+                                if b2i(self.bytes, state_index + 4, big_endian=True ) == 0x04:
+                                    label = f'SPECIAL STATE <TECH JUMP> [start:frame {b2i(self.bytes, state_index + 7, big_endian=True )} end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
+                                if b2i(self.bytes, state_index + 4, big_endian=True ) == 0x2b:
+                                    label = f'SPECIAL STATE <TECH COUNTER?> [start:frame {b2i(self.bytes, state_index + 7, big_endian=True )} end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
+
+                            if state_id == 0x3221:
+                                label = f'PERSONA CHANGE % [{b2i(self.bytes, state_index + 4, big_endian=True )}%]'
+                            
+                            
+
+                        except:
+                            state = 'ERROR'
+
+                        list_of_bytes.append((current_bytes, 'CALL MOVE SCRIPT: {}({})'.format(label+state if label != "" else state, state_args), index))
+
+                    elif first_arg == 0x03:
+                        try:
+                            label = ''
+                            if state_id == 0x0004:
+                                label = f'APPLY MOVEMENT [angle:{b2i(self.bytes, state_index + 4, big_endian=True )} distance:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x000e:
+                                label = f'ANIMATION BUFFER [amount:{b2i(self.bytes, state_index + 4, big_endian=True )} frames]'
+                            if state_id == 0x002f:
+                                label = f'SELECT CAMERA [0:{b2i(self.bytes, state_index + 4, big_endian=True )} 1:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x07d0:
+                                label = f'PLAY SOUND [id:{b2i(self.bytes, state_index + 4, big_endian=True )}]'
+                            if state_id == 0x07d1:
+                                label = f'PLAY VOICE LINE [type:{b2i(self.bytes, state_index + 4, big_endian=True )} id:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x07df:
+                                label = f'PLAY RANDOM VOICE LINE [type:{b2i(self.bytes, state_index + 4, big_endian=True )}]'
+                            if state_id == 0x13a1:
+                                label = f'SET CHARACTER VALUE [target:{bs2i(self.bytes, state_index + 4, big_endian=True )} value:{bs2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x13d8:
+                                label = f'APPLY DAMAGE SCALING [{bs2i(self.bytes, state_index + 7, big_endian=True )}%]'
+                            if state_id == 0x13e0:
+                                label = f'CHANGE CHARACTER VALUE BY ## [target:{bs2i(self.bytes, state_index + 4, big_endian=True )} value:{bs2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x2afb:
+                                label = f'APPLY SCREEN FILTER [in:{b2i(self.bytes, state_index + 4, big_endian=True )} duration:{b2i(self.bytes, state_index + 7, big_endian=True )} out:{b2i(self.bytes, state_index + 10, big_endian=True )} sat:{b2i(self.bytes, state_index + 13, big_endian=True )} lgt:{b2i(self.bytes, state_index + 16, big_endian=True )} reds:{b2i(self.bytes, state_index + 19, big_endian=True )} greens:{b2i(self.bytes, state_index + 22)} ??:{b2i(self.bytes, state_index + 25, big_endian=True )} blues:{b2i(self.bytes, state_index + 28, big_endian=True )}]'
+                            if state_id == 0x2332 or state_id == 0x2333:
+                                label = f'MOVE CAMERA [type:{b2i(self.bytes, state_index + 4, big_endian=True )} ??:{b2i(self.bytes, state_index + 7, big_endian=True )} target:{b2i(self.bytes, state_index + 10, big_endian=True )} ??:{b2i(self.bytes, state_index + 13, big_endian=True )} ??:{b2i(self.bytes, state_index + 16, big_endian=True )} zoom:{b2i(self.bytes, state_index + 19, big_endian=True )} vertical_angle:{b2i(self.bytes, state_index + 22)} left/right_span:{b2i(self.bytes, state_index + 25, big_endian=True )} roll:{b2i(self.bytes, state_index + 28, big_endian=True )}]'
+                        
+                        except:
+                            state = 'ERROR'
+                        list_of_bytes.append((current_bytes, 'CALL SYSTEM SCRIPT: {}'.format(label if label !="" else state), index))
+
                     else:
-                        list_of_bytes.append((current_bytes, 'STATE {} ?? ({}) '.format(state, state_args), index))
+                        list_of_bytes.append((current_bytes, 'CALL SYSTEM SCRIPT {} ?? ({}) '.format(state, state_args), index))
                     current_bytes =  b''
                 if inst == CC.EXE_19:
-                    list_of_bytes.append((current_bytes, 'neutral cancel(???)'.format(first_arg), index))
+                    list_of_bytes.append((current_bytes, 'SET VARIABLE ({})'.format(second_arg), index))
                     current_bytes = b''
                 if inst == CC.EXE_13:
                     list_of_bytes.append((current_bytes, 'yoshimitsu only ??? backturned mantis stance?'.format(first_arg), index))
@@ -782,11 +913,11 @@ class Cancel:
                     goto_blocks.append((index, args))
                     current_bytes = b''
                 if inst == CC.PEN_28:
-                    list_of_bytes.append((current_bytes, 'IF [last a5] GOTO: {:04x}'.format(args), index))
+                    list_of_bytes.append((current_bytes, 'IF [{} = False] GOTO: {:04x}'.format(last_bool, args), index))
                     current_bytes = b''
                     goto_blocks.append((index, args))
                 if inst == CC.PEN_29:
-                    list_of_bytes.append((current_bytes, 'IF ??? GOTO{:04x}'.format(args), index))
+                    list_of_bytes.append((current_bytes, 'IF ??? GOTO: {:04x}'.format(args), index))
                     current_bytes = b''
                     goto_blocks.append((index, args))
 

@@ -4,7 +4,7 @@
 block_cipher = None
 
 
-a = Analysis(['GUI_Main.py'],
+a = Analysis(['GUI_MoveViewer.py'],
              pathex=[],
              binaries=[],
              datas=[('Data', 'Data'), ('Config', 'Config')],
@@ -24,7 +24,7 @@ exe = EXE(pyz,
           a.scripts, 
           [],
           exclude_binaries=True,
-          name='SCUFFLE',
+          name='SCUFFLE_Editor',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -41,4 +41,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='SCUFFLE')
+               name='SCUFFLE_Editor')

@@ -5,6 +5,7 @@ import tkinter.font as tkf
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import asksaveasfilename
 import MovelistParser
+from _GameStateManager import GameStateManager
 
 class GUI_MoveViewer:
 
@@ -35,8 +36,9 @@ class GUI_MoveViewer:
 
     def __init__(self, master):
         self.master = master
+        self.launcher = GameStateManager()
         #self.master.geometry(str(1850) + 'x' + str(990))
-        master.title("SCUFFLE Move Viewer")
+        master.title("SCUFFLE Move Editor")
         master.iconbitmap('Data/icon.ico')
         s = Style()
         bold_label_font = 'Consolas 10 bold'
@@ -53,7 +55,7 @@ class GUI_MoveViewer:
         s.configure('TNotebook.Tab', font='Consolas 14')
 
         loader_frame = Frame(self.main_window, style='Loader.TFrame')
-        loader_frame.grid(sticky=N+W, row = 0, column=0)
+        loader_frame.grid(sticky=N+W+E+S, row = 0, column=0)
 
         loader_frame_top = Frame(loader_frame)
         loader_frame_bot = Frame(loader_frame)
@@ -92,7 +94,7 @@ class GUI_MoveViewer:
         cancel_frame = Frame(self.main_window)
 
         display_frame.add(move_frame, text='Move')
-        display_frame.add(hitbox_frame, text='Attack')
+        display_frame.add(hitbox_frame, text='Hitbox')
         display_frame.add(cancel_frame, text = 'Scripting')
 
         move_id_entry_container = Frame(loader_frame_bot)
@@ -126,7 +128,7 @@ class GUI_MoveViewer:
         save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: self.save_move_bytes_command())
         save_move.pack()
 
-        self.move_pair= ScrolledTextPair(move_frame, (12, 32), 24, True)
+        self.move_pair= ScrolledTextPair(move_frame, (12, 64), 60, True)
         self.move_pair.grid(sticky=W, row=0, column=1)
         self.move_raw = self.move_pair.left
         self.move_intr = self.move_pair.right
@@ -134,7 +136,7 @@ class GUI_MoveViewer:
         hitbox_frame_header = Frame(loader_frame_hit)
         hitbox_frame_header.pack()
 
-        hitbox_frame_label = Label(hitbox_frame_header, text="Attacks", font=bold_label_font)
+        hitbox_frame_label = Label(hitbox_frame_header, text="Hitboxes", font=bold_label_font)
         hitbox_frame_label.pack()
 
         self.hitbox_index = 0
@@ -160,13 +162,13 @@ class GUI_MoveViewer:
         hitbox_id_label.pack()
         hitbox_iterator_frame.pack()
 
-        self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 32), 36, True)
+        self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 104), 60, True)
         self.hitbox_pair.grid(sticky=W, row=0, column=1)
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
 
-        self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 50), 40, add_canvas=True)
-        self.cancel_pair.grid(sticky=N + W, row = 0, column = 1)
+        self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 100), 60, add_canvas=True)
+        self.cancel_pair.grid(sticky=N + W + E + S, row = 0, column = 1)
 
         self.cancel_raw = self.cancel_pair.left
 
@@ -223,6 +225,7 @@ class GUI_MoveViewer:
         tool_decode_label = Label(encode_to_decode, text='Decoded')
         tool_encode_label.grid(row=1, column=0)
         tool_decode_label.grid(row=1, column=1)
+        self.set_movelist(self.launcher.game_reader.p1_movelist)
 
 
 
@@ -245,14 +248,14 @@ class GUI_MoveViewer:
             if self.master.focus_get() != self.tool_decode:
                 i = int(self.tool_encode_string.get(), 16)
                 i = MovelistParser.decode_move_id(i, self.movelist)
-                self.tool_decode_string.set(hex(i))
+                self.tool_decode_string.set(i)
         except:
             pass
 
     def encode(self, *args):
         try:
             if self.master.focus_get() != self.tool_encode:
-                i = int(self.tool_decode_string.get(), 16)
+                i = int(self.tool_decode_string.get(), 10)
                 i = MovelistParser.encode_move_id(i, self.movelist)
                 self.tool_encode_string.set(hex(i))
         except:
@@ -268,7 +271,10 @@ class GUI_MoveViewer:
 
     def set_movelist(self, movelist):
         self.movelist = movelist
-        self.movelist_name_var.set(self.movelist.name)
+        try:
+            self.movelist_name_var.set(self.movelist.name)
+        except:
+            pass
 
 
     def save_move_bytes_command(self):
@@ -501,7 +507,7 @@ class ScrolledTextPair(Frame):
 
             self.canvas.yview('moveto', '1.0')
             self.pack_propagate(0)
-            self.canvas.pack(side=LEFT, fill=None, expand=False)
+            self.canvas.pack(side=LEFT, fill='y', expand=True)
             self.pack_propagate(1)
             #self.canvas.create_rectangle(0,0, 20, 300, fill='red')
 
@@ -606,3 +612,4 @@ if __name__ == '__main__':
     root = Tk()
     my_gui = GUI_MoveViewer(root)
     root.mainloop()
+    

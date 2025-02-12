@@ -1,0 +1,29 @@
+name: scuffle
+channels:
+  - defaults
+dependencies:
+  - ca-certificates=2024.12.31=haa95532_0
+  - openssl=3.0.15=h827c3e9_0
+  - pip=25.0=py39haa95532_0
+  - python=3.9.21=h8205438_1
+  - setuptools=75.8.0=py39haa95532_0
+  - sqlite=3.45.3=h2bbff1b_0
+  - tzdata=2025a=h04d1e81_0
+  - vc=14.42=haa95532_3
+  - vs2015_runtime=14.42.34433=he0abc0d_3
+  - wheel=0.45.1=py39haa95532_0
+  - pip:
+    - altgraph==0.17.4
+    - certifi==2025.1.31
+    - charset-normalizer==3.4.1
+    - idna==3.10
+    - importlib-metadata==8.6.1
+    - packaging==24.2
+    - pefile==2023.2.7
+    - pyinstaller==4.10
+    - pyinstaller-hooks-contrib==2025.1
+    - pywin32-ctypes==0.2.3
+    - requests==2.32.3
+    - urllib3==2.3.0
+    - zipp==3.21.0
+prefix: C:\Users\LogzatioStudios\anaconda3\envs\scuffle

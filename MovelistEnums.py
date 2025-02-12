@@ -45,12 +45,21 @@ class PaddedButton(Enum):
     #c =
     dd = 0x0054
 
+    Back = 0x1002
+    Back_ALT = 0x3004
+
+    Right = 0x1004
+    Right_ALT = 0x4004
+
+    Left = 0x1006
+    Left_ALT = 0x4008
+
 class InputType(Enum):
     Press = 0x06
     Hold = 0x20
 
     Direction_PRESS = 0x13AF
-    Direction_HOLD = 0x13AE
+    Direction_HOLD= 0x13AE
     Direction_ALT = 0x0002
     No_SC_Press =0x8f #for when you're not in soul charge???
 
@@ -79,7 +88,7 @@ class CC(Enum): #Cancel codes for the cancel block, mostly we expect (CC XX XX C
 
     ARG_89 = 0x89 #the ARG blocks provide arguments to the EXE blocks
     ARG_8B = 0x8b
-    ARG_8A = 0x8a #may not be an arg field???
+    ARG_8A = 0x8a #read var value
 
     PEN_2A = 0x2A #the variables for these blocks stay the same or increase (although they may start in the middle of the block and 'wrap' around to the top)
     PEN_28 = 0x28
