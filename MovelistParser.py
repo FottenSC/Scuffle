@@ -399,8 +399,8 @@ class Attack:
             (0x64, 0x66, b2i, "???"),
             (0x66, 0x68, b2i, "???"),
 
-            (0x68, 0x6c, lambda x, y: f'[{b2i(x,y)}][{bs2i(x,y+2)}]' if bs2i(x,y+2) > -1 else 'None',  "VFX addition on block - [VFX type (00:Common 01:Character 03:Stage)] [VFX ID]"),
-            (0x6c, 0x70, lambda x, y: f'[{b2i(x,y)}][{bs2i(x,y+2)}]' if bs2i(x,y+2) > -1 else 'None',  "VFX addition on hit - [VFX type (00:Common 01:Character 03:Stage)] [VFX ID]"),
+            (0x68, 0x6c, lambda x, y: f'[{name_from_enum(AssetType, b2i(x,y))}][{bs2i(x,y+2)}]' if bs2i(x,y+2) > -1 else 'None',  "VFX addition on block - [VFX type][VFX ID]"),
+            (0x6c, 0x70, lambda x, y: f'[{name_from_enum(AssetType,b2i(x,y))}][{bs2i(x,y+2)}]' if bs2i(x,y+2) > -1 else 'None',  "VFX addition on hit - [VFX type][VFX ID]"),
         ]
         return self.bytes, guide
 
@@ -735,7 +735,7 @@ class Cancel:
         current_bytes = b''
         label = ''
         last_bool = 'last A5'
-        button_states = [0x06, 0x0020]
+        button_states = [0x05 , 0x06, 0x0020]
 
         while index < len(self.bytes):
             current_bytes += self.bytes[index: index + 1]
@@ -749,7 +749,11 @@ class Cancel:
             if inst == CC.END:
                 list_of_bytes.append((current_bytes, 'END', index))
                 break
-            elif inst in Movelist.THREE_BYTE_INSTRUCTIONS:
+
+            
+            
+            
+            if inst in Movelist.THREE_BYTE_INSTRUCTIONS:
                 args_bytes = self.bytes[index + 1: index + 3]
                 current_bytes += args_bytes
                 args = b2i(args_bytes, 0, big_endian=True)
@@ -767,31 +771,56 @@ class Cancel:
                         state_index = (index - 3) - (second_arg * 3)
                         state = b2i(self.bytes, state_index + 1, big_endian=True)
                         state_args = Movelist.bytes_as_string(self.bytes[state_index + 3: index - 3])
+                        label_prefix = '<b>INVERTED CHECK:<b>' if b1i(self.bytes, index) == 0x96 else '<b>CHECK:<b>'
+                        reversed_check = True if b1i(self.bytes, index) == 0x96 else False
                     except:
                         state = 'ERROR'
                         state_args = 'ERROR'
 
                     if first_arg == 0x01:
-                            #if hex(b1i(self.bytes, state_index)) == 0x8b:
+                            
                             try:
+                                
                                 if state in button_states:
                                     
                                     if state == 0x0006: 
-                                       label = f'BUTTON INPUT CHECK: {InputType(state).name} {mve.PaddedButton(b2i(self.bytes, state_index + 4, big_endian=True)).name.replace("_", "+")}'
+                                       label = f'{label_prefix} BUTTON INPUT [{name_from_enum(InputType, state, slice=True)} <b>{name_from_enum(mve.PaddedButton, b2i(self.bytes, state_index + 4, big_endian=True),"+")}<b>]'
                                        last_bool = 'BUTTON INPUT CHECK'
 
                                     if state == 0x20: # hold input with frame duration check?
-                                        label = f'BUTTON INPUT CHECK: {InputType(state).name} {mve.PaddedButton(b2i(self.bytes, state_index + 4, big_endian=True)).name.replace("_", "+")} for {b2i(self.bytes, state_index + 7, big_endian=True)} frames'
+                                        label = f'{label_prefix} BUTTON INPUT [{name_from_enum(InputType, state, slice=True)} <b>{name_from_enum(mve.PaddedButton, b2i(self.bytes, state_index + 4, big_endian=True),"+")}<b> for <b>{b2i(self.bytes, state_index + 7, big_endian=True)}<b> frames]'
                                         last_bool = 'BUTTON INPUT CHECK'
                                 
-                                if state == 0x66:
-                                    label = f'HIT CHECK <{b2i(self.bytes, state_index + 4, big_endian=True )}>'
-                                    last_bool = 'HIT CHECK'
+                                if state == 0x11:
+                                    label = f'{label_prefix} PLAYER CHARACTER [character:{name_from_enum(CharacterID, b2i(self.bytes, state_index + 4, big_endian=True))}]'
+                                    last_bool = 'PLAYER CHARACTER CHECK'
 
+                                if state == 0x16:
+                                    label = f'{label_prefix} ROUND END'
+                                    last_bool = 'ROUND END CHECK'
+                                if state == 0x3c:
+                                    label = f'{label_prefix} OPPONENT CHARACTER [character:{name_from_enum(CharacterID, b2i(self.bytes, state_index + 4, big_endian=True))}]'
+                                    last_bool = 'OPPONENT CHARACTER CHECK'
+                                if state == 0x6b:
+                                    label = f'{label_prefix} PLAYER STYLE [style:{name_from_enum(CharacterID, b2i(self.bytes, state_index + 4, big_endian=True))}]'
+                                    last_bool = 'PLAYER STYLE CHECK'
+                                if state == 0x7b:
+                                    label = f'{label_prefix} PLAYER HP PERCENT [value:{bs2i(self.bytes, state_index + 4, big_endian=True)}%]'
+                                    last_bool = 'PLAYER HP PERCENT CHECK'
+                                if state == 0x13bd:
+                                    label = f'{label_prefix} OPPONENT HP PERCENT [value:{bs2i(self.bytes, state_index + 4, big_endian=True)}%]'
+                                    last_bool = 'OPPONENT HP PERCENT CHECK'
+                                if state == 0x66:
+                                    label = f'{label_prefix} OPPONENT STATE [state:{name_from_enum(OpponentState, b2i(self.bytes, state_index + 4, big_endian=True ))}]'
+                                    last_bool = 'OPPONENT STATE CHECK'
+                                if state == 0x138a:
+                                    label = f'{label_prefix} CHARACTER VALUE [target_value:{name_from_enum(CharacterValue, b2i(self.bytes, state_index + 4, big_endian=True ))}][value:{b2i(self.bytes, state_index + 7, big_endian=True )} to {b2i(self.bytes, state_index + 10, big_endian=True )}]'
+                                    last_bool = 'CHARACTER VALUE CHECK'
                                 if state == 0x13ae or state == 0x13af:
-                                    label = f'DIRECTION INPUT CHECK: {InputType(state).name.split("_")[1].capitalize()} {mve.PaddedButton(b2i(self.bytes, state_index + 4, big_endian=True)).name.split("_")[0]}'
+                                    label = f'{label_prefix} DIRECTION INPUT [{name_from_enum(InputType, state, format=True, slice=True, slice_index=1)} <b>{name_from_enum(mve.PaddedButton, b2i(self.bytes, state_index + 4, big_endian=True),slice=True)}<b>]'
                                     last_bool = 'DIRECTION INPUT CHECK'
-                                    
+
+                            
 
                                 
                             except:
@@ -800,24 +829,50 @@ class Cancel:
                     if first_arg == 0x25:
                         try:
                             if second_arg == 0x02:
+                                
+                                label = f'{label_prefix} FRAME WINDOW '
+                                base_label = label
+                                last_bool = 'FRAME WINDOW CHECK'
+                                
+                                
                                 if b1i(self.bytes, state_index + 1) == 0x74:
-                                    label = f'RELATIVE FRAME WINDOW CHECK <ENTRY>: frame {b1i(self.bytes, state_index + 2)} to {b1i(self.bytes, state_index + 5)}'
-                                    last_bool = 'RELATIVE FRAME WINDOW CHECK <ENTRY>'
-                                else:   
-                                    label = f'FRAME WINDOW CHECK: frame {state} to {b2i(self.bytes, state_index + 4, big_endian=True)}'
-                                    last_bool = 'FRAME WINDOW CHECK'
+                                    label += f'[entry frame + <b>{b1i(self.bytes, state_index + 2)}<b> ' if b1i(self.bytes, state_index + 2) > 0 else  f'[entry frame '
+
+                                    if b1i(self.bytes, state_index + 4) == 0x74:
+                                        label += f'to entry frame + <b>{b1i(self.bytes, state_index + 5)}<b>]' if b1i(self.bytes, state_index + 5) > 0 else  f'to entry frame]'
+                                    elif b2i(self.bytes, state_index + 4,big_endian=True) == 0x7fff:
+                                        label = base_label + f'[if frame > or = to entry frame + <b>{b1i(self.bytes, state_index + 2)}]<b>' if b1i(self.bytes, state_index + 2) > 0 else base_label + f'[if frame > or = to entry frame]'
+                                    else:
+                                        label += f'to frame <b>{b2i(self.bytes, state_index + 4,big_endian=True)}<b>]'
+                    
+                                elif b2i(self.bytes, state_index + 1,big_endian=True) == 0x7fff:
+                                    if b1i(self.bytes, state_index + 4) == 0x74:
+                                        label = base_label + f'[if frame < or = to entry frame + <b>{b1i(self.bytes, state_index + 5,big_endian=True)}<b>]'
+                                        
+                                    else:
+                                        label = base_label + f'[if frame < or = to frame <b>{b2i(self.bytes, state_index + 4,big_endian=True)}<b>]'
+                                
+                               
+                                elif b2i(self.bytes, state_index + 4,big_endian=True) == 0x7fff:
+                                        label = base_label + f'[if frame > or = to frame <b>{b2i(self.bytes, state_index + 1,big_endian=True)}<b>]'
+
+                                else:
+                                    label = f'{label_prefix} FRAME WINDOW [frame <b>{state}<b> to <b>{b2i(self.bytes, state_index + 4, big_endian=True)}<b>]'
+                                    
                             elif b1i(self.bytes, state_index + 1) == 0x74:
-                                label = f'RELATIVE FRAME CHECK <ENTRY>: frame {b1i(self.bytes, state_index + 2)}'
-                                last_bool = 'RELATIVE FRAME CHECK <ENTRY>'
+                                label = f'{label_prefix} FRAME [entry frame + <b>{b1i(self.bytes, state_index + 2)}<b>]' if b1i(self.bytes, state_index + 2) > 0 else  f'{label_prefix} FRAME [entry frame]'
+                                last_bool = 'FRAME CHECK'
                             else:
-                                label = f'FRAME CHECK: frame {state}'
+                                label = f'{label_prefix} FRAME [frame <b>{state}<b>]'
                                 last_bool = 'FRAME CHECK'
 
                                     
                         except:
                             state = 'ERROR'
 
-                           
+                    if reversed_check:
+                        current_bytes += b'\x96'
+                        index += 1
                     list_of_bytes.append((current_bytes, label, index))
                     current_bytes = b''
                 if inst == CC.EXE_25:
@@ -839,68 +894,96 @@ class Cancel:
                         else:
                             tag = '<b>'
                         state_id = state
-                        state = '{}[id:{}{}{}]'.format(state, tag, alias, tag)
+                        state = '[id:{}{}{}]'.format(tag, alias, tag)
                     except:
                         state = 'ERROR'
                         state_args = 'ERROR'
 
-
-                    if first_arg == 0x07:
-                        list_of_bytes.append((current_bytes, 'SWITCH {} ({})'.format(state, state_args), index))
+                    if first_arg == 0x03:
+                        try:
+                            label = ''
+                            if state_id == 0x0004:
+                                label = f'<b>APPLY MOVEMENT<b>: [angle:{b2i(self.bytes, state_index + 4, big_endian=True )}][distance:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x000e:
+                                label = f'<b>ANIMATION BUFFER<b>: [amount:{b2i(self.bytes, state_index + 4, big_endian=True )} frames]'
+                            if state_id == 0x002f:
+                                label = f'<b>SELECT CAMERA<b>: [0:{b2i(self.bytes, state_index + 4, big_endian=True )} 1:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x004d:
+                                label = f'<b>CAMERA SHAKE<b>: [strength:{b2i(self.bytes, state_index + 4,big_endian=True)}]'
+                            if state_id == 0x03eb:
+                                label = f'<b>SET FACIAL EXPRESSION<b>: [expression:{name_from_enum(FacialExpression, b2i(self.bytes, state_index + 4,big_endian=True))}]'
+                            if state_id == 0x07d0:
+                                label = f'<b>PLAY SOUND<b>: [id:{b2i(self.bytes, state_index + 4, big_endian=True )}]'
+                            if state_id == 0x07d1:
+                                label = f'<b>PLAY VOICE LINE<b>: [category:{name_from_enum(VoiceCategory, b2i(self.bytes, state_index + 4, big_endian=True))}][id:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x07df:
+                                label = f'<b>PLAY RANDOM VOICE LINE<b>: [category:{name_from_enum(RandomVoiceCategory, b2i(self.bytes, state_index + 4, big_endian=True))}]'
+                            if state_id == 0x13a1:
+                                label = f'<b>SET CHARACTER VALUE<b>: [target:{name_from_enum(CharacterValue, bs2i(self.bytes, state_index + 4, big_endian=True ))}][value:{bs2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x13d8:
+                                label = f'<b>APPLY DAMAGE SCALING<b>: [{bs2i(self.bytes, state_index + 7, big_endian=True )}%]'
+                            if state_id == 0x13e0:
+                                label = f'<b>CHANGE CHARACTER VALUE BY AMOUNT<b>: [target_value:{bs2i(self.bytes, state_index + 4, big_endian=True )}][amount:{bs2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x2afb:
+                                label = f'<b>APPLY SCREEN FILTER<b>: [in:{b2i(self.bytes, state_index + 4, big_endian=True )}][duration:{b2i(self.bytes, state_index + 7, big_endian=True )}][out:{b2i(self.bytes, state_index + 10, big_endian=True )}][sat:{b2i(self.bytes, state_index + 13, big_endian=True )}][lgt:{b2i(self.bytes, state_index + 16, big_endian=True )}][reds:{b2i(self.bytes, state_index + 19, big_endian=True )}][greens:{b2i(self.bytes, state_index + 22)}][??:{b2i(self.bytes, state_index + 25, big_endian=True )}][blues:{b2i(self.bytes, state_index + 28, big_endian=True )}]'
+                            if state_id == 0x2332 or state_id == 0x2333:
+                                label = f'<b>MOVE CAMERA<b>: [type:{b2i(self.bytes, state_index + 4, big_endian=True )}][??:{b2i(self.bytes, state_index + 7, big_endian=True )}][target:{name_from_enum(ViewTarget, b2i(self.bytes, state_index + 10, big_endian=True ))}][??:{b2i(self.bytes, state_index + 13, big_endian=True )}][??:{b2i(self.bytes, state_index + 16, big_endian=True )}][zoom:{b2i(self.bytes, state_index + 19, big_endian=True )}][vertical_angle:{b2i(self.bytes, state_index + 22)}][left/right_span:{b2i(self.bytes, state_index + 25, big_endian=True )}][roll:{b2i(self.bytes, state_index + 28, big_endian=True )}]'
+                            if state_id == 0x2718:
+                                label = f'<b>ADD VFX<b>: [id:{b2i(self.bytes, state_index + 4, big_endian=True )}][{b2i(self.bytes, state_index + 7, big_endian=True )}][{b2i(self.bytes, state_index + 10, big_endian=True )}][{b2i(self.bytes, state_index + 13, big_endian=True )}][{b2i(self.bytes, state_index + 16, big_endian=True )}][{b2i(self.bytes, state_index + 19, big_endian=True )}][{b2i(self.bytes, state_index + 22)}][{b2i(self.bytes, state_index + 25, big_endian=True )}][{b2i(self.bytes, state_index + 28, big_endian=True)}]'
+                            
+                        except:
+                            state = 'ERROR'
+                        list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: {state}' if label == "" else label, index))
+                    
+                    elif first_arg == 0x07:
+                        list_of_bytes.append((current_bytes, 'SWITCH MOVE: MOVE{} ({})'.format(state, state_args), index))
+                    
                     elif first_arg == 0x0d:
                         try:
                             label = ''
                             if state_id == 0x305d:
-                                label = f'SPECIAL STATE <{b2i(self.bytes, state_index + 4, big_endian=True )}> [start:frame {b2i(self.bytes, state_index + 7, big_endian=True )} end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
-                                if b2i(self.bytes, state_index + 4, big_endian=True ) == 0x02:
-                                    label = f'SPECIAL STATE <TECH CROUCH> [start:frame {b2i(self.bytes, state_index + 7, big_endian=True )} end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
-                                if b2i(self.bytes, state_index + 4, big_endian=True ) == 0x04:
-                                    label = f'SPECIAL STATE <TECH JUMP> [start:frame {b2i(self.bytes, state_index + 7, big_endian=True )} end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
-                                if b2i(self.bytes, state_index + 4, big_endian=True ) == 0x2b:
-                                    label = f'SPECIAL STATE <TECH COUNTER?> [start:frame {b2i(self.bytes, state_index + 7, big_endian=True )} end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
+                                label = f'SPECIAL STATE [state:{name_from_enum(SpecialState, b2i(self.bytes, state_index + 4, big_endian=True))}][start:frame {b2i(self.bytes, state_index + 7, big_endian=True )}][end:frame {b2i(self.bytes, state_index + 10, big_endian=True )}]'
+
+                            if state_id == 0x30ad:
+                                label = f'EARTHQUAKE [start frame:{b2i(self.bytes, state_index + 4, big_endian=True )}][bone:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
+                            if state_id == 0x30d3:
+                                label = f'SWITCH MOVE (SOUL CHARGE) MOVE[id:<b>{decode_move_id(b2i(self.bytes, state_index + 4,big_endian=True),self.movelist)}<b>]'
+
+                            if state_id == 0x30d4:
+                                label = f'SOUL CHARGE ATTACK [drain_amount:{b2i(self.bytes, state_index + 4, big_endian=True )}][show_flare:{bool(b2i(self.bytes, state_index + 7, big_endian=True))}]'
+                            
+                            if state_id == 0x30d5:
+                                label = f'ENABLE SOUL CHARGE'
 
                             if state_id == 0x3221:
                                 label = f'PERSONA CHANGE % [{b2i(self.bytes, state_index + 4, big_endian=True )}%]'
-                            
+
                             
 
                         except:
                             state = 'ERROR'
 
-                        list_of_bytes.append((current_bytes, 'CALL MOVE SCRIPT: {}({})'.format(label+state if label != "" else state, state_args), index))
+                        list_of_bytes.append((current_bytes, '<b>MOVE SCRIPT<b>: {} ({})'.format(f'{label} SCRIPT{state}' if label != "" else state, state_args), index))
 
-                    elif first_arg == 0x03:
+                    elif first_arg == 0x14:
                         try:
                             label = ''
-                            if state_id == 0x0004:
-                                label = f'APPLY MOVEMENT [angle:{b2i(self.bytes, state_index + 4, big_endian=True )} distance:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
-                            if state_id == 0x000e:
-                                label = f'ANIMATION BUFFER [amount:{b2i(self.bytes, state_index + 4, big_endian=True )} frames]'
-                            if state_id == 0x002f:
-                                label = f'SELECT CAMERA [0:{b2i(self.bytes, state_index + 4, big_endian=True )} 1:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
-                            if state_id == 0x07d0:
-                                label = f'PLAY SOUND [id:{b2i(self.bytes, state_index + 4, big_endian=True )}]'
-                            if state_id == 0x07d1:
-                                label = f'PLAY VOICE LINE [type:{b2i(self.bytes, state_index + 4, big_endian=True )} id:{b2i(self.bytes, state_index + 7, big_endian=True )}]'
-                            if state_id == 0x07df:
-                                label = f'PLAY RANDOM VOICE LINE [type:{b2i(self.bytes, state_index + 4, big_endian=True )}]'
-                            if state_id == 0x13a1:
-                                label = f'SET CHARACTER VALUE [target:{bs2i(self.bytes, state_index + 4, big_endian=True )} value:{bs2i(self.bytes, state_index + 7, big_endian=True )}]'
-                            if state_id == 0x13d8:
-                                label = f'APPLY DAMAGE SCALING [{bs2i(self.bytes, state_index + 7, big_endian=True )}%]'
-                            if state_id == 0x13e0:
-                                label = f'CHANGE CHARACTER VALUE BY ## [target:{bs2i(self.bytes, state_index + 4, big_endian=True )} value:{bs2i(self.bytes, state_index + 7, big_endian=True )}]'
-                            if state_id == 0x2afb:
-                                label = f'APPLY SCREEN FILTER [in:{b2i(self.bytes, state_index + 4, big_endian=True )} duration:{b2i(self.bytes, state_index + 7, big_endian=True )} out:{b2i(self.bytes, state_index + 10, big_endian=True )} sat:{b2i(self.bytes, state_index + 13, big_endian=True )} lgt:{b2i(self.bytes, state_index + 16, big_endian=True )} reds:{b2i(self.bytes, state_index + 19, big_endian=True )} greens:{b2i(self.bytes, state_index + 22)} ??:{b2i(self.bytes, state_index + 25, big_endian=True )} blues:{b2i(self.bytes, state_index + 28, big_endian=True )}]'
-                            if state_id == 0x2332 or state_id == 0x2333:
-                                label = f'MOVE CAMERA [type:{b2i(self.bytes, state_index + 4, big_endian=True )} ??:{b2i(self.bytes, state_index + 7, big_endian=True )} target:{b2i(self.bytes, state_index + 10, big_endian=True )} ??:{b2i(self.bytes, state_index + 13, big_endian=True )} ??:{b2i(self.bytes, state_index + 16, big_endian=True )} zoom:{b2i(self.bytes, state_index + 19, big_endian=True )} vertical_angle:{b2i(self.bytes, state_index + 22)} left/right_span:{b2i(self.bytes, state_index + 25, big_endian=True )} roll:{b2i(self.bytes, state_index + 28, big_endian=True )}]'
-                        
+                            if state_id == 0x17:
+                                label = f'SET AIR STUN [type:{name_from_enum(AirStunType,b2i(self.bytes, state_index + 4,big_endian=True))}]'
+
+                            if state_id == 0x21:
+                                label = f'OVERRIDE STUN [type:{name_from_enum(StunOverride, b2i(self.bytes, state_index + 4, big_endian=True))}]'
+
                         except:
-                            state = 'ERROR'
-                        list_of_bytes.append((current_bytes, 'CALL SYSTEM SCRIPT: {}'.format(label if label !="" else state), index))
+                            state= 'ERROR'
+                        list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: {state}' if label == "" else label, index))
+
+                    elif first_arg == 0x26:
+                        list_of_bytes.append((current_bytes, f'<b>SET ACTIVE HITBOX<b>: hitbox {state_id + 1}', index))
+                    
 
                     else:
-                        list_of_bytes.append((current_bytes, 'CALL SYSTEM SCRIPT {} ?? ({}) '.format(state, state_args), index))
+                        list_of_bytes.append((current_bytes, '<b>SYSTEM SCRIPT<b>: {} ?? ({}) '.format(state, state_args), index))
                     current_bytes =  b''
                 if inst == CC.EXE_19:
                     list_of_bytes.append((current_bytes, 'SET VARIABLE ({})'.format(second_arg), index))
@@ -913,14 +996,46 @@ class Cancel:
                     goto_blocks.append((index, args))
                     current_bytes = b''
                 if inst == CC.PEN_28:
-                    list_of_bytes.append((current_bytes, 'IF [{} = False] GOTO: {:04x}'.format(last_bool, args), index))
+                    list_of_bytes.append((current_bytes, 'IF [<b>{}<b> = False] GOTO: {:04x}'.format(last_bool, args), index))
                     current_bytes = b''
                     goto_blocks.append((index, args))
                 if inst == CC.PEN_29:
-                    list_of_bytes.append((current_bytes, 'IF ??? GOTO: {:04x}'.format(args), index))
+                    list_of_bytes.append((current_bytes, 'IF [<b>{}<b> = True] GOTO: {:04x}'.format(last_bool, args), index))
                     current_bytes = b''
                     goto_blocks.append((index, args))
-
+                # if inst == CC.ARG_8A and self.bytes[index] == (CC.ARG_89.value or CC.ARG_8A.value or CC.ARG_8B.value):
+                #     try:
+                #         label = f'VARIABLE COMPARE <{b1i(self.bytes, index + 3)}>'
+                #         last_bool = f'VARIABLE COMPARE <{b1i(self.bytes, index + 3)}>'
+                #         state = self.bytes[index + 3]
+                #         #state = b2i(self.bytes,state_index + 1,big_endian=True)
+                #         if state == CC.RETURN_9f.value:
+                #             args_bytes = self.bytes[index:index + 4]
+                #             current_bytes += args_bytes
+                #             label = f'VARIABLE COMPARE <EQUAL>: VARIABLE({b2i(self.bytes,index - 2, big_endian=True)}) = {b2i(self.bytes,index + 1, big_endian=True)} '
+                #             last_bool = 'VARIABLE COMPARE <EQUAL>'
+                #             index += 4
+                #         if state == CC.RETURN_8c.value:
+                #             args_bytes = self.bytes[index:index + 4]
+                #             current_bytes += args_bytes
+                #             label = f'ADD VARIABLES: VARIABLE ({b2i(self.bytes,index - 2, big_endian=True)}) and VARIABLE ({b2i(self.bytes,index + 1,big_endian=True)})'
+                #             index += 4
+                #         if state == CC.RETURN_8d.value:
+                #             args_bytes = self.bytes[index:index + 4]
+                #             current_bytes += args_bytes
+                #             label = f'SUBTRACT VARIABLES: VARIABLE ({b2i(self.bytes,index - 2, big_endian=True)}) and VARIABLE ({b2i(self.bytes,index + 1,big_endian=True)})'
+                #             index += 4
+                #         if state == CC.RETURN_a3.value:
+                #             args_bytes = self.bytes[index:index + 4]
+                #             current_bytes += args_bytes
+                #             label = f'VARIABLE COMPARE <LESS THAN>: VARIABLE ({b2i(self.bytes,index - 2, big_endian=True)}) and VARIABLE ({b2i(self.bytes,index + 1,big_endian=True)})'
+                #             index += 4
+                        
+                #     except:
+                #         state = 'ERROR'
+                #     list_of_bytes.append((current_bytes, label, index))
+                #     current_bytes = b''    
+                
             else:
                 index += 1
                 list_of_bytes.append((current_bytes, 'RETURN ({})'.format(inst.value), index))

@@ -6,6 +6,8 @@ from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import asksaveasfilename
 import MovelistParser
 from _GameStateManager import GameStateManager
+import time
+from threading import Thread
 
 class GUI_MoveViewer:
 
@@ -36,7 +38,6 @@ class GUI_MoveViewer:
 
     def __init__(self, master):
         self.master = master
-        self.launcher = GameStateManager()
         #self.master.geometry(str(1850) + 'x' + str(990))
         master.title("SCUFFLE Move Editor")
         master.iconbitmap('Data/icon.ico')
@@ -44,12 +45,13 @@ class GUI_MoveViewer:
         bold_label_font = 'Consolas 10 bold'
 
         self.do_inject_movelist = False
+        self.reload_on_save_var = BooleanVar(value=True)
 
         self.movelist_name_var = StringVar()
         self.movelist_name_var.set('???')
 
         self.main_window = Frame(master)
-        self.main_window.pack()
+        self.main_window.grid(sticky=N+W+E+S)
 
         s.configure('Loader.TFrame', background='#D1D1D1')
         s.configure('TNotebook.Tab', font='Consolas 14')
@@ -111,24 +113,28 @@ class GUI_MoveViewer:
         move_id_label_container = Frame(move_id_entry_container)
         move_id_label_container.pack()
 
-        move_id_entry = Entry(move_id_label_container)
-        move_id_entry.bind('<Return>', lambda x: self.load_moveid(move_id_entry.get()))
+        self.move_id_entry = Entry(move_id_label_container)
+        self.move_id_entry.bind('<Return>', lambda x: Thread(target=self.load_moveid, args=(self.move_id_entry.get(),False, True)).start())
 
-        self.load_button = Button(move_id_entry_container, text="Load", command=lambda: self.load_moveid(move_id_entry.get()))
+        self.load_button = Button(move_id_entry_container, text="Load", command=lambda: Thread(target=self.load_moveid, args=(self.move_id_entry.get(),False, True)).start())
         self.load_button.pack()
 
-        next_move_id_button = Button(move_id_label_container, text=">", width = 1, command=lambda: self.next_move_id_command())
-        prev_move_id_button = Button(move_id_label_container, text="<", width = 1, command=lambda: self.prev_move_id_command())
+        next_move_id_button = Button(move_id_label_container, text=">", width = 1, command=lambda: Thread(target=self.next_move_id_command, args=()).start())
+        prev_move_id_button = Button(move_id_label_container, text="<", width = 1, command=lambda: Thread(target=self.prev_move_id_command,args=()).start())
 
         next_move_id_button.grid(row=0, column=2)
-        move_id_entry.grid(row=0, column=1)
+        self.move_id_entry.grid(row=0, column=1)
         prev_move_id_button.grid(row=0, column=0)
 
         s.configure('Save.TButton', font='Consolas 14 bold')
-        save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: self.save_move_bytes_command())
+        save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=()).start())
         save_move.pack()
 
-        self.move_pair= ScrolledTextPair(move_frame, (12, 64), 60, True)
+        save_move_reload = Checkbutton(move_id_entry_container, variable=self.reload_on_save_var, onvalue=True, offvalue=False, text="Reload after save") 
+        save_move_reload.pack()
+        
+
+        self.move_pair= ScrolledTextPair(move_frame, (12, 64), 28, True)
         self.move_pair.grid(sticky=W, row=0, column=1)
         self.move_raw = self.move_pair.left
         self.move_intr = self.move_pair.right
@@ -162,12 +168,12 @@ class GUI_MoveViewer:
         hitbox_id_label.pack()
         hitbox_iterator_frame.pack()
 
-        self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 104), 60, True)
+        self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 104), 40, True)
         self.hitbox_pair.grid(sticky=W, row=0, column=1)
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
 
-        self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 100), 60, add_canvas=True)
+        self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 103), 40, add_canvas=True)
         self.cancel_pair.grid(sticky=N + W + E + S, row = 0, column = 1)
 
         self.cancel_raw = self.cancel_pair.left
@@ -225,7 +231,7 @@ class GUI_MoveViewer:
         tool_decode_label = Label(encode_to_decode, text='Decoded')
         tool_encode_label.grid(row=1, column=0)
         tool_decode_label.grid(row=1, column=1)
-        self.set_movelist(self.launcher.game_reader.p1_movelist)
+        
 
 
 
@@ -305,9 +311,18 @@ class GUI_MoveViewer:
             self.cancel_pair.highlight_blue()
         else:
             self.cancel_pair.highlight_red()
+        time.sleep(1)
 
         if move_successful and hitbox_successful and cancel_successful:
             self.inject_movelist_dialog()
+            time.sleep(2.5)
+            if self.reload_on_save_var.get() == True:
+                self.load_moveid(self.move_id_textvar.get(),manual=True)
+                
+                
+            
+        
+
 
     def text_entry_to_bytes(self, text_widget, modified, bytes_length):
         raw = text_widget.get(1.0, END)
@@ -347,7 +362,7 @@ class GUI_MoveViewer:
     def prev_move_id_command(self):
         self.load_moveid(int(self.move_id_textvar.get()) - 1)
 
-    def load_moveid(self, move_id, is_encoded=False):
+    def load_moveid(self, move_id, is_encoded=False, manual=False):
         try:
             id = int(move_id)
         except:
@@ -398,10 +413,15 @@ class GUI_MoveViewer:
             highlight_tag_and_remove(self.cancel_intr, '<sc>', 'soulcharge')
             highlight_tag_and_remove(self.cancel_intr, '<b>', 'bold')
 
-
+            if manual:
+                self.move_pair.highlight_green()
+                self.hitbox_pair.highlight_green()
+                self.cancel_pair.highlight_green()
+                time.sleep(2)
             self.move_pair.highlight_gray()
             self.hitbox_pair.highlight_gray()
             self.cancel_pair.highlight_gray()
+            
 
             if self.cancel_pair.canvas != None:
                 canvas = self.cancel_pair.canvas
@@ -460,6 +480,8 @@ class GUI_MoveViewer:
 
     def inject_movelist_dialog(self):
         self.do_inject_movelist = True
+        
+                
 
     def apply_guide(self, bytes, guide):
         raw = ''
@@ -526,6 +548,7 @@ class ScrolledTextPair(Frame):
         self.left.tag_configure("even", background="#ffffff")
         self.left.tag_configure("red", background="#ffdddd")
         self.left.tag_configure("blue", background="#ddddff")
+        self.left.tag_configure("green", background="#ddffdd")
         self.left.tag_raise('sel')
 
         self.right.tag_configure("odd", background="#f0f0f0")
@@ -555,19 +578,26 @@ class ScrolledTextPair(Frame):
 
     def highlight_gray(self):
         ScrolledTextPair.alternating_tags(self.left, 'odd', 'even')
+        ScrolledTextPair.alternating_tags(self.right, 'odd', 'even')
 
     def highlight_blue(self):
         ScrolledTextPair.alternating_tags(self.left, 'blue', 'even')
+        ScrolledTextPair.alternating_tags(self.right, 'blue', 'even')
+    
+    def highlight_green(self):
+        ScrolledTextPair.alternating_tags(self.left, 'green', 'even')
+        ScrolledTextPair.alternating_tags(self.right, 'green', 'even')
 
     def highlight_red(self):
         ScrolledTextPair.alternating_tags(self.left, 'red', 'even')
+        ScrolledTextPair.alternating_tags(self.right, 'red', 'even')
 
     # https://stackoverflow.com/questions/26348989/changing-background-color-for-every-other-line-of-text-in-a-tkinter-text-box-wid
     def alternating_tags(text, even, odd):
         lastline = text.index("end-1c").split(".")[0]
         tag = odd
         for i in range(1, int(lastline)):
-            for t in ('red', 'blue', 'odd', 'even'):
+            for t in ('red', 'blue', 'green', 'odd', 'even'):
                 text.tag_remove(t, "%s.0" % i, "%s.0" % (i + 1))
             text.tag_add(tag, "%s.0" % i, "%s.0" % (i + 1))
             tag = even if tag == odd else odd

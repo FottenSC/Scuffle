@@ -5,6 +5,7 @@ import ModuleEnumerator
 import PIDSearcher
 import GameplayEnums
 import MovelistParser
+from threading import Thread
 
 class SC6GameReader:
         def __init__(self):
@@ -126,6 +127,8 @@ class SC6GameReader:
                         self.do_write_movelist = False
                         self.VoidPID()
                         self.VoidMovelists()
+                        
+                        
 
                     self.snapshots.append(GameSnapshot(value_p1, value_p2, self.timer))
                     MAX_FRAMES_TO_KEEP = 1000

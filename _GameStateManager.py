@@ -3,6 +3,7 @@ import time
 import GameplayEnums
 import MovelistParser
 from typing import List
+from threading import Thread
 
 class GameStateManager:
     def __init__(self):
@@ -16,6 +17,7 @@ class GameStateManager:
         self.time_spent_in_move_id_count = [[], []]
 
     def Update(self, do_print_debug_vars, show_all_hitboxes):
+        
         successful_update = self.game_reader.UpdateCurrentSnapshot()
         if successful_update:
             try:
