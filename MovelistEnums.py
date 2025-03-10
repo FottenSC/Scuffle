@@ -7,6 +7,7 @@ def name_from_enum(cls, value, replace_char = " ", format = False, slice = False
     try:
         if enum_has_value(cls, value):
             result = cls(value).name
+            result = result.replace("__", " > ")
             if slice:
                 result = result.split("_")[slice_index]
             if format:
@@ -20,6 +21,9 @@ def name_from_enum(cls, value, replace_char = " ", format = False, slice = False
     
     except:
         return value
+class Flag(Enum):
+    False_ = 0x00
+    True_ = 0x01
 
 class Button(Enum):
     A = 0x01
@@ -44,14 +48,16 @@ class PaddedButton(Enum):
     K = 0x0004
     G = 0x0008
 
-    B_K = 0x0600
     A_B = 0x0300
+    A_K = 0x0500
+    B_K = 0x0600
     A_G = 0x0900
     B_G = 0x0a00
     K_G = 0x0C00
-
+    
     A_B_K = 0x0700
-
+    A_B_K_G = 0x0F00
+    
     Forward = 0x1008
     Forward_ALT = 0x3008
 
@@ -72,11 +78,211 @@ class PaddedButton(Enum):
     Left_ALT = 0x4008
 
 
-   
+class EffectPart(Enum):
+    BASE = 0x0
+    STOMACH = 0x01
+    LOWER_CHEST = 0x02
+    UPPER_CHEST = 0x03
+    NECK = 0x04
+    HEAD = 0x05
+    RIGHT_COLLARBONE = 0x06
+    RIGHT_SHOULDER = 0x07
+    RIGHT_ARM = 0x08
+    RIGHT_HAND = 0x09
+    LEFT_COLLARBONE = 0x0a
+    LEFT_SHOULDER = 0x0b
+    LEFT_ARM = 0x0c
+    LEFT_HAND = 0x0d
+    WAIST = 0x0e
+    RIGHT_THIGH = 0x0f
+    RIGHT_KNEE = 0x10
+    RIGHT_FOOT = 0x11
+    RIGHT_TOE = 0x12
+    LEFT_THIGH = 0x13
+    LEFT_KNEE = 0x14
+    LEFT_FOOT = 0x15
+    LEFT_TOE = 0x16
+    WEAPON_1 = 0x17
+    WEAPON_2 = 0x18
+    WEAPON_3 = 0x19
+    WEAPON_4 = 0x1a
+    WEAPON_5 = 0x1b
+    WEAPON_6 = 0x1c
+    WEAPON_7 = 0x1d
+    WEAPON_8 = 0x1e
+    WEAPON_9 = 0x1f
+    RIGHT_THUMB_3 = 0x20
+    RIGHT_THUMB_2 = 0x21
+    RIGHT_THUMB_1 = 0x22
+    RIGHT_INDEX_FINGER_3 = 0x23
+    RIGHT_INDEX_FINGER_2 = 0x24
+    RIGHT_INDEX_FINGER_1 = 0x25
+    RIGHT_MIDDLE_FINGER_3 = 0x26
+    RIGHT_MIDDLE_FINGER_2 = 0x27
+    RIGHT_MIDDLE_FINGER_1 = 0x28
+    RIGHT_RING_FINGER_3 = 0x29
+    RIGHT_RING_FINGER_2 = 0x2a
+    RIGHT_RING_FINGER_1 = 0x2b
+    RIGHT_PINKY_FINGER_3 = 0x2c
+    RIGHT_PINKY_FINGER_2 = 0x2d
+    RIGHT_PINKY_FINGER_1 = 0x2e
+    LEFT_THUMB_3 = 0x2f
+    LEFT_THUMB_2 = 0x30
+    LEFT_THUMB_1 = 0x31
+    LEFT_INDEX_FINGER_3 = 0x32
+    LEFT_INDEX_FINGER_2 = 0x33
+    LEFT_INDEX_FINGER_1 = 0x34
+    LEFT_MIDDLE_FINGER_3 = 0x35
+    LEFT_MIDDLE_FINGER_2 = 0x36
+    LEFT_MIDDLE_FINGER_1 = 0x37
+    LEFT_RING_FINGER_3 = 0x38
+    LEFT_RING_FINGER_2 = 0x39
+    LEFT_RING_FINGER_1 = 0x3a
+    LEFT_PINKY_FINGER_3 = 0x3b
+    LEFT_PINKY_FINGER_2 = 0x3c
+    LEFT_PINKY_FINGER_1 = 0x3d
+    RIGHT_INNER_EYEBROW = 0x3e
+    RIGHT_EYEBROW = 0x3f
+    RIGHT_EYE = 0x40
+    RIGHT_UPPER_EYELID = 0x41
+    RIGHT_LOWER_EYELID = 0x42
+    RIGHT_CHEEK = 0x43
+    RIGHT_NOSTRIL = 0x44
+    RIGHT_JAW = 0x45
+    LEFT_INNER_EYEBROW = 0x46
+    LEFT_EYEBROW = 0x47
+    LEFT_EYE = 0x48
+    LEFT_UPPER_EYELID = 0x49
+    LEFT_LOWER_EYELID = 0x4a
+    LEFT_CHEEK = 0x4b
+    LEFT_NOSTRIL = 0x4c
+    LEFT_JAW = 0x4d
+    MIDDLE_UPPER_LIP = 0x4e
+    RIGHT_UPPER_LIP = 0x4f
+    LEFT_UPPER_LIP = 0x50
+    JAW = 0x51
+    RIGHT_LOWER_LIP = 0x52
+    RIGHT_MOUTH_CORNER = 0x53
+    LEFT_LOWER_LIP = 0x54
+    LEFT_MOUTH_CORNER = 0x55
+    TONGUE_1 = 0x56
+    TONGUE_2 = 0x57
+    OBJ_NUM = 0x58
+
+class EffectTarget(Enum):
+    Player = 0x01
+    Opponent = 0x03
+    Player__On_Ground = 0x05
+    Opponent__On_Ground = 0x06
+
+class TraceType(Enum):
+    AUTO = 0x00
+    NORMAL = 0x01
+    TUBE = 0x02
+    LINE = 0x03
+    THUNDER = 0x04
+    WIND = 0x05
+    FLAME = 0x06 #unblockable
+    LIGHT = 0x07
+    PFLAME = 0x08 
+    PSMOKE = 0x09
+    PBURN = 0x0a
+    PLIGHT = 0x0b
+    PFLAME_L = 0x0c
+    PSMOKE_L = 0x0d
+    PBURN_L = 0x0e
+    PLIGHT_L = 0x0f
+    PDUST = 0x10
+    PDUST_L = 0x11
+    PAURA = 0x12
+    PAURA_L = 0x13
+    SPARK = 0x14
+    FIRE_S = 0x15
+    PTHUNDER = 0x16 #break attack
+    PWIND = 0x17
+    LIGHTSABER = 0x18
+    KICK = 0x19
+    ULTIMATE_EDGE = 0x1a
+    ULTIMATE_CALIBUR = 0x1b
+    NORMAL_S = 0x1c #normal
+    NORMAL_M = 0x1d #normal
+    NORMAL_L = 0x1e #normal
+    PTHUNDER_PINK = 0x1f #reversal edge start
+    PTHUNDER_RED = 0x20 #reversal edge hold / during reversal egde
+    SOUL_CHARGE_NORMAL_S = 0x21 #soul charge
+    SOUL_CHARGE_NORMAL_M = 0x22 #soul charge
+    SOUL_CHARGE_NORMAL_L = 0x23 #soul charge
+    SOUL_CHARGE_PFLAME = 0x24 #soul charge unblockable
+    SOUL_CHARGE_PTHUNDER = 0x25 #soul charge break attack
+    SOUL_CHARGE_PTHUNDER_PINK = 0x26 #soul charge reversal edge start
+    SOUL_CHARGE_PTHUNDER_RED = 0x27 #soul charge reversal edge hold / during reversal egde
+    CE_1 = 0x28
+    CE_2 = 0x29
+    CE_3 = 0x2a
+    SPECIAL_1 = 0x2b
+    SPECIAL_2 = 0x2c
+    SPECIAL_3 = 0x2d
+    SOUL_ATTACK = 0x2e #soul attack SP_4
+
+class TracePart(Enum):
+    NONE = 0xFFFF
+    WEAPONS1 = 0X00
+    WEAPONS2 = 0x01
+    WEAPONS3 = 0x02
+    WEAPONS4 = 0x03
+    WEAPONS5 = 0x04
+    WEAPONS6 = 0x05
+    WEAPONS7 = 0x06
+    WEAPONS8 = 0x07
+    WEAPONS9 = 0x08
+    TAIL = 0x09
+    CHEST = 0x0a
+    HEAD = 0x0b
+    RIGHT_SHOULDER = 0x0c
+    RIGHT_ARM = 0x0d
+    RIGHT_HAND = 0x0e
+    LEFT_SHOULDER = 0x0f
+    LEFT_ARM = 0x10
+    LEFT_HAND = 0x11
+    WAIST = 0x12
+    RIGHT_THIGH = 0x13
+    RIGHT_LEG = 0x14
+    RIGHT_FOOT = 0x15
+    LEFT_THIGH = 0x16
+    LEFT_LEG = 0x17
+    LEFT_FOOT = 0x18
+    RIGHT_EYE = 0x19
+    LEFT_EYE = 0x1a
+    AUO_1 = 0x1b
+    AUO_2 = 0x1c
+    AUO_3 = 0x1d
+    AUO_4 = 0x1e
+    AUO_5 = 0x1f
+    AUO_6 = 0x20
+    AUO_7 = 0x21
+    AUO_8 = 0x22
+    NM_THUMB = 0x23
+    NM_INDEX_FINGER = 0x24
+    NM_MIDDLE_FINGER = 0x25
+    SPECIAL_1 = 0x26
+    SPECIAL_2 = 0x27
+    SPECIAL_3 = 0x28
+    SPECIAL_4 = 0x29
+    SPECIAL_5 = 0x2a
+    SPECIAL_6 = 0x2b
+    SPECIAL_7 = 0x2c
+    SPECIAL_8 = 0x2d
+    SPECIAL_9 = 0x2e
+    
+
+
+
+
 
 class InputType(Enum):
     Press = 0x06
-    Hold = 0x20
+    Hold = 0x05
+    _Hold = 0x20  
 
     Direction_PRESS = 0x13AF
     Direction_HOLD= 0x13AE
@@ -193,7 +399,33 @@ class FacialExpression(Enum):
     Extra_5 = 0x10
 
 class AirStunType(Enum):
-    No_Stun = 0x00
+    None__Allow_AC = 0x00
+    Air__Vertical_Spiral = 0x01
+    Air__Vertical_Spiral_Bounce = 0x02
+    Air__Vertical_Roll = 0x03
+    Air__Horizontal_Spiral = 0x04
+    Bind__Bounce = 0x05
+    Bind__Stun = 0x06
+    Bind__Knockback = 0x07
+    Air__Horizontal_Roll = 0x08
+    Air_Bind__Vertical_Spiral__Disable_Ukemi = 0x09
+    Bind__Grounded = 0x0a
+    Bind__Long_Grounded_Recovery = 0x0b
+    Bind__Vertical_Roll = 0x0c
+    Air__Relaunch = 0x0d
+    unk__Flip_Forward = 0x0e
+    Bind__Pull_Toward = 0x0f
+    Short_Bind__Knockack = 0x10
+    Air__Faster_Vertical_Roll = 0x11
+    Bind__Rolling_Restand = 0x12
+    Bind__Knockback_2 = 0x13
+    Bind_Grounded__Gets_up = 0x14
+    Air_Bind__Vertical_Spiral__Allow_Ukemi = 0x15
+    Bind__Inverted_Knockback = 0x16
+    None__Disable_AC = 0x17
+
+
+
 
 class StunOverride(Enum):
     STAND = 0x01

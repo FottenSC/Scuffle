@@ -30,8 +30,8 @@ class GameStateManager:
                     if did_p1_attack_change:
                         old_id = snapshots[-3].p1.movement_block.movelist_id
                         self.count_time_in_move_id(self.time_spent_in_move_id_count[0], old_id, snapshots, True)
-
-                        s = self.create_frame_entry('p1', snapshots[-1].p1, self.move_ids_record[0], self.bhc_stuns_record[0], self.entry_times[0], self.game_reader.p1_movelist)
+                        
+                        s = self.create_frame_entry('p1', snapshots[-1].p1, self.move_ids_record[0], self.bhc_stuns_record[0], self.entry_times[0], self.game_reader.p1_movelist) if self.game_reader.p1_movelist != None else None
 
                         if s != None:
                             for entry in s:
@@ -45,7 +45,7 @@ class GameStateManager:
                     if did_p2_attack_change:
                         old_id = snapshots[-3].p2.movement_block.movelist_id
                         self.count_time_in_move_id(self.time_spent_in_move_id_count[1], old_id, snapshots, False)
-                        s = self.create_frame_entry('p2', snapshots[-1].p2, self.move_ids_record[1],self.bhc_stuns_record[1], self.entry_times[1], self.game_reader.p2_movelist)
+                        s = self.create_frame_entry('p2', snapshots[-1].p2, self.move_ids_record[1],self.bhc_stuns_record[1], self.entry_times[1], self.game_reader.p2_movelist) if self.game_reader.p2_movelist != None else None
 
                         if s != None:
                             for entry in s:
@@ -98,20 +98,21 @@ class GameStateManager:
             record.append(id)
         #bhc_stuns.append((0, 0, 0))
         #if id != 0x59 and id <= movelist.block_Q_length:  # 0x59 is the 'coming to a stop' move_id from 8 way run and above q_length are 'imaginary' moves
-        if (id >= 0x0100 and id <= movelist.block_Q_length) or id == 212 or id == 214: #212 is soul charge, the only interesting move below 0x0100
-                if len(bhc_stuns) > 1:
-                    stun = bhc_stuns[-1] #declare here in case we add a new one in FrameStringFromMovelist
-                s = GameStateManager.FrameStringFromMovelist(name, p, record, bhc_stuns, self.game_reader.snapshots[-1].timer)
-                #times.append(self.game_reader.timer - p.movement_block.short_timer)
-                times.append(self.game_reader.timer)
-                if len(times) > 1 and len(bhc_stuns) > 2:
-                    #delta = times[-1] - times[-2]
-                    delta = times[-1] - stun[4]
-                    delta -= stun[3]
-                    #print(stun)
-                    #print('d{}({}) | {} | {} | {}'.format(delta, delta + stun[3], delta - stun[0], delta - stun[1], delta - stun[2]))
+        if movelist != None:
+            if (id >= 0x0100 and id <= movelist.block_Q_length) or id == 212 or id == 214: #212 is soul charge, the only interesting move below 0x0100
+                    if len(bhc_stuns) > 1:
+                        stun = bhc_stuns[-1] #declare here in case we add a new one in FrameStringFromMovelist
+                    s = GameStateManager.FrameStringFromMovelist(name, p, record, bhc_stuns, self.game_reader.snapshots[-1].timer)
+                    #times.append(self.game_reader.timer - p.movement_block.short_timer)
+                    times.append(self.game_reader.timer)
+                    if len(times) > 1 and len(bhc_stuns) > 2:
+                        #delta = times[-1] - times[-2]
+                        delta = times[-1] - stun[4]
+                        delta -= stun[3]
+                        #print(stun)
+                        #print('d{}({}) | {} | {} | {}'.format(delta, delta + stun[3], delta - stun[0], delta - stun[1], delta - stun[2]))
 
-                return s
+                    return s
         while len(record) > 10:
             record.pop(0)
 
@@ -149,7 +150,6 @@ class GameStateManager:
                 fd.whiff = '{}'.format(total - cf)
 
             fd.delta = delta
-
             pretty_frame_data_entry(fd)
             return strings
 
@@ -203,6 +203,7 @@ class GameStateManager:
 
         else:
             frame_datas = move.get_frame_data(delta=delta)
+        try:  
             if len(frame_datas) == 0:
                 return no_hitbox_data()
             else:
@@ -219,6 +220,9 @@ class GameStateManager:
                     pretty_frame_data_entry(fd)
                     counter += 1
                 return strings
+        except:
+            return strings
+
 
 
 

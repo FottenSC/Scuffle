@@ -5,9 +5,9 @@ import tkinter.font as tkf
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import asksaveasfilename
 import MovelistParser
-from _GameStateManager import GameStateManager
 import time
 from threading import Thread
+import GUI_Main
 
 class GUI_MoveViewer:
 
@@ -42,22 +42,26 @@ class GUI_MoveViewer:
         master.title("SCUFFLE Move Editor")
         master.iconbitmap('Data/icon.ico')
         s = Style()
-        bold_label_font = 'Consolas 10 bold'
+        bold_label_font = 'Consolas 8 bold'
 
         self.do_inject_movelist = False
-        self.reload_on_save_var = BooleanVar(value=True)
+        self.reload_on_save_var = BooleanVar(value=False)
 
         self.movelist_name_var = StringVar()
         self.movelist_name_var.set('???')
 
         self.main_window = Frame(master)
-        self.main_window.grid(sticky=N+W+E+S)
+        self.main_window.pack(fill= BOTH, expand=True, anchor=S+W)
+        self.main_window.rowconfigure(0,weight=2)
+        self.main_window.columnconfigure(0, weight=0)
+        self.main_window.columnconfigure(1, weight=2)
+        
 
         s.configure('Loader.TFrame', background='#D1D1D1')
         s.configure('TNotebook.Tab', font='Consolas 14')
-
+    
         loader_frame = Frame(self.main_window, style='Loader.TFrame')
-        loader_frame.grid(sticky=N+W+E+S, row = 0, column=0)
+        loader_frame.grid(sticky=N+W+E+S, column=0)
 
         loader_frame_top = Frame(loader_frame)
         loader_frame_bot = Frame(loader_frame)
@@ -69,7 +73,8 @@ class GUI_MoveViewer:
         loader_frame_bot.grid(sticky=N + E + W, row=1, column=0, padx=5, pady=5)
         loader_frame_hit.grid(sticky=N + E + W, row=2, column=0, padx=5, pady=5)
         loader_frame_clip.grid(sticky=N + E + W, row=3, column=0, padx=5, pady=5)
-        loader_frame_tools.grid(sticky=N + E + W, row=4, column=0, padx=5, pady=5)
+        loader_frame_tools.grid(sticky=N + E + W + S, row=4, column=0, padx=5, pady=5)
+    
 
         self.movelist_menu_label = Label(loader_frame_top, text="Movelist", font=bold_label_font)
         self.movelist_menu_label.pack()
@@ -80,24 +85,34 @@ class GUI_MoveViewer:
 
         self.load_movelist_button = Button(loader_frame_top, text="Load Movelist", command=lambda: self.load_movelist_dialog())
         self.load_movelist_button.pack()
+        master.bind('<Control-Shift-L>', lambda x: self.load_movelist_dialog())
 
         self.save_movelist_button = Button(loader_frame_top, text="Save Movelist", command=lambda: self.save_movelist_dialog())
         self.save_movelist_button.pack()
+        master.bind('<Control-Shift-S>', lambda x: self.save_movelist_dialog())
 
         self.save_movelist_button = Button(loader_frame_top, text="Inject Movelist", command=lambda: self.inject_movelist_dialog())
         self.save_movelist_button.pack()
+        master.bind('<Control-i>', lambda x: self.inject_movelist_dialog())
 
         #display_frame = Frame(self.main_window)
-        display_frame = Notebook(self.main_window)
-        display_frame.grid(sticky=S + E + W, row = 0, column = 1)
+        self.display_frame = Notebook(self.main_window)
+        self.display_frame.grid(sticky=N+W+E+S, row = 0, column = 1)
 
-        move_frame = Frame(display_frame)
-        hitbox_frame = Frame(display_frame)
+        move_frame = Frame(self.display_frame)
+        hitbox_frame = Frame(self.display_frame)
         cancel_frame = Frame(self.main_window)
 
-        display_frame.add(move_frame, text='Move')
-        display_frame.add(hitbox_frame, text='Hitbox')
-        display_frame.add(cancel_frame, text = 'Scripting')
+        self.display_frame.add(move_frame, text='Move')
+        self.display_frame.add(hitbox_frame, text='Hitbox')
+        self.display_frame.add(cancel_frame, text = 'Scripting')
+        master.bind('<Control-Key-1>', lambda x: self.display_frame.select(0))
+        master.bind('<Control-Key-2>', lambda x: self.display_frame.select(1))
+        master.bind('<Control-Key-3>', lambda x: self.display_frame.select(2))
+        master.bind('<Control-KP_1>', lambda x: self.display_frame.select(0))
+        master.bind('<Control-KP_2>', lambda x: self.display_frame.select(1))
+        master.bind('<Control-KP_3>', lambda x: self.display_frame.select(2))
+    
 
         move_id_entry_container = Frame(loader_frame_bot)
         move_id_entry_container.grid(row=0, column=0)
@@ -114,28 +129,38 @@ class GUI_MoveViewer:
         move_id_label_container.pack()
 
         self.move_id_entry = Entry(move_id_label_container)
-        self.move_id_entry.bind('<Return>', lambda x: Thread(target=self.load_moveid, args=(self.move_id_entry.get(),False, True)).start())
+        self.move_id_entry.bind('<Return>', lambda x: self.load_moveid(self.move_id_entry.get()))
+        master.bind('<Control-m>', lambda x: self.move_id_entry.focus())
 
-        self.load_button = Button(move_id_entry_container, text="Load", command=lambda: Thread(target=self.load_moveid, args=(self.move_id_entry.get(),False, True)).start())
+        self.load_button = Button(move_id_entry_container, text="Load", command=lambda:self.load_moveid(self.move_id_entry.get()))
         self.load_button.pack()
+        master.bind('<Control-l>', lambda x: self.load_moveid(self.move_id_textvar.get()))
 
-        next_move_id_button = Button(move_id_label_container, text=">", width = 1, command=lambda: Thread(target=self.next_move_id_command, args=()).start())
-        prev_move_id_button = Button(move_id_label_container, text="<", width = 1, command=lambda: Thread(target=self.prev_move_id_command,args=()).start())
-
+        next_move_id_button = Button(move_id_label_container, text=">", width = 1, command=lambda: self.next_move_id_command())
+        prev_move_id_button = Button(move_id_label_container, text="<", width = 1, command=lambda: self.prev_move_id_command())
         next_move_id_button.grid(row=0, column=2)
         self.move_id_entry.grid(row=0, column=1)
         prev_move_id_button.grid(row=0, column=0)
+        master.bind('<Control-[>', lambda x: self.prev_move_id_command() )
+        master.bind('<Control-]>', lambda x: self.next_move_id_command() )
 
         s.configure('Save.TButton', font='Consolas 14 bold')
         save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=()).start())
         save_move.pack()
+        master.bind('<Control-s>', lambda x: Thread(target=self.save_move_bytes_command, args=()).start())
 
         save_move_reload = Checkbutton(move_id_entry_container, variable=self.reload_on_save_var, onvalue=True, offvalue=False, text="Reload after save") 
         save_move_reload.pack()
+        master.bind('<Control-r>', lambda x: self.reload_on_save_var.set(not self.reload_on_save_var.get()))
         
+        move_frame.rowconfigure(0,weight=2)
+        hitbox_frame.rowconfigure(0,weight=2)
+        cancel_frame.rowconfigure(0,weight=2)
+        cancel_frame.columnconfigure(0, weight=1)
+        #cancel_frame.columnconfigure(1, weight=2)
 
         self.move_pair= ScrolledTextPair(move_frame, (12, 64), 28, True)
-        self.move_pair.grid(sticky=W, row=0, column=1)
+        self.move_pair.grid(sticky=N+W+E+S, row=0, column=1)
         self.move_raw = self.move_pair.left
         self.move_intr = self.move_pair.right
 
@@ -164,17 +189,19 @@ class GUI_MoveViewer:
         prev_hitbox_button.grid(sticky=N, row=0, column=0)
         hitbox_label.grid(sticky=N+E+W, row=0, column=1)
         next_hitbox_button.grid(sticky=N, row = 0, column=2)
+        master.bind('<Control-{>',lambda x: self.prev_hitbox_command())
+        master.bind('<Control-}>',lambda x: self.next_hitbox_command())
 
         hitbox_id_label.pack()
         hitbox_iterator_frame.pack()
 
         self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 104), 40, True)
-        self.hitbox_pair.grid(sticky=W, row=0, column=1)
+        self.hitbox_pair.grid(sticky=N+W+E+S, row=0, column=1)
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
 
         self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 103), 40, add_canvas=True)
-        self.cancel_pair.grid(sticky=N + W + E + S, row = 0, column = 1)
+        self.cancel_pair.grid(sticky=N+W+E+S, row = 0, column = 0)
 
         self.cancel_raw = self.cancel_pair.left
 
@@ -187,12 +214,15 @@ class GUI_MoveViewer:
 
         clipboard_move_button = Button(loader_frame_clip, text="Copy Move to Clipboard", command=lambda: GUI_MoveViewer.copy_to_clipboard_and_strip(self.move_raw.get('1.0', END)))
         clipboard_move_button.grid(sticky=N + W + E, row=1, column=0)
+        master.bind('<Control-,>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.move_raw.get('1.0', END)))
 
         clipboard_hitbox_button = Button(loader_frame_clip, text="Copy Hitbox to Clipboard", command=lambda: GUI_MoveViewer.copy_to_clipboard_and_strip(self.hitbox_raw.get('1.0', END)))
         clipboard_hitbox_button.grid(sticky=N + W + E, row=2, column=0)
+        master.bind('<Control-.>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.hitbox_raw.get('1.0', END)))
 
         clipboard_cancel_button = Button(loader_frame_clip, text="Copy Scripting to Clipboard", command=lambda: GUI_MoveViewer.copy_to_clipboard_and_strip(self.cancel_raw.get('1.0', END)))
         clipboard_cancel_button.grid(sticky=N + W + E, row=3, column=0)
+        master.bind('<Control-/>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.cancel_raw.get('1.0', END)))
 
         tool_label = Label(loader_frame_tools, text="Tools", font=bold_label_font)
         tool_label.pack()
@@ -210,6 +240,8 @@ class GUI_MoveViewer:
         tool_dec = Entry(hex_to_dec, textvariable=self.tool_dec_string, width=10)
         tool_hex.grid(row=0, column=0)
         tool_dec.grid(row=0, column=1)
+        master.bind('<Control-E>', lambda x: tool_hex.focus())
+        master.bind('<Control-D>', lambda x: tool_dec.focus())
 
         tool_hex_label = Label(hex_to_dec, text='HEX')
         tool_dec_label = Label(hex_to_dec, text='DEC')
@@ -226,6 +258,8 @@ class GUI_MoveViewer:
         self.tool_encode = Entry(encode_to_decode, textvariable=self.tool_encode_string, width=10)
         self.tool_encode.grid(row=0, column=0)
         self.tool_decode.grid(row=0, column=1)
+        master.bind('<Control-e>', lambda x: self.tool_encode.focus())
+        master.bind('<Control-d>', lambda x: self.tool_decode.focus())
 
         tool_encode_label = Label(encode_to_decode, text='Encoded')
         tool_decode_label = Label(encode_to_decode, text='Decoded')
@@ -292,7 +326,11 @@ class GUI_MoveViewer:
         if self.hitbox_index >= 0:
             if len(move.attacks) > 0:
                 attack = move.attacks[self.hitbox_index]
-                hitbox_successful = self.text_entry_to_bytes(self.hitbox_raw, attack, MovelistParser.Attack.LENGTH)
+                if isinstance(attack, MovelistParser.Throw):
+                    hitbox_successful = self.text_entry_to_bytes(self.hitbox_raw, attack, MovelistParser.Throw.LENGTH)
+                else:
+                    hitbox_successful = self.text_entry_to_bytes(self.hitbox_raw, attack, MovelistParser.Attack.LENGTH)
+
                 if hitbox_successful:
                     self.hitbox_pair.highlight_blue()
                 else:
@@ -318,6 +356,12 @@ class GUI_MoveViewer:
             time.sleep(2.5)
             if self.reload_on_save_var.get() == True:
                 self.load_moveid(self.move_id_textvar.get(),manual=True)
+            else:
+                self.move_pair.highlight_orange()
+                self.hitbox_pair.highlight_orange()
+                self.cancel_pair.highlight_orange()
+                
+                
                 
                 
             
@@ -335,8 +379,10 @@ class GUI_MoveViewer:
                     raise AssertionError()
 
             b = []
+            
             for i in range(0, len(raw), 2):
                 b.append(int(raw[i:i + 2], 16))
+            
             modified_bytes = bytes(b)
             modified.modified_bytes = modified_bytes
             return True
@@ -529,7 +575,8 @@ class ScrolledTextPair(Frame):
 
             self.canvas.yview('moveto', '1.0')
             self.pack_propagate(0)
-            self.canvas.pack(side=LEFT, fill='y', expand=True)
+            self.canvas.pack(side=LEFT, fill='y', anchor=N+W)
+            
             self.pack_propagate(1)
             #self.canvas.create_rectangle(0,0, 20, 300, fill='red')
 
@@ -542,6 +589,7 @@ class ScrolledTextPair(Frame):
 
         self.left.pack(side=LEFT, fill=BOTH, expand=True)
         self.right.pack(side=LEFT, fill=BOTH, expand=True)
+        
 
         #Styling
         self.left.tag_configure("odd", background="#f0f0f0")
@@ -549,10 +597,15 @@ class ScrolledTextPair(Frame):
         self.left.tag_configure("red", background="#ffdddd")
         self.left.tag_configure("blue", background="#ddddff")
         self.left.tag_configure("green", background="#ddffdd")
+        self.left.tag_configure("orange", background="#Fbd2a3")
         self.left.tag_raise('sel')
 
         self.right.tag_configure("odd", background="#f0f0f0")
         self.right.tag_configure("even", background="#ffffff")
+        self.right.tag_configure("red", background="#ffdddd")
+        self.right.tag_configure("blue", background="#ddddff")
+        self.right.tag_configure("green", background="#ddffdd")
+        self.right.tag_configure("orange", background="#Fbd2a3")
         self.right.tag_raise('sel')
 
         # Changing the settings to make the scrolling work
@@ -588,6 +641,10 @@ class ScrolledTextPair(Frame):
         ScrolledTextPair.alternating_tags(self.left, 'green', 'even')
         ScrolledTextPair.alternating_tags(self.right, 'green', 'even')
 
+    def highlight_orange(self):
+        ScrolledTextPair.alternating_tags(self.left, 'orange', 'even')
+        ScrolledTextPair.alternating_tags(self.right, 'orange', 'even')
+
     def highlight_red(self):
         ScrolledTextPair.alternating_tags(self.left, 'red', 'even')
         ScrolledTextPair.alternating_tags(self.right, 'red', 'even')
@@ -597,7 +654,7 @@ class ScrolledTextPair(Frame):
         lastline = text.index("end-1c").split(".")[0]
         tag = odd
         for i in range(1, int(lastline)):
-            for t in ('red', 'blue', 'green', 'odd', 'even'):
+            for t in ('red', 'blue', 'green', 'orange', 'odd', 'even'):
                 text.tag_remove(t, "%s.0" % i, "%s.0" % (i + 1))
             text.tag_add(tag, "%s.0" % i, "%s.0" % (i + 1))
             tag = even if tag == odd else odd

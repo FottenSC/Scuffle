@@ -68,7 +68,10 @@ class SC6GameReader:
 
                 self.module_address = ModuleEnumerator.GetModuleAddressByPIDandName(pid = self.pid, name = "SoulcaliburVI.exe")
                 
-                test_block = GetValueFromAddress(process_handle, self.module_address + AddressMap.global_timer_address)
+                if self.module_address != None:
+                    test_block = GetValueFromAddress(process_handle, self.module_address + AddressMap.global_timer_address)
+                else:
+                    test_block = 0
 
                 if test_block == 0: #not in a fight yet or application closed
                     self.consecutive_frames_of_zero_timer += 1
@@ -123,10 +126,13 @@ class SC6GameReader:
 
                     if self.do_write_movelist:
                         p1_movelist_address = GetValueFromAddress(process_handle, self.module_address + AddressMap.p1_movelist_address, is64bit=True)
+                        
                         WriteBlockOfData(process_handle, p1_movelist_address, self.p1_movelist.generate_modified_movelist_bytes())
                         self.do_write_movelist = False
                         self.VoidPID()
                         self.VoidMovelists()
+                        
+                        
                         
                         
 

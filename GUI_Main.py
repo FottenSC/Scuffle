@@ -63,12 +63,14 @@ class GUI_Main(Tk):
 
         self.tekken_bot_menu = Menu(self.menu)
         self.tekken_bot_menu.add_command(label="Restart", command=self.restart)
+        self.bind('<Control-R>', lambda x: self.restart())
 
         self.menu.add_cascade(label="SCUFFLE", menu=self.tekken_bot_menu)
 
         self.tools_menu = Menu(self.menu)
         self.move_viewer = None
         self.tools_menu.add_command(label="Launch Move Editor", command=self.launch_move_viewer)
+        self.bind('<Control-e>', lambda x: self.launch_move_viewer())
 
         self.move_id_ometer = None
         self.tools_menu.add_command(label="Launch Move-Id-Ometer", command=self.launch_move_id_ometer)
