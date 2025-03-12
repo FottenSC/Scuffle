@@ -16,7 +16,7 @@ class GameStateManager:
         self.entry_times = [[], []]
         self.time_spent_in_move_id_count = [[], []]
 
-    def Update(self, do_print_debug_vars, show_all_hitboxes):
+    def Update(self, do_print_debug_vars, show_all_hitboxes, verbose_log=False):
         
         successful_update = self.game_reader.UpdateCurrentSnapshot()
         if successful_update:
@@ -31,7 +31,7 @@ class GameStateManager:
                         old_id = snapshots[-3].p1.movement_block.movelist_id
                         self.count_time_in_move_id(self.time_spent_in_move_id_count[0], old_id, snapshots, True)
                         
-                        s = self.create_frame_entry('p1', snapshots[-1].p1, self.move_ids_record[0], self.bhc_stuns_record[0], self.entry_times[0], self.game_reader.p1_movelist) if self.game_reader.p1_movelist != None else None
+                        s = self.create_frame_entry('p1', snapshots[-1].p1, self.move_ids_record[0], self.bhc_stuns_record[0], self.entry_times[0], self.game_reader.p1_movelist,verbose=verbose_log) if self.game_reader.p1_movelist != None else None
 
                         if s != None:
                             for entry in s:
@@ -45,7 +45,7 @@ class GameStateManager:
                     if did_p2_attack_change:
                         old_id = snapshots[-3].p2.movement_block.movelist_id
                         self.count_time_in_move_id(self.time_spent_in_move_id_count[1], old_id, snapshots, False)
-                        s = self.create_frame_entry('p2', snapshots[-1].p2, self.move_ids_record[1],self.bhc_stuns_record[1], self.entry_times[1], self.game_reader.p2_movelist) if self.game_reader.p2_movelist != None else None
+                        s = self.create_frame_entry('p2', snapshots[-1].p2, self.move_ids_record[1],self.bhc_stuns_record[1], self.entry_times[1], self.game_reader.p2_movelist,verbose=verbose_log) if self.game_reader.p2_movelist != None else None
 
                         if s != None:
                             for entry in s:
@@ -92,17 +92,22 @@ class GameStateManager:
             count_list.pop(0)
 
 
-    def create_frame_entry(self, name, p, record, bhc_stuns, times, movelist):
+    def create_frame_entry(self, name, p, record, bhc_stuns, times, movelist,verbose=False):
         id = p.movement_block.movelist_id
         if len(record) == 0 or record[-1] != id:
             record.append(id)
         #bhc_stuns.append((0, 0, 0))
         #if id != 0x59 and id <= movelist.block_Q_length:  # 0x59 is the 'coming to a stop' move_id from 8 way run and above q_length are 'imaginary' moves
         if movelist != None:
-            if (id >= 0x0100 and id <= movelist.block_Q_length) or id == 212 or id == 214: #212 is soul charge, the only interesting move below 0x0100
+            end = movelist.block_Q_length 
+            if verbose:
+                end = movelist.length
+                
+
+            if (id >= 0x0100 and id <= end) or id == 219 or id == 221: #219 is soul charge, the only interesting move below 0x0100
                     if len(bhc_stuns) > 1:
                         stun = bhc_stuns[-1] #declare here in case we add a new one in FrameStringFromMovelist
-                    s = GameStateManager.FrameStringFromMovelist(name, p, record, bhc_stuns, self.game_reader.snapshots[-1].timer)
+                    s = GameStateManager.FrameStringFromMovelist(name, p, record, bhc_stuns, self.game_reader.snapshots[-1].timer,verbose)
                     #times.append(self.game_reader.timer - p.movement_block.short_timer)
                     times.append(self.game_reader.timer)
                     if len(times) > 1 and len(bhc_stuns) > 2:
@@ -124,7 +129,7 @@ class GameStateManager:
 
         return None
 
-    def FrameStringFromMovelist(p_str, p : SoulCaliburGameState.PlayerSnapshot, move_ids, stuns, timer):
+    def FrameStringFromMovelist(p_str, p : SoulCaliburGameState.PlayerSnapshot, move_ids, stuns, timer, verbose=False):
 
         def pretty_frame_data_entry(fd : MovelistParser.FrameData):
             guard_damage = p.startup_block.guard_damage
@@ -204,7 +209,7 @@ class GameStateManager:
         else:
             frame_datas = move.get_frame_data(delta=delta)
         try:  
-            if len(frame_datas) == 0:
+            if len(frame_datas) == 0 and verbose == False:
                 return no_hitbox_data()
             else:
                 added_stun = False
@@ -221,7 +226,7 @@ class GameStateManager:
                     counter += 1
                 return strings
         except:
-            return strings
+            return no_hitbox_data() if verbose else strings
 
 
 
@@ -390,5 +395,5 @@ class FrameBackCounter:
 if __name__ == "__main__":
     launcher = GameStateManager()
     while(True):
-        launcher.Update(False, False)
+        launcher.Update(False, False, False)
         time.sleep(.05)

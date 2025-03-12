@@ -79,6 +79,10 @@ class GUI_Main(Tk):
         self.do_show_all_hitbox_data.set(False)
         self.tools_menu.add_checkbutton(label='Show frame data for all hitboxes (useful for moves with \'tip\' properties)', onvalue=True, offvalue=False, variable=self.do_show_all_hitbox_data)
 
+        self.verbose_logging = BooleanVar()
+        self.verbose_logging.set(True)
+        self.tools_menu.add_checkbutton(label='Verbose logging: Log info for all moves', onvalue=True, offvalue=False, variable=self.verbose_logging)
+
         self.tools_menu.add_command(label="Dump all frame data to console", command=self.dump_frame_data)
 
         self.do_print_debug_values = BooleanVar()
@@ -236,7 +240,7 @@ class GUI_Main(Tk):
 
     def update_launcher(self):
         time1 = time.time()
-        successful_update = self.launcher.Update(self.do_print_debug_values.get(), self.do_show_all_hitbox_data.get())
+        successful_update = self.launcher.Update(self.do_print_debug_values.get(), self.do_show_all_hitbox_data.get(), self.verbose_logging.get())
 
         if self.move_viewer != None:
             if self.launcher.p1_move_id != self.old_move_id and self.launcher.p1_move_id != 0x59: #0x59 is the hex for 'coming to a stop' move_id

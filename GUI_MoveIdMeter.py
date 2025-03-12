@@ -307,7 +307,7 @@ if __name__ == '__main__':
     counter = 0
     while (True):
         counter += 1
-        launcher.Update(False, False)
+        launcher.Update(False, False, False)
 
         root.update_idletasks()
         root.update()
