@@ -36,8 +36,9 @@ class GUI_MoveViewer:
         '#000000'
     ]
 
-    def __init__(self, master):
+    def __init__(self, master,verbose=False):
         self.master = master
+        self.verbose = verbose
         #self.master.geometry(str(1850) + 'x' + str(990))
         master.title("SCUFFLE Move Editor")
         master.iconbitmap('Data/icon.ico')
@@ -306,11 +307,13 @@ class GUI_MoveViewer:
         try:
             self.movelist = MovelistParser.Movelist.from_file(path)
             self.movelist_name_var.set(self.movelist.name)
+            self.movelist.verbose = self.verbose
         except Exception as e:
             print(e)
 
     def set_movelist(self, movelist):
         self.movelist = movelist
+        self.movelist.verbose = self.verbose
         try:
             self.movelist_name_var.set(self.movelist.name)
         except:

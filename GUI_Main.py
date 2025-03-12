@@ -167,7 +167,7 @@ class GUI_Main(Tk):
             if self.move_viewer != None:
                 self.move_viewer.master.destroy()
                 self.move_viewer = None
-            self.move_viewer = GUI_MoveViewer.GUI_MoveViewer(Toplevel(self))
+            self.move_viewer = GUI_MoveViewer.GUI_MoveViewer(Toplevel(self),verbose=self.verbose_logging.get())
             self.move_viewer.set_movelist(self.launcher.game_reader.p1_movelist)
         except Exception as e:
             print(e)

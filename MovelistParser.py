@@ -506,7 +506,7 @@ class Throw:
 
 
 class Cancel:
-    def __init__(self, movelist, bytes, address, move_id):
+    def __init__(self, movelist, bytes, address, move_id, verbose = False):
         self.movelist = movelist
         self.address = address
         self.bytes = bytes
@@ -516,7 +516,7 @@ class Cancel:
         else:
             self.type = -1
         self.move_id = move_id
-        self.links = Movelist.links_from_bytes(self, self.movelist)
+        self.links = Movelist.links_from_bytes(self, self.movelist,verbose)
 
     def get_modified_bytes(self):
         if self.modified_bytes == None:
@@ -1371,7 +1371,7 @@ class Condition:
 
 
 class Link:
-    def __init__(self, cancel, cancel_index, conditions, args, move_id, encoded_move_id, type, sc_only, is_last_call, is_shortcut):
+    def __init__(self, cancel, cancel_index, conditions, args, move_id, encoded_move_id, type, sc_only, is_last_call, is_shortcut,verbose):
         self.cancel = cancel
         self.cancel_index = cancel_index
         self.conditions = conditions
@@ -1383,11 +1383,15 @@ class Link:
         self.is_last_call = is_last_call
         self.hold = False
         self.is_shortcut = is_shortcut
+        self.verbose = verbose
 
         self.delta = self.parse_edge()
 
         #self.button_press = self.parse_button()
-        if (0xff < self.move_id < self.cancel.movelist.block_Q_length):
+        end = self.cancel.movelist.block_Q_length
+        if verbose:
+            end = self.cancel.movelist.length
+        if (0xff < self.move_id < (end)):
             self.button_press = self.better_parse_button()
         else:
             self.button_press = None
@@ -1430,12 +1434,15 @@ class Link:
         self.weight = self.leave_on
         return self.leave_on - self.enter_in
 
-    def is_to_attack_or_stance(self, movelist):
+    def is_to_attack_or_stance(self, movelist, verbose = False):
         #attacks exist between 256 and the end of the first block in the movelist (block Q)
         #stances exist in the fourth block (block T) and seem to always start with 0x32 (so 0x3200+ could be a stance?)
         if not self.is_last_call:
             if self.move_id < len(movelist.all_moves):
-                if self.move_id > 0x0100 and self.move_id < movelist.block_Q_length and self.sc_only == False:
+                end = movelist.block_Q_length
+                if verbose:
+                    end = movelist.length
+                if self.move_id > 0x0100 and self.move_id < end and self.sc_only == False:
                     return True
                 if self.encoded_move_id >= 0x3200 and self.encoded_move_id < 0x3216:
 
@@ -1579,7 +1586,7 @@ class Movelist:
     def __init__(self, raw_bytes, name):
         self.bytes = raw_bytes
         self.name = name.split('/')[-1].split('_')[0].capitalize()
-
+        self.verbose = False
         header_index_1x = 0xC
         header_index_1y = 0xE
         header_index_2 = 0x10 # to attacks info
@@ -1657,7 +1664,7 @@ class Movelist:
                 end = self.all_moves[i + 1].cancel_address
             except:
                 end = ca + self.parse_cancel_bytes_to_end(raw_bytes[ca:])
-            cancel = Cancel(self, raw_bytes[ca: end], ca, i)
+            cancel = Cancel(self, raw_bytes[ca: end], ca, i,self.verbose)
             self.all_cancels[ca] = cancel
             self.move_ids_to_cancels[i] = cancel
             self.all_moves[i].set_cancel(cancel)
@@ -1994,7 +2001,7 @@ class Movelist:
             return Movelist.links_from_bytes(cancel, self)
 
 
-    def links_from_bytes(cancel, movelist):
+    def links_from_bytes(cancel, movelist, verbose=False):
             bytes = cancel.bytes
             buf_all = []
 
@@ -2073,7 +2080,7 @@ class Movelist:
                                     state = decode_move_id(state, movelist)
                                     break
 
-                        links.append(Link(cancel, index - len(args), conditions, args, state, ref_state, exe_type, sc_only, is_last_call, is_shortcut))
+                        links.append(Link(cancel, index - len(args), conditions, args, state, ref_state, exe_type, sc_only, is_last_call, is_shortcut,verbose))
                         #print('{} {} {}: ({})'.format(inst, int(bytes[index + 1]), int(bytes[index + 2]), state))
 
                         conditions = []
