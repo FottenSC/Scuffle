@@ -300,7 +300,10 @@ class InputType(Enum):
 
 class SpecialState(Enum):
     TECH_CROUCH = 0x02
+    GROUNDED = 0x03
     TECH_JUMP = 0x04
+    WALL_HIT = 0x1f
+    RING_OUT = 0x28
     TECH_COUNTER = 0x2b
 
 class AssetType(Enum):
