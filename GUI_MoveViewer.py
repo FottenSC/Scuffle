@@ -123,7 +123,9 @@ class GUI_MoveViewer:
 
         self.move_id_textvar = StringVar()
         self.move_id_textvar.set('-')
-        self.move_id_label = Label(move_id_entry_container, textvariable=self.move_id_textvar, font = bold_label_font)
+        self.encoded_move_id_textvar = StringVar()
+        self.encoded_move_id_textvar.set('-')
+        self.move_id_label = Label(move_id_entry_container, textvariable=self.encoded_move_id_textvar, font = bold_label_font)
         self.move_id_label.pack()
 
         move_id_label_container = Frame(move_id_entry_container)
@@ -423,6 +425,7 @@ class GUI_MoveViewer:
 
         if id < len(self.movelist.all_moves) and id >= 0:
             self.move_id_textvar.set('{}'.format(id))
+            self.encoded_move_id_textvar.set('{} ({})'.format(id,hex(MovelistParser.encode_move_id(id,self.movelist))))
             move = self.movelist.all_moves[id]
 
             bytes, guide = move.get_gui_guide()

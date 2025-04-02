@@ -131,6 +131,7 @@ class HitLevel(Enum):
     sl_63 = 0x63
 
     throw = 0x81 #most throws
+    throw_ast_air = 0xC0
     throw_ast = 0xC1 #astaroth throws
     throw_mid = 0x82 #mids
 

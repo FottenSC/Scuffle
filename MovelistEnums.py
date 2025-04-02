@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, Flag
 
 
 def enum_has_value(cls, value):
@@ -16,12 +16,12 @@ def name_from_enum(cls, value, replace_char = " ", format = False, slice = False
             return f'{result.replace("_", replace_char)}'
         else:
             return value
-            
-
     
     except:
         return value
-class Flag(Enum):
+
+
+class BoolFlag(Enum):
     False_ = 0x00
     True_ = 0x01
 
@@ -111,6 +111,15 @@ class EffectPart(Enum):
     WEAPON_7 = 0x1d
     WEAPON_8 = 0x1e
     WEAPON_9 = 0x1f
+    WEAPON_SOCKET_1 = 0x8017
+    WEAPON_SOCKET_2 = 0x8018
+    WEAPON_SOCKET_3 = 0x8019
+    WEAPON_SOCKET_4 = 0x801a
+    WEAPON_SOCKET_5 = 0x801b
+    WEAPON_SOCKET_6 = 0x801c
+    WEAPON_SOCKET_7 = 0x801d
+    WEAPON_SOCKET_8 = 0x801e
+    WEAPON_SOCKET_9 = 0x801f
     RIGHT_THUMB_3 = 0x20
     RIGHT_THUMB_2 = 0x21
     RIGHT_THUMB_1 = 0x22
@@ -175,7 +184,7 @@ class EffectTarget(Enum):
     Player__On_Ground = 0x05
     Opponent__On_Ground = 0x06
 
-class TraceType(Enum):
+class TraceKind(Enum):
     AUTO = 0x00
     NORMAL = 0x01
     TUBE = 0x02
@@ -208,36 +217,36 @@ class TraceType(Enum):
     NORMAL_M = 0x1d #normal
     NORMAL_L = 0x1e #normal
     PTHUNDER_PINK = 0x1f #reversal edge start
-    PTHUNDER_RED = 0x20 #reversal edge hold / during reversal egde
+    PTHUNDER_RED = 0x20 #reversal edge hold / during reversal edge
     SOUL_CHARGE_NORMAL_S = 0x21 #soul charge
     SOUL_CHARGE_NORMAL_M = 0x22 #soul charge
     SOUL_CHARGE_NORMAL_L = 0x23 #soul charge
     SOUL_CHARGE_PFLAME = 0x24 #soul charge unblockable
     SOUL_CHARGE_PTHUNDER = 0x25 #soul charge break attack
     SOUL_CHARGE_PTHUNDER_PINK = 0x26 #soul charge reversal edge start
-    SOUL_CHARGE_PTHUNDER_RED = 0x27 #soul charge reversal edge hold / during reversal egde
+    SOUL_CHARGE_PTHUNDER_RED = 0x27 #soul charge reversal edge hold / during reversal edge
     CE_1 = 0x28
     CE_2 = 0x29
     CE_3 = 0x2a
-    SPECIAL_1 = 0x2b
-    SPECIAL_2 = 0x2c
-    SPECIAL_3 = 0x2d
-    SOUL_ATTACK = 0x2e #soul attack SP_4
+    SPECIAL_1 = 0x2b #SP_01
+    SPECIAL_2 = 0x2c #SP_02
+    SPECIAL_3 = 0x2d #SP_03
+    SOUL_ATTACK = 0x2e #SP_04, always soul attack
 
 class TracePart(Enum):
     NONE = 0xFFFF
-    WEAPONS1 = 0X00
-    WEAPONS2 = 0x01
-    WEAPONS3 = 0x02
-    WEAPONS4 = 0x03
-    WEAPONS5 = 0x04
-    WEAPONS6 = 0x05
-    WEAPONS7 = 0x06
-    WEAPONS8 = 0x07
-    WEAPONS9 = 0x08
+    WEAPONS1 = 0X00 #ARMS1
+    WEAPONS2 = 0x01 #ARMS2
+    WEAPONS3 = 0x02 #ARMS3
+    WEAPONS4 = 0x03 #ARMS4
+    WEAPONS5 = 0x04 #ARMS5
+    WEAPONS6 = 0x05 #ARMS6
+    WEAPONS7 = 0x06 #ARMS7
+    WEAPONS8 = 0x07 #ARMS8
+    WEAPONS9 = 0x08 #ARMS9
     TAIL = 0x09
-    CHEST = 0x0a
-    HEAD = 0x0b
+    CHEST = 0x0a #MUNE
+    HEAD = 0x0b #ATAMA
     RIGHT_SHOULDER = 0x0c
     RIGHT_ARM = 0x0d
     RIGHT_HAND = 0x0e
@@ -298,18 +307,66 @@ class InputType(Enum):
     #PressBack =  0x0002 /0x1002 ??
     #0x0120 #geralt, super?? + hold button
 
+class ComboConditions(Flag):
+    Counter_Hit = 0x01
+    Prevent_Chain = 0x08
+    Jail_on_Block = 0x20
+
+class ReturnState(Enum):
+    STANDING = 0xc8
+    CROUCHING = 0xc9
+    STANDING_GUARD = 0xca
+    CROUCHING_GUARD = 0xcb
+    GROUNDED_FACE_UP = 0xd0
+    GROUNDED_FACE_DOWN = 0xd1
+    BT_STANDING = 0xd2
+    BT_CROUCHING = 0xd3
+    CROUCHING__STANDING = 0xd4
+    BT_CROUCHING__STANDING = 0xd5
+    BT_GROUNDED_FACE_UP = 0xdc
+    BT_GROUNDED_FACE_DOWN = 0xdd
+
+
 class SpecialState(Enum):
     TECH_CROUCH = 0x02
     GROUNDED = 0x03
     TECH_JUMP = 0x04
+    GUARD_IMPACT = 0x0a
+    HIT = 0x1b
     WALL_HIT = 0x1f
+    INVISIBLE = 0x23
     RING_OUT = 0x28
     TECH_COUNTER = 0x2b
+    BLOCK = 0x2e
+    CROUCHING_ATTACK = 0x68
+    WHILE_RISING_ATTACK = 0x69
+    MULTI_PRESS_ATTACK = 0x6a
+    _8WAYRUN_ATTACK = 0x6b 
 
 class AssetType(Enum):
     Common = 0x00
     Character = 0x01
     Stage = 0x03
+
+class CharacterIndex(Enum):
+    Player = 0x00
+    Opponent = 0x01
+
+class Hand(Enum):
+    Left = 0x00
+    Right = 0x01
+
+class MeterType(Enum):
+    HP_METER_REGEN = 0x00
+    HP_METER_REGEN_ = 0x01
+    SOUL_METER_REGEN = 0x02
+    SOUL_METER_REGEN_ = 0x03
+    GUARD_METER_REGEN = 0x04
+    GUARD_METER_REGEN_ = 0x05
+
+class MeterCalcBase(Enum):
+    _120 = 0x00
+    _240 = 0x01
 
 
 class VoiceCategory(Enum):
@@ -441,10 +498,16 @@ class ViewTarget(Enum):
     Stage = 0x0a
 
 class OpponentState(Enum):
+    Grounded = 0x03
+    Airborne = 0x07
+    Airborne_ = 0x0f
     Hurt = 0x1b
     Block = 0x2e
 
 class CharacterValue(Enum):
+    Soul_Gauge = 0x00
+    Guard_Break = 0x07
+    KO = 0x09
     Soul_Charge = 0x0a
 
 class CharacterID(Enum):

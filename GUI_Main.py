@@ -50,8 +50,7 @@ class GUI_Main(Tk):
             print("Error reading readme file.")
 
         #Disables version checker
-        updates = False
-        #updates = VersionChecker.check_version()
+        updates = VersionChecker.check_version()
         if updates:
             self.wm_title("SCUFFLE (Updates Available)")
 

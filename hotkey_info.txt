@@ -1,4 +1,4 @@
-NEW KEYBOARD SHORTCUTS
+```NEW KEYBOARD SHORTCUTS
 Ctrl + L - reload current move
 Ctrl + Shift + L - load movelist from file
 
@@ -21,9 +21,12 @@ Ctrl + D - focus Decoded entry box
 Ctrl + Shift + E - focus HEX entry box
 Ctrl + Shift + D - focus DEC entry box
 
-Ctrl + [ / ] - decrease / increase move id
-Ctrl + Shift + [ / ] - decrease / increase hitbox id
+Ctrl + [ - decrease move id
+Ctrl + ] - increase move id
+Ctrl + Shift + [ - decrease hitbox id
+Ctrl + Shift + ] - increase hitbox id
 
 Ctrl + , - copy move to clipboard
 Ctrl + . - copy hitbox to clipboard
 Ctrl + / - copy scripting to clipboard
+```

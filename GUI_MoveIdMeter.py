@@ -63,7 +63,7 @@ class GUI_MoveIdMeter:
         master.attributes("-topmost", True)
         master.iconbitmap('Data/icon.ico')
 
-        guide_font = ("Consolas", 12)
+        guide_font = ("Consolas", 8)
         label_font = ("Consolas", 8)
 
         self.style = Style()
