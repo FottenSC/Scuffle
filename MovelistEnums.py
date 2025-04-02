@@ -357,12 +357,12 @@ class Hand(Enum):
     Right = 0x01
 
 class MeterType(Enum):
-    HP_METER_REGEN = 0x00
-    HP_METER_REGEN_ = 0x01
-    SOUL_METER_REGEN = 0x02
-    SOUL_METER_REGEN_ = 0x03
-    GUARD_METER_REGEN = 0x04
-    GUARD_METER_REGEN_ = 0x05
+    HP_METER = 0x00
+    HP_METER = 0x01
+    SOUL_METER = 0x02
+    SOUL_METER = 0x03
+    GUARD_METER = 0x04
+    GUARD_METER = 0x05
 
 class MeterCalcBase(Enum):
     _120 = 0x00
