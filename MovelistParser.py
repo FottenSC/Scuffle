@@ -1489,8 +1489,11 @@ class Cancel:
                     except:
                         list_of_bytes.append((current_bytes, f'<b>SET VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
+                if inst == CC.EXE_12:
+                    list_of_bytes.append((current_bytes, f'<b>ADD ONE TO VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
+                    current_bytes = b''
                 if inst == CC.EXE_13:
-                    list_of_bytes.append((current_bytes, 'yoshimitsu only ??? backturned mantis stance?'.format(first_arg), index))
+                    list_of_bytes.append((current_bytes, f'<b>SUBTRACT ONE FROM VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
                 if inst == CC.PEN_2A:
                     list_of_bytes.append((current_bytes, 'GOTO: {}'.format(format(args,'04x') if args not in end else 'END'), index))
