@@ -332,7 +332,8 @@ class SpecialState(Enum):
     GROUNDED = 0x03
     TECH_JUMP = 0x04
     GUARD_IMPACT = 0x0a
-    HIT = 0x1b
+    ATTACK_HIT = 0x1b
+    ATTACK_MISS = 0x1c
     WALL_HIT = 0x1f
     INVISIBLE = 0x23
     RING_OUT = 0x28
@@ -475,7 +476,7 @@ class AirStunType(Enum):
     Air__Relaunch = 0x0d
     unk__Flip_Forward = 0x0e
     Bind__Pull_Toward = 0x0f
-    Short_Bind__Knockack = 0x10
+    Short_Bind__Knockback = 0x10
     Air__Faster_Vertical_Roll = 0x11
     Bind__Rolling_Restand = 0x12
     Bind__Knockback_2 = 0x13
@@ -484,8 +485,177 @@ class AirStunType(Enum):
     Bind__Inverted_Knockback = 0x16
     None__Disable_AC = 0x17
 
+class LH_Situation(Enum):
+    Standing = 0x01
+    Crouching = 0x02
+    Standing_or_Crouching = 0x03
+    Airborne = 0x04
+    Standing_or_Airborne = 0x05
+    Crouching_or_Airborne = 0x06
+    Standing_or_Crouching_or_Airborne = 0x07
+    Jumping = 0x0c
+    Downed = 0x10
+    Guard_Impacted = 0x20
+    Determined_from_Character_Value = 0x23
 
+class LH_Condition(Enum):
+    Attack_Counter__First_Hit = 0x01
+    Attack_Counter__Second_Hit = 0x02
+    Attack_Counter = 0x03
+    Run_Counter__Side = 0x04
+    Run_Counter__Side_or_Attack_Counter__First_Hit = 0x05
+    Run_Counter__Side_or_Attack_Counter__Second_Hit = 0x06
+    Run_Counter__Side_or_Attack_Counter = 0x07
+    Step_Counter__Side = 0x08
+    Step_Counter__Side_or_Attack_Counter_First_Hit = 0x09
+    Step_Counter__Side_or_Attack_Counter_Second_Hit = 0x0a
+    Step_Counter__Side_or_Attack_Counter = 0x0b
+    Step_Counter__Side_or_Run_Counter__Side = 0x0c
+    Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter_First_Hit = 0x0d
+    Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter_Second_Hit = 0x0e
+    Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter = 0x0f
+    Run_Counter__Back = 0x10
+    Run_Counter__Back_or_Attack_Counter_First_Hit = 0x11
+    Run_Counter__Back_or_Attack_Counter_Second_Hit = 0x12
+    Run_Counter__Back_or_Attack_Counter = 0x13
+    Run_Counter__Back_or_Run_Counter__Side = 0x14
+    Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter_First_Hit = 0x15
+    Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter_Second_Hit = 0x16
+    Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter = 0x17
+    Run_Counter__Back_or_Step_Counter__Side = 0x18
+    Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter__First_Hit = 0x19
+    Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter__Second_Hit = 0x1a
+    Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter = 0x1b
+    Run_Counter = 0x1c
+    Run_Counter_or_Attack_Counter__First_Hit = 0x1d
+    Run_Counter_or_Attack_Counter__Second_Hit = 0x1e
+    Run_Counter_or_Attack_Counter = 0x1f
+    Guard_Crush = 0x20
+    Guard_Crush_or_Attack_Counter__First_Attack = 0x21
+    Guard_Crush_or_Attack_Counter__Second_Attack = 0x22
+    Guard_Crush_or_Attack_Counter = 0x23
+    Guard_Crush_or_Run_Counter__Side = 0x24
+    Guard_Crush_or_Run_Counter__Side_or_Attack_Counter__First_Hit = 0x25
+    Guard_Crush_or_Run_Counter__Side_or_Attack_Counter__Second_Hit = 0x26
+    Guard_Crush_or_Run_Counter__Side_or_Attack_Counter = 0x27
+    Guard_Crush_or_Step_Counter__Side = 0x28
+    Guard_Crush_or_Step_Counter__Side_or_Attack_Counter__First_Hit = 0x29
+    Guard_Crush_or_Step_Counter__Side_or_Attack_Counter__Second_Hit = 0x2a
+    Guard_Crush_or_Step_Counter__Side_or_Attack_Counter = 0x2b
+    Guard_Crush_or_Step_Counter__Side_or_Run_Counter__Side = 0x2c
+    Guard_Crush_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter__First_Hit = 0x2d
+    Guard_Crush_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter__Second_Hit = 0x2e
+    Guard_Crush_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter = 0x2f
+    Guard_Crush_or_Run_Counter__Back = 0x30
+    Guard_Crush_or_Run_Counter__Back_or_Attack_Counter__First_Hit = 0x31
+    Guard_Crush_or_Run_Counter__Back_or_Attack_Counter__Second_Hit = 0x32
+    Guard_Crush_or_Run_Counter__Back_or_Attack_Counter = 0x33
+    Guard_Crush_or_Run_Counter__Back_or_Run_Counter__Side = 0x34
+    Guard_Crush_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter__First_Hit = 0x35
+    Guard_Crush_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter__Second_Hit = 0x36
+    Guard_Crush_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter = 0x37
+    Guard_Crush_or_Run_Counter__Back_or_Step_Counter__Side = 0x38
+    Guard_Crush_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter__First_Hit = 0x39
+    Guard_Crush_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter__Second_Hit = 0x3a
+    Guard_Crush_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter = 0x3b
+    Guard_Crush_or_Run_Counter = 0x3c
+    Guard_Crush_or_Run_Counter_or_Attack_Counter__First_Hit = 0x3d
+    Guard_Crush_or_Run_Counter_or_Attack_Counter__Second_Hit = 0x3e
+    Guard_Crush_or_Run_Counter_or_Attack_Counter = 0x3f
+    Impact_Counter = 0x40
+    Impact_Counter_or_Attack_Counter__First_Attack = 0x41
+    Impact_Counter_or_Attack_Counter__Second_Attack = 0x42
+    Impact_Counter_or_Attack_Counter = 0x43
+    Impact_Counter_or_Run_Counter__Side = 0x44
+    Impact_Counter_or_Run_Counter__Side_or_Attack_Counter__First_Attack = 0x45
+    Impact_Counter_or_Run_Counter__Side_or_Attack_Counter__Second_Attack = 0x46
+    Impact_Counter_or_Run_Counter__Side_or_Attack_Counter = 0x47
+    Impact_Counter_or_Step_Counter__Side = 0x48
+    Impact_Counter_or_Step_Counter__Side_or_Attack_Counter__First_Attack = 0x49
+    Impact_Counter_or_Step_Counter__Side_or_Attack_Counter__Second_Attack = 0x4a
+    Impact_Counter_or_Step_Counter__Side_or_Attack_Counter = 0x4b
+    Impact_Counter_or_Step_Counter__Side_or_Run_Counter__Side = 0x4c
+    Impact_Counter_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter__First_Attack = 0x4d
+    Impact_Counter_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter__Second_Attack = 0x4e
+    Impact_Counter_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter = 0x4f
+    Impact_Counter_or_Run_Counter__Back = 0x50
+    Impact_Counter_or_Run_Counter__Back_or_Attack_Counter__First_Attack = 0x51
+    Impact_Counter_or_Run_Counter__Back_or_Attack_Counter__Second_Attack = 0x52
+    Impact_Counter_or_Run_Counter__Back_or_Attack_Counter = 0x53
+    Impact_Counter_or_Run_Counter__Back_or_Run_Counter__Side = 0x54
+    Impact_Counter_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter__First_Attack = 0x55
+    Impact_Counter_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter__Second_Attack = 0x56
+    Impact_Counter_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter = 0x57
+    Impact_Counter_or_Run_Counter__Back_or_Step_Counter__Side = 0x58
+    Impact_Counter_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter__First_Attack = 0x59
+    Impact_Counter_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter__Second_Attack = 0x5a
+    Impact_Counter_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter = 0x5b
+    Impact_Counter_or_Run_Counter__Back_or_Step_Counter__Side_or_Run_Counter__Side = 0x5c
+    Impact_Counter_or_Run_Counter__Back_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter__First_Attack = 0x5d
+    Impact_Counter_or_Run_Counter__Back_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter__Second_Attack = 0x5e
+    Impact_Counter_or_Run_Counter__Back_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter = 0x5f
+    Impact_Counter_or_Guard_Crush = 0x60
+    Impact_Counter_or_Guard_Crush_or_Attack_Counter__First_Attack = 0x61
+    Impact_Counter_or_Guard_Crush_or_Attack_Counter__Second_Attack = 0x62
+    Impact_Counter_or_Guard_Crush_or_Attack_Counter = 0x63
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Side = 0x64
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Side_or_Attack_Counter__First_Hit = 0x65
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Side_or_Attack_Counter__Second_Hit = 0x66
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Side_or_Attack_Counter = 0x67
+    Impact_Counter_or_Guard_Crush_or_Step_Counter__Side = 0x68
+    Impact_Counter_or_Guard_Crush_or_Step_Counter__Side_or_Attack_Counter__First_Hit = 0x69
+    Impact_Counter_or_Guard_Crush_or_Step_Counter__Side_or_Attack_Counter__Second_Hit = 0x6a
+    Impact_Counter_or_Guard_Crush_or_Step_Counter__Side_or_Attack_Counter = 0x6b
+    Impact_Counter_or_Guard_Crush_or_Step_Counter__Side_or_Run_Counter__Side = 0x6c
+    Impact_Counter_or_Guard_Crush_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter__First_Hit = 0x6d
+    Impact_Counter_or_Guard_Crush_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter__Second_Hit = 0x6e
+    Impact_Counter_or_Guard_Crush_or_Step_Counter__Side_or_Run_Counter__Side_or_Attack_Counter = 0x6f
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back = 0x70
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Attack_Counter__First_Hit = 0x71
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Attack_Counter__Second_Hit = 0x72
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Attack_Counter = 0x73
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Run_Counter__Side = 0x74
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter__First_Hit = 0x75
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter__Second_Hit = 0x76
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Run_Counter__Side_or_Attack_Counter = 0x77
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Step_Counter__Side = 0x78
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter__First_Hit = 0x79
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter__Second_Hit = 0x7a
+    Impact_Counter_or_Guard_Crush_or_Run_Counter__Back_or_Step_Counter__Side_or_Attack_Counter = 0x7b
+    Impact_Counter_or_Guard_Crush_or_Run_Counter = 0x7c
+    Impact_Counter_or_Guard_Crush_or_Run_Counter_or_Attack_Counter__First_Hit = 0x7d
+    Impact_Counter_or_Guard_Crush_or_Run_Counter_or_Attack_Counter__Second_Hit = 0x7e
+    Impact_Counter_or_Guard_Crush_or_Run_Counter_or_Attack_Counter = 0x7f
+ 
 
+    Counter_Hit = 0x017e
+    Opening_After_Opponent_Guard = 0x0200
+    Opponent_Missed_Attack = 0x0400
+    Opponent_Hit_During_Attack = 0x0402
+    Opponent_Missed_Guard_Impact = 0x0441
+    Character_Value_Check = 0x077f
+
+class GI_Type(Enum):
+    Inward_GI = 0x0146
+    Outward_GI_ = 0x0147
+    Armor = 0x0148
+    Outward_GI = 0x0149
+    Revenge = 0x014a
+    Clash = 0x014b
+    RI_ = 0x014c
+    Thrust = 0x014d
+    Inward_GI_ = 0x014e
+    RI = 0x014f
+
+class AttackLevel(Enum):
+    High = 0x0140
+    Middle = 0x0141
+    Low = 0x0142
+    High_and_Middle = 0x0143
+    Middle_and_Low = 0x0144
+    All = 0x0145
+
+    
 
 class StunOverride(Enum):
     STAND = 0x01
@@ -506,9 +676,10 @@ class OpponentState(Enum):
 
 class CharacterValue(Enum):
     Soul_Gauge = 0x00
-    Guard_Break = 0x07
+    Guard_Gauge = 0x02
     KO = 0x09
     Soul_Charge = 0x0a
+    Guard_Break = 0x0d
 
 class CharacterID(Enum):
     Mitsurugi = 0x01
@@ -551,7 +722,7 @@ class CharacterID(Enum):
     Night_Terror = 0x27
     Hilde = 0x28
     Algol = 0x29
-    Vader = 0x2a
+    Darth_Vader = 0x2a
     Yoda = 0x2b
     The_Apprentice = 0x2c
     Creation = 0x2d
@@ -573,10 +744,23 @@ class CharacterID(Enum):
     Master_Kilik = 0x3d
     Boss_Astaroth = 0x3e
     Boss_Cervantes = 0x3f
-    Boss_Nightmare = 0x40
-    Devil_Jin = 0x41
-    Guest1 = 0x42
-    Guest2 = 0x43
+    Boss_Nightmare_or_Angol_Fear = 0x40
+    Devil_Jin_or_Kamikirimusi_or_Miser = 0x41
+    Ezio_Auditore_or_Shura_or_Greed = 0x42
+    Ashlotte_or_Arthur = 0x43
+    Scheherazade_or_Hwang = 0x44
+    Luna = 0x45
+    Valeria = 0x46
+    Hualin = 0x47
+    Girardot = 0x48
+    Demuth = 0x4a
+    Aurelia = 0x4b
+    Chester = 0x4c
+    Strife = 0x4d
+    Abelia = 0x4e
+    Lynette = 0x4f
+    Li_Long = 0x51
+    Revenant = 0x54
     _2B = 0x60
     Haohmaru = 0x61
     Grøh = 0x62
@@ -602,7 +786,8 @@ class CC(Enum): #Cancel codes for the cancel block, mostly we expect (CC XX XX C
     EXE_25 = 0x25 #all EXE blocks have the seecond argument as the number of instructions since the last non 8b/89 block (mostly true)
     EXE_19 = 0x19 #very common in neutral blocks
     EXE_A5 = 0xA5
-    EXE_13 = 0x13 #very rare, yoshimitsu only???
+    EXE_12 = 0x12 # Increase variable value by 1.
+    EXE_13 = 0x13 # Decrease variable value by 1.
 
     ARG_89 = 0x89 #the ARG blocks provide arguments to the EXE blocks
     ARG_8B = 0x8b
@@ -650,6 +835,7 @@ class CC(Enum): #Cancel codes for the cancel block, mostly we expect (CC XX XX C
     RETURN_8d = 0x8d
     RETURN_8e = 0x8e
     RETURN_8f = 0x8f
+    RETURN_90 = 0x90
     RETURN_91 = 0x91
     RETURN_92 = 0x92
     RETURN_94 = 0x94

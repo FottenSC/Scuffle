@@ -496,7 +496,7 @@ class Attack:
             (0x58, 0x5a, b2i, "crouching block hit effect"),
             (0x5a, 0x5c, lambda x, y: f'{math.floor(bs2i(x, y)*100/240)}%' if bs2i(x,y) >= 0 else 'disabled' , "guard damage override (otherwise uses hit spark size and type calc)"),
             (0x5c, 0x5e, b2i, f"combo condition flag(s) [0x01 = counterhit, 0x08 = won't chain, 0x20 = jails on block]"),
-            (0x5e, 0x60, b2i, "attack intensity"),
+            (0x5e, 0x60, b2i, "ATK type and strength (Ex: 0x06 = medium horizontal attack, 0x1a = strong vertical attack, 0x31 = weak kick/throw)"),
             (0x60, 0x62, b2i, "same as above"),
 
             (0x62, 0x64, b2i, "hit spark size (contributes to guard damage)"),
@@ -568,6 +568,7 @@ class Cancel:
         self.address = address
         self.bytes = bytes
         self.modified_bytes = None
+        self.goto_blocks = []
         if len(self.bytes) >= 3:
             self.type = int(self.bytes[2])
         else:
@@ -614,6 +615,7 @@ class Cancel:
         else:
             updated_bytes = b''
             z = 0
+            new_diff = diff
             while z < len(new_bytes):
                 inst = new_bytes[z]
                 try:
@@ -630,9 +632,26 @@ class Cancel:
                         z += 3
                     else:
                         updated_bytes += new_bytes[z:z+1]
+                        
                         goto = b2i(new_bytes, z + 1, big_endian=True)
+                        if first_index >= len(old_bytes) - 1:
+                            new_diff = 0
+                    
                         if goto > first_index:
-                            goto += diff
+                            if z + 1 >= first_index and z + 1 <= first_index + diff:
+                                if goto > len(new_bytes) - 1:
+                                    goto = len(new_bytes) - 1
+                                new_diff = 0 
+                            if goto <= 0:
+                               goto = 0
+                               new_diff = 0
+                            elif goto > len(new_bytes) - 1:
+                                goto = len(new_bytes) - 1
+                                new_diff = 0
+                            else:
+                                new_diff = diff
+                            goto += new_diff if goto + new_diff <= len(new_bytes) - 1 else 0
+                        
                         updated_bytes += goto.to_bytes(2, byteorder='big')
                         z += 3
             return updated_bytes
@@ -998,6 +1017,10 @@ class Cancel:
                                 if state == 0x54:
                                     label = f'{label_prefix} EXITING MOVE'
                                     last_bool = 'EXITING MOVE CHECK'
+
+                                if state == 0x5a:
+                                    label = f'{label_prefix} OPPONENT GENDER'
+                                    last_bool = 'OPPONENT GENDER CHECK'
                                 
                                 if state == 0x61:
                                     label = f'{label_prefix} OPPONENT STATE [state:{format_value(args_list[0],OpponentState)}]'
@@ -1019,10 +1042,13 @@ class Cancel:
                                     label = f'{label_prefix} PLAYER HP PERCENT [value:{format_value(args_list[0],prefix="below ")}%]'
                                     last_bool = 'PLAYER HP PERCENT CHECK'
 
+                                if state == 0x009c:
+                                    label = f'{label_prefix} PLAYER DISTANCE [0:{format_value(args_list[0])}][1:{format_value(args_list[1])}]'
+                                    last_bool = 'PLAYER DISTANCE CHECK'
 
                                 if state == 0x138a:
-                                    label = f'{label_prefix} CHARACTER VALUE [target_value:{format_value(args_list[0],CharacterValue)}][value:{format_value(args_list[1],negative=True)} to {format_value(args_list[2],negative=True)}]'
-                                    last_bool = 'CHARACTER VALUE CHECK'
+                                    label = f'{label_prefix} PLAYER CHARACTER VALUE [target_value:{format_value(args_list[0],CharacterValue)}][value:{format_value(args_list[1],negative=True)} to {format_value(args_list[2],negative=True)}]'
+                                    last_bool = 'PLAYER CHARACTER VALUE CHECK'
 
                                 if state == 0x13ae or state == 0x13af or state == 0x24:
                                     label = f'{label_prefix} DIRECTION INPUT [<b>{name_from_enum(mve.PaddedButton, b2i(self.bytes, state_index + 4, big_endian=True),slice=True)}<b>]'
@@ -1035,6 +1061,10 @@ class Cancel:
                                 if state == 0x13c5:
                                     label = f'{label_prefix} PLAYER CHARACTER (MIMIC) [character:{format_value(args_list[0],CharacterID)}]'
                                     last_bool = 'PLAYER CHARACTER CHECK'
+
+                                if state == 0x13ce:
+                                    label = f'{label_prefix} OPPONENT CHARACTER VALUE [target_value:{format_value(args_list[0],CharacterValue)}][value:{format_value(args_list[1],negative=True)} to {format_value(args_list[2],negative=True)}]'
+                                    last_bool = 'OPPONENT CHARACTER VALUE CHECK'
 
                                 if state == 0x13da:
                                     label = f'{label_prefix} TRAINING MODE'
@@ -1126,6 +1156,10 @@ class Cancel:
                                 label = f'<b>ANIMATION BUFFER<b>: [amount:{format_value(args_list[0],suffix=" frames")}]'
                             if state_id == 0x0015:
                                 label = f'<b>ANIMATION SPEED OVERRIDE<b>: [speed:{format_value(args_list[0],encoded_percent=True, percent_base=0x5640)}]'
+                            
+                            if state_id == 0x0018:
+                                label = f'<b>MOVE SPEED OVERRIDE<b>: [speed:{format_value(args_list[0],encoded_percent=True, percent_base=0x5640)}]'
+
                             if state_id == 0x001a:
                                 label = f'<b>THROW<b>: [hurt_script_id:{format_value(args_list[0])}][animation_id:{format_value(args_list[1])}]'
                             if state_id == 0x0022:
@@ -1133,7 +1167,7 @@ class Cancel:
                             if state_id == 0x0025:
                                 label = f'<b>THROW DAMAGE<b>: [amount:{format_value(args_list[0],suffix="% of total damage")}]'
                             if state_id == 0x0028:
-                                label = f'<b>SET HAND POSE<b>: [hand:{format_value(args_list[0],Hand)}][pose_id:{format_value(args_list[1])}]'
+                                label = f'<b>SET HAND POSE<b>: [hand:{format_value(args_list[0],Hand)}][1:{format_value(args_list[1])}][pose_id:{format_value(args_list[2])}]'
                             if state_id == 0x002f:
                                 if second_arg == 0x02:
                                     label = f'<b>SELECT CAMERA<b>: [0:{format_value(args_list[0])}]'
@@ -1188,12 +1222,19 @@ class Cancel:
                                 if second_arg == 0x03:    
                                     label = f'<b>SET OPPONENT SPEED (LESS THAN OR EQUAL TO 100%)<b>: [speed:{format_value(args_list[0],encoded_percent=True, percent_base=0x3c00)}][duration:{format_value(args_list[1],suffix=" frames")}]'
                             
+                            if state_id == 0x13d0:
+                                label = f'<b>SET LETHAL HIT SITUATION<b>: [situation:{format_value(args_list[0],LH_Situation)}]'
+                            if state_id == 0x13d1:
+                                label = f'<b>SET LETHAL HIT CONDITION<b>: [condition:{format_value(args_list[0],LH_Condition)}]'
                             if state_id == 0x13d8:
                                 label = f'<b>APPLY DAMAGE SCALING<b>: [{format_value(args_list[0],suffix="%")}]'
                             if state_id == 0x13da:
-                                label = f'<b>GAIN METER<b>: [target:{format_value(args_list[0],CharacterIndex)}][type:{format_value(args_list[1],MeterType)}][percentage_base:{format_value(args_list[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list[3], negative=True, encoded_percent=True, percent_base=240 if bs2i(args_list[2],1,big_endian=True) != 1 else 120)}]'
+                                label = f'<b>ADD/REMOVE METER<b>: [target:{format_value(args_list[0],CharacterIndex)}][type:{format_value(args_list[1],MeterType)}][percentage_base:{format_value(args_list[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list[3], negative=True, encoded_percent=True, percent_base=240 if bs2i(args_list[2],1,big_endian=True) != 1 else 120)}]'
                             if state_id == 0x13e0:
                                 label = f'<b>CHANGE CHARACTER VALUE BY AMOUNT<b>: [target_value:{format_value(args_list[0])}][amount:{format_value(args_list[1])}]'
+
+                            if state_id == 0x13e1:
+                                label = f'<b>SET LETHAL HIT STATE<b>: [enabled:{format_value(args_list[0],BoolFlag,replace_char="")}]'
 
                             if state_id == 0x13e2:
                                 label = f'<b>SET CHARACTER VALUE<b>: [target_value:{format_value(args_list[0])}][value:{format_value(args_list[1])}]'
@@ -1319,6 +1360,26 @@ class Cancel:
                                 
                             if state_id == 0x305d:
                                 label = f'SPECIAL STATE [state:{format_value(args_list[0],SpecialState)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix = "frame ")}]'
+
+                            if state_id == 0x3064:
+                                if second_arg == 0x02:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}]'
+                                if second_arg == 0x03:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}]'
+                                if second_arg == 0x04:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}]'
+                                if second_arg == 0x05:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}]'
+                                if second_arg == 0x06:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}]'
+                                if second_arg == 0x07:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}][vertical:{format_value(args_list[5],BoolFlag,replace_char="")}]'
+                                if second_arg == 0x08:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}][vertical:{format_value(args_list[5],BoolFlag,replace_char="")}][kick:{format_value(args_list[6],BoolFlag,replace_char="")}]'
+                                if second_arg == 0x09:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}][vertical:{format_value(args_list[5],BoolFlag,replace_char="")}][kick:{format_value(args_list[6],BoolFlag,replace_char="")}][??:{format_value(args_list[7],BoolFlag,replace_char="")}]'
+                                if second_arg == 0x0a:
+                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}][vertical:{format_value(args_list[5],BoolFlag,replace_char="")}][kick:{format_value(args_list[6],BoolFlag,replace_char="")}][??:{format_value(args_list[7],BoolFlag,replace_char="")}][RI_effect:{format_value(args_list[8],BoolFlag,replace_char="")}]'
 
                             if state_id == 0x3084:
                                 label = f'SCALING (Throw) [0:{format_value(args_list[0],SpecialState)}][amount:{format_value(args_list[1],suffix="%")}][2:{format_value(args_list[2])}]'
@@ -1468,12 +1529,40 @@ class Cancel:
                     last_bool = 'COMPARE'
                 
                 elif inst == CC.RETURN_8c:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: {var if var != None else f"<b>{last_bool}<b>"} + {value if value != None else f"<b>{last_bool}<b>"}',index))
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: ADD [{var if var != None else f"<b>{last_bool}<b>"} + {value if value != None else f"<b>{last_bool}<b>"}]',index))
                     last_bool = 'math result'
                     
                 
                 elif inst == CC.RETURN_8d:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: {var if var != None else f"<b>{last_bool}<b>"} - {value if value != None else f"<b>{last_bool}<b>"}',index))
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: SUBTRACT [{var if var != None else f"<b>{last_bool}<b>"} - {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                    last_bool = 'math result'
+
+                elif inst == CC.RETURN_8e:
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: MULTIPLY [{var if var != None else f"<b>{last_bool}<b>"} * {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                    last_bool = 'math result'
+
+                elif inst == CC.RETURN_8f:
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: DIVIDE [{var if var != None else f"<b>{last_bool}<b>"} ÷ {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                    last_bool = 'math result'
+
+                elif inst == CC.RETURN_90:
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: MOD [{var if var != None else f"<b>{last_bool}<b>"} % {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                    last_bool = 'math result'
+
+                elif inst == CC.RETURN_91:
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: INVERT SIGN [{var if var != None else f"<b>{last_bool}<b>"} = {value if value != None else f"<b>{last_bool}<b>"} * -1]',index))
+                    last_bool = 'math result'
+
+                elif inst == CC.RETURN_94:
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: BITWISE AND [{var if var != None else f"<b>{last_bool}<b>"} & {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                    last_bool = 'math result'
+
+                elif inst == CC.RETURN_95:
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: BITWISE OR [{var if var != None else f"<b>{last_bool}<b>"} | {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                    last_bool = 'math result'
+
+                elif inst == CC.RETURN_98:
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: BIT SHIFT RIGHT [{var if var != None else f"<b>{last_bool}<b>"} >> {value if value != None else f"<b>{last_bool}<b>"}]',index))
                     last_bool = 'math result'
 
                 else:
@@ -1503,9 +1592,11 @@ class Cancel:
 
         goto_line_to_line = []
         for x, y in goto_blocks:
+            if y > len(self.bytes) - 1:
+                y = len(self.bytes) - 1
             goto_line_to_line.append((index_to_line_number[x], index_to_line_number[y]))
         #print(goto_line_to_line)
-
+        self.goto_blocks = goto_blocks
         return guide, goto_line_to_line
 
 class Condition:
@@ -1849,7 +1940,10 @@ class Movelist:
                     attacks.append(self.all_attacks[index])
                 else:
                     index = index ^ 0x1000
-                    attacks.append(self.all_throws[index])
+                    if index > len(self.all_throws) - 1:
+                       pass
+                    else:
+                        attacks.append(self.all_throws[index])
             move.set_attacks(attacks)
 
 

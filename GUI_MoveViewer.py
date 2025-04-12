@@ -198,7 +198,7 @@ class GUI_MoveViewer:
         hitbox_id_label.pack()
         hitbox_iterator_frame.pack()
 
-        self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 104), 40, True)
+        self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 120), 40, True)
         self.hitbox_pair.grid(sticky=N+W+E+S, row=0, column=1)
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
@@ -358,10 +358,12 @@ class GUI_MoveViewer:
 
         if move_successful and hitbox_successful and cancel_successful:
             self.inject_movelist_dialog()
-            time.sleep(2.5)
+            time.sleep(3)
+            
             if self.reload_on_save_var.get() == True:
                 self.load_moveid(self.move_id_textvar.get(),manual=True)
-            else:
+                
+            elif self.reload_on_save_var.get() == False:
                 self.move_pair.highlight_orange()
                 self.hitbox_pair.highlight_orange()
                 self.cancel_pair.highlight_orange()
