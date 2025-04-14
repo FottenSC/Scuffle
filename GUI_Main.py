@@ -274,7 +274,7 @@ class GUI_Main(Tk):
 
         #self.graph.update_state()
         time2 = time.time()
-        elapsed_time = 1000 * (time2 - time1)
+        elapsed_time = 10000 * (time2 - time1)
 
         if self.launcher.game_reader.HasWorkingPID():
             if self.launcher.game_reader.HasNewMovelist():
