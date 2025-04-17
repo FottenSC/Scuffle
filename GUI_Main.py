@@ -9,6 +9,7 @@ import GUI_Overlay as ovr
 #import GUI_PunishCoachOverlay as pco
 import ConfigReader
 from _GameStateManager import GameStateManager
+from ByteTools import *
 import time
 from enum import Enum
 import VersionChecker
@@ -56,8 +57,10 @@ class GUI_Main(Tk):
 
         print("SCUFFLE Starting...")
         self.launcher = GameStateManager()
+        
 
         self.overlay = fdo.GUI_FrameDataOverlay(self, self.launcher)
+        self.reboot_overlay()
         #self.graph = tlo.GUI_TimelineOverlay(self, self.launcher)
 
         self.tekken_bot_menu = Menu(self.menu)
@@ -229,13 +232,13 @@ class GUI_Main(Tk):
             self.overlay.toplevel.destroy()
         self.overlay = None
 
-    def start_overlay(self):
-        self.overlay = fdo.GUI_FrameDataOverlay(self, self.launcher)
+    def start_overlay(self, log=True):
+        self.overlay = fdo.GUI_FrameDataOverlay(self, self.launcher, log)
         self.overlay.hide()
 
     def reboot_overlay(self):
         self.stop_overlay()
-        self.start_overlay()
+        self.start_overlay(log=False)
 
     def update_launcher(self):
         time1 = time.time()
@@ -274,7 +277,7 @@ class GUI_Main(Tk):
 
         #self.graph.update_state()
         time2 = time.time()
-        elapsed_time = 10000 * (time2 - time1)
+        elapsed_time = 1000 * (time2 - time1)
 
         if self.launcher.game_reader.HasWorkingPID():
             if self.launcher.game_reader.HasNewMovelist():
@@ -284,6 +287,9 @@ class GUI_Main(Tk):
                         try:
                             self.move_viewer.set_movelist(movelist)
                             self.launcher.game_reader.MarkMovelistAsOld()
+                            if self.move_viewer.tool_encode_string != "":
+                                self.move_viewer.decode()
+                      
                         except:
                             self.move_viewer = None
                         self.previous_working_pid += 1

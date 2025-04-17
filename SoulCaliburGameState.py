@@ -14,7 +14,9 @@ class SC6GameReader:
             self.test_block = 0
             self.snapshots = []
             self.p1_movelist = None
+            self.last_p1_movelist_address = None
             self.p2_movelist = None
+            self.last_p2_movelist_address = None
             self.timer = 0
             self.do_write_movelist = False
             self.is_movelist_new = False
@@ -48,7 +50,9 @@ class SC6GameReader:
 
         def VoidMovelists(self):
             self.p1_movelist = None
+            self.last_p1_movelist_address = None
             self.p2_movelist = None
+            self.last_p2_movelist_address = None
 
         def MarkMovelistAsOld(self):
             self.is_movelist_new = False
@@ -67,13 +71,14 @@ class SC6GameReader:
                         self.test_block = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.global_timer_address)
                     else:
                         self.test_block = 0
+
                     print("Soul Calibur VI process id acquired: {}".format(self.pid))
                 else:
                     print("Failed to find processid. Trying to acquire...")
 
             elif self.HasWorkingPID():
                 
-
+                
                 if self.test_block == 0: #not in a fight yet or application closed
                     self.consecutive_frames_of_zero_timer += 1
                     if self.consecutive_frames_of_zero_timer > 10:
@@ -81,6 +86,9 @@ class SC6GameReader:
                         self.VoidMovelists()
                     return False
                 else:
+                    
+                        
+
                     self.consecutive_frames_of_zero_timer = 0
                     if self.p1_movelist == None:
                         #movelist_sample = GetValueFromAddress(process_handle, AddressMap.p1_movelist_address, isString=True)
@@ -92,8 +100,9 @@ class SC6GameReader:
                             p2_movelist_data = GetDataBlockAtEndOfPointerOffsetList(self.process_handle, self.module_address, [AddressMap.p2_movelist_address], AddressMap.MOVELIST_BYTES)
                             self.p1_movelist = MovelistParser.Movelist(p1_movelist_data, 'p1')
                             self.p2_movelist = MovelistParser.Movelist(p2_movelist_data, 'p2')
-                            self.is_movelist_new = True
+                            self.is_movelist_new = True    
                         else:
+                            self.is_movelist_new = False
                             return False
 
                     new_timer = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.global_timer_address)
@@ -124,17 +133,23 @@ class SC6GameReader:
 
                     value_p1 = PlayerSnapshot(self.p1_movelist, p1_gdam, p1_move_id, p1_global)
                     value_p2 = PlayerSnapshot(self.p2_movelist, p2_gdam, p2_move_id, p2_global)
+                    
+                    p1_movelist_address = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_movelist_address, is64bit=True)
+
+                    if p1_movelist_address != self.last_p1_movelist_address:
+                        self.p1_movelist = None
+                        self.last_p1_movelist_address = None
+                        self.VoidPID()
 
                     if self.do_write_movelist:
                         p1_movelist_address = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_movelist_address, is64bit=True)
-                        
                         WriteBlockOfData(self.process_handle, p1_movelist_address, self.p1_movelist.generate_modified_movelist_bytes())
                         self.do_write_movelist = False
                         self.VoidPID()
                         self.VoidMovelists()
                         
                         
-                        
+                    self.last_p1_movelist_address = p1_movelist_address
                         
 
                     self.snapshots.append(GameSnapshot(value_p1, value_p2, self.timer))
