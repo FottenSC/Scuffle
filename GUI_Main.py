@@ -285,6 +285,7 @@ class GUI_Main(Tk):
                     movelist = self.launcher.game_reader.p1_movelist
                     if movelist != None:
                         try:
+                            
                             self.move_viewer.set_movelist(movelist)
                             self.launcher.game_reader.MarkMovelistAsOld()
                             if self.move_viewer.tool_encode_string != "":

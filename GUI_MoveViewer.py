@@ -5,6 +5,7 @@ import tkinter.font as tkf
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import asksaveasfilename
 import MovelistParser
+import ConfigReader
 import time
 from threading import Thread
 import GUI_Main
@@ -43,7 +44,8 @@ class GUI_MoveViewer:
         master.title("SCUFFLE Move Editor")
         master.iconbitmap('Data/icon.ico')
         s = Style()
-        bold_label_font = 'Consolas 8 bold'
+        font_config = ConfigReader.ConfigReader('font_config')
+        bold_label_font = font_config.get_property("Side Panel","bold_font", "Consolas 8 bold")
 
         self.do_inject_movelist = False
         self.reload_on_save_var = BooleanVar(value=False)
@@ -59,7 +61,7 @@ class GUI_MoveViewer:
         
 
         s.configure('Loader.TFrame', background='#D1D1D1')
-        s.configure('TNotebook.Tab', font='Consolas 14')
+        s.configure('TNotebook.Tab', font=font_config.get_property("Tabs","notebook_tab_font", "Consolas 14"))
     
         loader_frame = Frame(self.main_window, style='Loader.TFrame')
         loader_frame.grid(sticky=N+W+E+S, column=0)
@@ -147,7 +149,7 @@ class GUI_MoveViewer:
         master.bind('<Control-[>', lambda x: self.prev_move_id_command() )
         master.bind('<Control-]>', lambda x: self.next_move_id_command() )
 
-        s.configure('Save.TButton', font='Consolas 14 bold')
+        s.configure('Save.TButton', font=font_config.get_property("Side Panel","save_changes_font", "Consolas 14 bold"))
         save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=()).start())
         save_move.pack()
         master.bind('<Control-s>', lambda x: Thread(target=self.save_move_bytes_command, args=()).start())
@@ -209,8 +211,8 @@ class GUI_MoveViewer:
         self.cancel_raw = self.cancel_pair.left
 
         self.cancel_intr = self.cancel_pair.right
-        self.cancel_intr.tag_configure("bold", font="Helvetica 9 bold")
-        self.cancel_intr.tag_configure("soulcharge", font="Helvetica 9 bold", foreground='#2C75FF')
+        self.cancel_intr.tag_configure("bold", font=font_config.get_property("Tabs","bold_guide_font", "Consolas 9 bold"))
+        self.cancel_intr.tag_configure("soulcharge", font=font_config.get_property("Tabs","soul_charge_font", "Consolas 9 bold"), foreground='#2C75FF')
 
         clipboard_label = Label(loader_frame_clip, text="Cheat Engine", font = bold_label_font)
         clipboard_label.grid(sticky=N+W+E, row=0, column=0)
