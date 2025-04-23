@@ -19,6 +19,7 @@ class SC6GameReader:
             self.last_p2_movelist_address = None
             self.timer = 0
             self.do_write_movelist = False
+            self.do_fix_goto = True
             self.is_movelist_new = False
             self.consecutive_frames_of_zero_timer = 0
             
@@ -143,7 +144,7 @@ class SC6GameReader:
 
                     if self.do_write_movelist:
                         p1_movelist_address = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_movelist_address, is64bit=True)
-                        WriteBlockOfData(self.process_handle, p1_movelist_address, self.p1_movelist.generate_modified_movelist_bytes())
+                        WriteBlockOfData(self.process_handle, p1_movelist_address, self.p1_movelist.generate_modified_movelist_bytes(self.do_fix_goto))
                         self.do_write_movelist = False
                         self.VoidPID()
                         self.VoidMovelists()

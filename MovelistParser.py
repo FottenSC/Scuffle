@@ -642,14 +642,16 @@ class Cancel:
                                 if goto > len(new_bytes) - 1:
                                     goto = len(new_bytes) - 1
                                 new_diff = 0 
+                            
+                            elif goto + diff >= len(new_bytes) - 1:
+                                goto = len(new_bytes) - 1
+                                new_diff = 0
+
+                            else:
+                                new_diff = diff
                             if goto <= 0:
                                goto = 0
                                new_diff = 0
-                            elif goto > len(new_bytes) - 1:
-                                goto = len(new_bytes) - 1
-                                new_diff = 0
-                            else:
-                                new_diff = diff
                             goto += new_diff if goto + new_diff <= len(new_bytes) - 1 else 0
                         
                         updated_bytes += goto.to_bytes(2, byteorder='big')
@@ -2025,7 +2027,7 @@ class Movelist:
 
 
 
-    def generate_modified_movelist_bytes(self):
+    def generate_modified_movelist_bytes(self,fix_goto=True):
         #header = b'\x99' + self.bytes[1:Movelist.HEADER_LENGTH]
         header = self.bytes[:Movelist.HEADER_LENGTH]
 
@@ -2055,7 +2057,10 @@ class Movelist:
         cancels = b''
         for key in range(0, len(self.all_moves)):
             cancel = self.move_ids_to_cancels[key]
-            next_cancel = cancel.update_goto_instructions(cancel.get_modified_bytes(), cancel.bytes)
+            if fix_goto:
+                next_cancel = cancel.update_goto_instructions(cancel.get_modified_bytes(), cancel.bytes)
+            else:
+                next_cancel = cancel.update_goto_instructions(cancel.get_modified_bytes(), cancel.get_modified_bytes())
             cancels += next_cancel
             cancel_offsets.append(len(next_cancel))
 

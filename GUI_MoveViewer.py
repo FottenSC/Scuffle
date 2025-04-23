@@ -45,9 +45,12 @@ class GUI_MoveViewer:
         master.iconbitmap('Data/icon.ico')
         s = Style()
         font_config = ConfigReader.ConfigReader('font_config')
+        self.defaultFont = tkf.nametofont("TkDefaultFont")
+        self.defaultFont.configure(family=font_config.get_property("General","default_font_family","Consolas"),size=font_config.get_property("General","default_font_size", 8),weight=font_config.get_property("General","default_font_weight","normal"))
         bold_label_font = font_config.get_property("Side Panel","bold_font", "Consolas 8 bold")
 
         self.do_inject_movelist = False
+        self.do_fix_goto = BooleanVar(value=True)
         self.reload_on_save_var = BooleanVar(value=False)
 
         self.movelist_name_var = StringVar()
@@ -150,13 +153,18 @@ class GUI_MoveViewer:
         master.bind('<Control-]>', lambda x: self.next_move_id_command() )
 
         s.configure('Save.TButton', font=font_config.get_property("Side Panel","save_changes_font", "Consolas 14 bold"))
-        save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=()).start())
-        save_move.pack()
-        master.bind('<Control-s>', lambda x: Thread(target=self.save_move_bytes_command, args=()).start())
+        s.configure('Bold.TButton', font=bold_label_font)
+        save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=(False,)).start())
+        save_move.pack()    
+        master.bind('<Control-s>', lambda x: Thread(target=self.save_move_bytes_command, args=(self.do_fix_goto.get(),)).start())
+        
 
-        save_move_reload = Checkbutton(move_id_entry_container, variable=self.reload_on_save_var, onvalue=True, offvalue=False, text="Reload after save") 
+        update_pointers = Checkbutton(move_id_entry_container, variable=self.do_fix_goto, onvalue=True, offvalue=False,text="Update Goto pointers")
+        save_move_reload = Checkbutton(move_id_entry_container, variable=self.reload_on_save_var, onvalue=True, offvalue=False, text="Reload after save   ") 
+        update_pointers.pack()
         save_move_reload.pack()
         master.bind('<Control-r>', lambda x: self.reload_on_save_var.set(not self.reload_on_save_var.get()))
+        master.bind('<Control-p>', lambda x: self.do_fix_goto.set(not self.do_fix_goto.get()))
         
         move_frame.rowconfigure(0,weight=2)
         hitbox_frame.rowconfigure(0,weight=2)
@@ -324,7 +332,7 @@ class GUI_MoveViewer:
             pass
 
 
-    def save_move_bytes_command(self):
+    def save_move_bytes_command(self,update_goto=True):
 
         move = self.movelist.all_moves[int(self.move_id_textvar.get())]
         move_successful = self.text_entry_to_bytes(self.move_raw, move, MovelistParser.Move.LENGTH)
@@ -535,8 +543,7 @@ class GUI_MoveViewer:
                 fw.write(self.movelist.generate_modified_movelist_bytes())
 
     def inject_movelist_dialog(self):
-        self.do_inject_movelist = True
-        
+        self.do_inject_movelist = True   
                 
 
     def apply_guide(self, bytes, guide):
@@ -570,9 +577,10 @@ class ScrolledTextPair(Frame):
 
 
         # Creating the widgets
+        self.font_config = ConfigReader.ConfigReader('font_config')
         self.left = Text(self, width = width_lr[0], wrap='none', height=h,  undo=True, autoseparators=True, maxundo=-1)
-        self.font_height = tkf.Font(font=self.left['font']).metrics('linespace')
         self.right = Text(self, width = width_lr[1], wrap='none', height=h,  undo=True, autoseparators=True, maxundo=-1)
+        self.font_height = tkf.Font(font=self.left['font']).metrics('ascent')
         self.scrollbar = Scrollbar(self)
         if not hide_scrollbar:
             self.scrollbar.pack(side=RIGHT, fill=Y)

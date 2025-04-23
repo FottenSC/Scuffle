@@ -254,9 +254,15 @@ class GUI_Main(Tk):
 
             try:
                 if self.move_viewer.do_inject_movelist:
+                    if self.move_viewer.do_fix_goto.get() == False:
+                        self.launcher.game_reader.do_fix_goto = False
+                    else:
+                        self.launcher.game_reader.do_fix_goto = True
+                        
                     self.launcher.game_reader.do_write_movelist = True
                     self.launcher.game_reader.p1_movelist = self.move_viewer.movelist
                     self.move_viewer.do_inject_movelist = False
+                    
             except:
                 self.move_viewer = None
 
