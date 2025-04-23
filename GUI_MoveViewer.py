@@ -580,7 +580,7 @@ class ScrolledTextPair(Frame):
         self.font_config = ConfigReader.ConfigReader('font_config')
         self.left = Text(self, width = width_lr[0], wrap='none', height=h,  undo=True, autoseparators=True, maxundo=-1)
         self.right = Text(self, width = width_lr[1], wrap='none', height=h,  undo=True, autoseparators=True, maxundo=-1)
-        self.font_height = tkf.Font(font=self.left['font']).metrics('ascent')
+        self.font_height = tkf.Font(font=self.left['font']).metrics('linespace')
         self.scrollbar = Scrollbar(self)
         if not hide_scrollbar:
             self.scrollbar.pack(side=RIGHT, fill=Y)
