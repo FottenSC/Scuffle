@@ -2,7 +2,7 @@ import requests
 from multiprocessing import queues #pyinstaller workaround  https://stackoverflow.com/questions/40768570/importerror-no-module-named-queue-while-running-my-app-freezed-with-cx-freeze
 import json
 
-CURRENT_VERSION = '0.1.3'
+CURRENT_VERSION = 'scuffle_VV_1.3'
 
 def check_version(force_print=False):
 
@@ -12,7 +12,7 @@ def check_version(force_print=False):
         print("DEVELOPER NOTE: Remember to update VersionChecker.CURRENT_VERSION before publishing a release.")
     else:
         try:
-            r = requests.get('https://api.github.com/repos/rougelite/SCUFFLE/releases/latest')
+            r = requests.get('https://api.github.com/repos/LogzatioStudios150/Scuffle/releases/latest')
 
             #https://api.github.com
             #GET /repos/:owner/:repo/releases/latest
@@ -21,13 +21,14 @@ def check_version(force_print=False):
                 repoTag = repoItem['tag_name']
                 print("")
                 if (repoTag != CURRENT_VERSION):
-                    print("A new version of SCUFFLE is available.")
+                    print("---------------------------------------------------------" * 2)
+                    print("** A new version of SCUFFLE is available. **")
                     new_version_available = True
                 #if (repoTag != CURRENT_VERSION or force_print):
-                    print(repoItem['html_url'])
-                    #print("Release Notes:")
-                    #print(repoItem['body'])
-                    print('')
+                    #print(repoItem['html_url'])
+                    print("Release Notes:")
+                    print(repoItem['body'])
+                    print("---------------------------------------------------------" * 2)
                 else:
                     print("SCUFFLE is up to date.")
             else:

@@ -63,7 +63,7 @@ class GUI_MoveIdMeter:
         master.attributes("-topmost", True)
         master.iconbitmap('Data/icon.ico')
 
-        guide_font = ("Consolas", 12)
+        guide_font = ("Consolas", 8)
         label_font = ("Consolas", 8)
 
         self.style = Style()
@@ -307,7 +307,7 @@ if __name__ == '__main__':
     counter = 0
     while (True):
         counter += 1
-        launcher.Update(False, False)
+        launcher.Update(False, False, False)
 
         root.update_idletasks()
         root.update()

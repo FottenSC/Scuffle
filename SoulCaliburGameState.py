@@ -5,15 +5,21 @@ import ModuleEnumerator
 import PIDSearcher
 import GameplayEnums
 import MovelistParser
+from threading import Thread
 
 class SC6GameReader:
         def __init__(self):
             self.pid = -1
+            self.process_handle = None
+            self.test_block = 0
             self.snapshots = []
             self.p1_movelist = None
+            self.last_p1_movelist_address = None
             self.p2_movelist = None
+            self.last_p2_movelist_address = None
             self.timer = 0
             self.do_write_movelist = False
+            self.do_fix_goto = True
             self.is_movelist_new = False
             self.consecutive_frames_of_zero_timer = 0
             
@@ -45,7 +51,9 @@ class SC6GameReader:
 
         def VoidMovelists(self):
             self.p1_movelist = None
+            self.last_p1_movelist_address = None
             self.p2_movelist = None
+            self.last_p2_movelist_address = None
 
         def MarkMovelistAsOld(self):
             self.is_movelist_new = False
@@ -58,40 +66,47 @@ class SC6GameReader:
             if not self.HasWorkingPID():
                 self.pid = PIDSearcher.GetPIDByName(b'SoulcaliburVI.exe')
                 if self.HasWorkingPID():
+                    self.process_handle = OpenProcess(0x10 | 0x20 | 0x08, False, self.pid) #0x10 = ReadProcess Privleges 0x20 = WriteProcess Privleges 0x08 = Operation Privleges
+                    self.module_address = ModuleEnumerator.GetModuleAddressByPIDandName(pid = self.pid, name = "SoulcaliburVI.exe")
+                    if self.module_address != None:
+                        self.test_block = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.global_timer_address)
+                    else:
+                        self.test_block = 0
+
                     print("Soul Calibur VI process id acquired: {}".format(self.pid))
                 else:
                     print("Failed to find processid. Trying to acquire...")
 
-            if self.HasWorkingPID():
-                process_handle = OpenProcess(0x10 | 0x20 | 0x08, False, self.pid) #0x10 = ReadProcess Privleges 0x20 = WriteProcess Privleges 0x08 = Operation Privleges
-
-                self.module_address = ModuleEnumerator.GetModuleAddressByPIDandName(pid = self.pid, name = "SoulcaliburVI.exe")
+            elif self.HasWorkingPID():
                 
-                test_block = GetValueFromAddress(process_handle, self.module_address + AddressMap.global_timer_address)
-
-                if test_block == 0: #not in a fight yet or application closed
+                
+                if self.test_block == 0: #not in a fight yet or application closed
                     self.consecutive_frames_of_zero_timer += 1
                     if self.consecutive_frames_of_zero_timer > 10:
                         self.VoidPID()
                         self.VoidMovelists()
                     return False
                 else:
+                    
+                        
+
                     self.consecutive_frames_of_zero_timer = 0
                     if self.p1_movelist == None:
                         #movelist_sample = GetValueFromAddress(process_handle, AddressMap.p1_movelist_address, isString=True)
-                        movelist_sample = GetDataBlockAtEndOfPointerOffsetList(process_handle, self.module_address, [AddressMap.p1_movelist_address], 0x4)
+                        movelist_sample = GetDataBlockAtEndOfPointerOffsetList(self.process_handle, self.module_address, [AddressMap.p1_movelist_address], 0x4)
                         movelist_sample = GetValueFromDataBlock(movelist_sample, 0)
 
                         if  movelist_sample == MovelistParser.Movelist.STARTER_INT:
-                            p1_movelist_data = GetDataBlockAtEndOfPointerOffsetList(process_handle, self.module_address, [AddressMap.p1_movelist_address], AddressMap.MOVELIST_BYTES)
-                            p2_movelist_data = GetDataBlockAtEndOfPointerOffsetList(process_handle, self.module_address, [AddressMap.p2_movelist_address], AddressMap.MOVELIST_BYTES)
+                            p1_movelist_data = GetDataBlockAtEndOfPointerOffsetList(self.process_handle, self.module_address, [AddressMap.p1_movelist_address], AddressMap.MOVELIST_BYTES)
+                            p2_movelist_data = GetDataBlockAtEndOfPointerOffsetList(self.process_handle, self.module_address, [AddressMap.p2_movelist_address], AddressMap.MOVELIST_BYTES)
                             self.p1_movelist = MovelistParser.Movelist(p1_movelist_data, 'p1')
                             self.p2_movelist = MovelistParser.Movelist(p2_movelist_data, 'p2')
-                            self.is_movelist_new = True
+                            self.is_movelist_new = True    
                         else:
+                            self.is_movelist_new = False
                             return False
 
-                    new_timer = GetValueFromAddress(process_handle, self.module_address + AddressMap.global_timer_address)
+                    new_timer = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.global_timer_address)
 
                     if self.timer == new_timer:
                         return False
@@ -105,27 +120,38 @@ class SC6GameReader:
                     #p1_movement_block = GetDataBlockAtEndOfPointerOffsetList(process_handle, self.module_address, AddressMap.p1_movement_block_breadcrumb, 0x100)
                     #p2_movement_block = GetDataBlockAtEndOfPointerOffsetList(process_handle, self.module_address, AddressMap.p2_movement_block_breadcrumb, 0x100)
 
-                    p1_move_id = GetValueFromAddress(process_handle, self.module_address + AddressMap.p1_move_id_address, is_short =True)
-                    p2_move_id = GetValueFromAddress(process_handle, self.module_address + AddressMap.p2_move_id_address, is_short=True)
+                    p1_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_move_id_address, is_short =True)
+                    p2_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_move_id_address, is_short=True)
 
-                    p1_gdam = GetValueFromAddress(process_handle, self.module_address + AddressMap.p1_guard_damage_address, is_short=True)
-                    p2_gdam = GetValueFromAddress(process_handle, self.module_address + AddressMap.p2_guard_damage_address, is_short=True)
+                    p1_gdam = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_guard_damage_address, is_short=True)
+                    p2_gdam = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_guard_damage_address, is_short=True)
 
-                    p1_input = GetValueFromAddress(process_handle, self.module_address + AddressMap.p1_input_address, is_short =True)
+                    p1_input = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_input_address, is_short =True)
                     p1_global = SC6GlobalBlock(p1_input)
 
-                    p2_input = GetValueFromAddress(process_handle, self.module_address + AddressMap.p2_input_address, is_short=True)
+                    p2_input = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_input_address, is_short=True)
                     p2_global = SC6GlobalBlock(p2_input)
 
                     value_p1 = PlayerSnapshot(self.p1_movelist, p1_gdam, p1_move_id, p1_global)
                     value_p2 = PlayerSnapshot(self.p2_movelist, p2_gdam, p2_move_id, p2_global)
+                    
+                    p1_movelist_address = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_movelist_address, is64bit=True)
+
+                    if p1_movelist_address != self.last_p1_movelist_address:
+                        self.p1_movelist = None
+                        self.last_p1_movelist_address = None
+                        self.VoidPID()
 
                     if self.do_write_movelist:
-                        p1_movelist_address = GetValueFromAddress(process_handle, self.module_address + AddressMap.p1_movelist_address, is64bit=True)
-                        WriteBlockOfData(process_handle, p1_movelist_address, self.p1_movelist.generate_modified_movelist_bytes())
+                        p1_movelist_address = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_movelist_address, is64bit=True)
+                        WriteBlockOfData(self.process_handle, p1_movelist_address, self.p1_movelist.generate_modified_movelist_bytes(self.do_fix_goto))
                         self.do_write_movelist = False
                         self.VoidPID()
                         self.VoidMovelists()
+                        
+                        
+                    self.last_p1_movelist_address = p1_movelist_address
+                        
 
                     self.snapshots.append(GameSnapshot(value_p1, value_p2, self.timer))
                     MAX_FRAMES_TO_KEEP = 1000

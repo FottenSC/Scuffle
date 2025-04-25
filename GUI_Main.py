@@ -9,6 +9,7 @@ import GUI_Overlay as ovr
 #import GUI_PunishCoachOverlay as pco
 import ConfigReader
 from _GameStateManager import GameStateManager
+from ByteTools import *
 import time
 from enum import Enum
 import VersionChecker
@@ -50,25 +51,28 @@ class GUI_Main(Tk):
             print("Error reading readme file.")
 
         #Disables version checker
-        updates = False
-        #updates = VersionChecker.check_version()
+        updates = VersionChecker.check_version()
         if updates:
             self.wm_title("SCUFFLE (Updates Available)")
 
         print("SCUFFLE Starting...")
         self.launcher = GameStateManager()
+        
 
         self.overlay = fdo.GUI_FrameDataOverlay(self, self.launcher)
+        self.reboot_overlay()
         #self.graph = tlo.GUI_TimelineOverlay(self, self.launcher)
 
         self.tekken_bot_menu = Menu(self.menu)
         self.tekken_bot_menu.add_command(label="Restart", command=self.restart)
+        self.bind('<Control-R>', lambda x: self.restart())
 
         self.menu.add_cascade(label="SCUFFLE", menu=self.tekken_bot_menu)
 
         self.tools_menu = Menu(self.menu)
         self.move_viewer = None
-        self.tools_menu.add_command(label="Launch Move Viewer", command=self.launch_move_viewer)
+        self.tools_menu.add_command(label="Launch Move Editor", command=self.launch_move_viewer)
+        self.bind('<Control-e>', lambda x: self.launch_move_viewer())
 
         self.move_id_ometer = None
         self.tools_menu.add_command(label="Launch Move-Id-Ometer", command=self.launch_move_id_ometer)
@@ -76,6 +80,10 @@ class GUI_Main(Tk):
         self.do_show_all_hitbox_data = BooleanVar()
         self.do_show_all_hitbox_data.set(False)
         self.tools_menu.add_checkbutton(label='Show frame data for all hitboxes (useful for moves with \'tip\' properties)', onvalue=True, offvalue=False, variable=self.do_show_all_hitbox_data)
+
+        self.verbose_logging = BooleanVar()
+        self.verbose_logging.set(True)
+        self.tools_menu.add_checkbutton(label='Verbose logging: Log info for all moves', onvalue=True, offvalue=False, variable=self.verbose_logging)
 
         self.tools_menu.add_command(label="Dump all frame data to console", command=self.dump_frame_data)
 
@@ -161,7 +169,7 @@ class GUI_Main(Tk):
             if self.move_viewer != None:
                 self.move_viewer.master.destroy()
                 self.move_viewer = None
-            self.move_viewer = GUI_MoveViewer.GUI_MoveViewer(Toplevel(self))
+            self.move_viewer = GUI_MoveViewer.GUI_MoveViewer(Toplevel(self),verbose=self.verbose_logging.get())
             self.move_viewer.set_movelist(self.launcher.game_reader.p1_movelist)
         except Exception as e:
             print(e)
@@ -224,17 +232,17 @@ class GUI_Main(Tk):
             self.overlay.toplevel.destroy()
         self.overlay = None
 
-    def start_overlay(self):
-        self.overlay = fdo.GUI_FrameDataOverlay(self, self.launcher)
+    def start_overlay(self, log=True):
+        self.overlay = fdo.GUI_FrameDataOverlay(self, self.launcher, log)
         self.overlay.hide()
 
     def reboot_overlay(self):
         self.stop_overlay()
-        self.start_overlay()
+        self.start_overlay(log=False)
 
     def update_launcher(self):
         time1 = time.time()
-        successful_update = self.launcher.Update(self.do_print_debug_values.get(), self.do_show_all_hitbox_data.get())
+        successful_update = self.launcher.Update(self.do_print_debug_values.get(), self.do_show_all_hitbox_data.get(), self.verbose_logging.get())
 
         if self.move_viewer != None:
             if self.launcher.p1_move_id != self.old_move_id and self.launcher.p1_move_id != 0x59: #0x59 is the hex for 'coming to a stop' move_id
@@ -246,9 +254,15 @@ class GUI_Main(Tk):
 
             try:
                 if self.move_viewer.do_inject_movelist:
+                    if self.move_viewer.do_fix_goto.get() == False:
+                        self.launcher.game_reader.do_fix_goto = False
+                    else:
+                        self.launcher.game_reader.do_fix_goto = True
+                        
                     self.launcher.game_reader.do_write_movelist = True
                     self.launcher.game_reader.p1_movelist = self.move_viewer.movelist
                     self.move_viewer.do_inject_movelist = False
+                    
             except:
                 self.move_viewer = None
 
@@ -277,8 +291,12 @@ class GUI_Main(Tk):
                     movelist = self.launcher.game_reader.p1_movelist
                     if movelist != None:
                         try:
+                            
                             self.move_viewer.set_movelist(movelist)
                             self.launcher.game_reader.MarkMovelistAsOld()
+                            if self.move_viewer.tool_encode_string != "":
+                                self.move_viewer.decode()
+                      
                         except:
                             self.move_viewer = None
                         self.previous_working_pid += 1
