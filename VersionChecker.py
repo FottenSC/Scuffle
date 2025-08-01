@@ -2,7 +2,7 @@ import requests
 from multiprocessing import queues #pyinstaller workaround  https://stackoverflow.com/questions/40768570/importerror-no-module-named-queue-while-running-my-app-freezed-with-cx-freeze
 import json
 
-CURRENT_VERSION = 'scuffle_VV_1.3'
+CURRENT_VERSION = 'scuffle_VV_1.4'
 
 def check_version(force_print=False):
 
@@ -12,7 +12,7 @@ def check_version(force_print=False):
         print("DEVELOPER NOTE: Remember to update VersionChecker.CURRENT_VERSION before publishing a release.")
     else:
         try:
-            r = requests.get('https://api.github.com/repos/LogzatioStudios150/Scuffle/releases/latest')
+            r = requests.get('https://api.github.com/repos/aHorseface/Scuffle/releases/latest')
 
             #https://api.github.com
             #GET /repos/:owner/:repo/releases/latest

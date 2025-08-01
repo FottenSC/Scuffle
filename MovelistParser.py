@@ -10,6 +10,8 @@ from MovelistEnums import *
 import GameplayEnums
 import copy
 import math
+import json
+import os
 
 def b4i (bytes, index : int):
     return struct.unpack('I', bytes[index: index + 4])[0]
@@ -64,6 +66,46 @@ def decode_move_id(encoded_move_id, movelist):
         move_id += movelist.block_R_start
     return move_id
 
+def string_to_class(string):
+    conversion_table = {
+        "BoolFlag": BoolFlag,
+        "Button": Button,
+        "PaddedButton": PaddedButton,
+        "EffectPart": EffectPart,
+        "EffectTarget": EffectTarget,
+        "TraceKind": TraceKind,
+        "TracePart": TracePart,
+        'InputType': InputType,
+        "ComboConditions": ComboConditions,
+        "ReturnState": ReturnState,
+        "SpecialState": SpecialState,
+        "AssetType": AssetType,
+        "CharacterIndex": CharacterIndex,
+        "Hand": Hand,
+        "MeterType": MeterType,
+        "MeterAmount": MeterAmount,
+        "MeterCalcBase": MeterCalcBase,
+        "VoiceCategory": VoiceCategory,
+        "RandomVoiceCategory": RandomVoiceCategory,
+        "FacialExpression": FacialExpression,
+        "AirStunType": AirStunType,
+        "LH_Situation": LH_Situation,
+        "LH_Condition": LH_Condition,
+        "GI_Type": GI_Type,
+        "AttackLevel": AttackLevel,
+        "StunOverride": StunOverride,
+        "ViewTarget": ViewTarget,
+        "OpponentState": OpponentState,
+        "CharacterValue": CharacterValue,
+        "CharacterID": CharacterID,
+        "format_value": format_value,
+        "name_from_enum": name_from_enum
+    }
+    for s in conversion_table.keys():
+        if s == string:
+            return conversion_table[s]
+        
+
 def format_value(bytes, cls=None, auto = False, decode = False, movelist = None, negative = False, end = False, prefix = "", suffix = "", offset = 0, replace_char = " ", format = False, slice= False, slice_index = 0, encoded_percent = False, percent_base = 0x3c00):
     value = bs2i(bytes,1,big_endian=True) if negative else b2i(bytes,1,big_endian=True)
     type = int(bytes[0])
@@ -71,7 +113,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
     
     if type == 0x89: #constant
         if cls != None:
-            result = f'<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>'
+            result = f'{prefix}<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>{suffix}'
         else:
             if value == 0 and auto:
                 result = f'<b>Auto<b>'
@@ -110,7 +152,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
                 
         return result if result != None else "<b>last return<b>"
     
-    elif type == 0x8a or type == 0x19: #variable / input param
+    elif type == 0x8a or type == 0x19 or type == 0x12 or type == 0x13: #variable / input param
         if value & 0xf0 == 0xf0:
             result = f'<b>input param {(value ^ 0xf0) + 1}<b>'
         elif value & 0x0100 == 0x0100:
@@ -905,7 +947,6 @@ class Cancel:
 
     def get_gui_guide(self):
         guide = []
-
         index = 0
         list_of_bytes = []
         goto_blocks = []
@@ -914,7 +955,8 @@ class Cancel:
         last_bool = 'last A5'
         button_states = [0x05 , 0x06, 0x0020]
         end = [len(self.bytes) - 1, len(self.bytes) - 4]
-
+        
+      
         while index < len(self.bytes):
             current_bytes += self.bytes[index: index + 1]
 
@@ -938,11 +980,14 @@ class Cancel:
                 first_arg = int(args_bytes[0])
                 second_arg = int(args_bytes[1])
                 index += 3
+                custom_script_path = f'./Data/Scripts/Custom'
+                character_script_path = f'./Data/Scripts/{self.movelist.character_id}'
+                
 
                 if inst == CC.START:
                     list_of_bytes.append((current_bytes, 'START (type {})'.format(args), index))
                     current_bytes = b''
-                if inst == CC.EXE_A5:
+                if inst == CC.EXE_A5: 
                     try:
                         label = 'SET A5 (condition {})'.format(first_arg)
                         last_bool = 'last a5'
@@ -953,141 +998,173 @@ class Cancel:
                         label_prefix = '<b>INVERTED CHECK:<b>' if reversed_check else '<b>CHECK:<b>'
                         arg_bytes = self.bytes[state_index + 3: index - 3]
                         args_list = [arg_bytes[i:i + 3] for i in range(0, len(arg_bytes), 3)]
+
+                        with open('./Data/Scripts/Common/A5.json','r') as xA5_script:
+                            xA5_data = json.load(xA5_script)
+
+                        if os.path.exists(f'{character_script_path}/A5.json') and self.movelist.character_id != '000':
+                            custom = True
+                            with open(f'{character_script_path}/A5.json') as xA5_char_script:
+                                xA5_char_data = json.load(xA5_char_script)
+                        
+                       
+                        if os.path.exists(f'{custom_script_path}/A5.json'):
+                            with open(f'{custom_script_path}/A5.json') as xA5_custom_script:
+                                xA5_custom_data = json.load(xA5_custom_script)
+
                             
                     except:
                         state = 'ERROR'
                         state_args = 'ERROR'
 
-                    if first_arg == 0x01:
+                    if first_arg == 0x01: #condition checks
                             
                             try:
+                                found = False
+                                if self.movelist.character_id != '000' and custom == True:
+                                    for index_id in xA5_char_data:
+                                        if index_id["multiple_state"] == True:
+                                            for i, idx in enumerate(index_id["state"]):
+                                                if index_id['state'][i] == str(f"0x{state:#04x}") and index_id["type"] == "01":
+                                                    state_info = index_id
+                                                    found = True
+                                                    break
+                                        else:
+                                            if index_id['state'] == str(f"0x{state:#04x}") and index_id["type"] == "01":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                if found == False:
+                                    for index_id in xA5_custom_data:
+                                        if index_id["multiple_state"] == True:
+                                            for i, idx in enumerate(index_id["state"]):
+                                                if index_id['state'][i] == str(f"0x{state:#04x}") and index_id["type"] == "01":
+                                                    state_info = index_id
+                                                    found = True
+                                                    break
+                                        else:
+                                            if index_id['state'] == str(f"0x{state:#04x}") and index_id["type"] == "01":
+                                                state_info = index_id
+                                                found = True
+                                                break
                                 
-                                if state in button_states:
-                                    
-                                    if state == 0x0005: 
-                                       label = f'{label_prefix} BUTTON INPUT [{name_from_enum(InputType, state, slice=True)} {format_value(args_list[0],mve.PaddedButton,replace_char= "+")}]'
-                                       last_bool = 'BUTTON INPUT CHECK'
+                                if found == False:
+                                    for index_id in xA5_data:
+                                        if index_id["multiple_state"] == True:
+                                            for i, idx in enumerate(index_id["state"]):
+                                                if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == "01":
+                                                    state_info = index_id
+                                                    found = True
+                                                    break
+                                        else:
+                                            if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == "01":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                if found:
+                                    argp = []
+                                    for i, a in enumerate(state_info["args"]):
+                                        if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
+                                            break
+                                        if a["name"] != "":
+                                            a["name"] = f'{a["name"]}:'
+                                        if a["type"] == "format_value":
+                                            if a["range"] == True:
+                                                val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),**a["data"])}'
+                                            else:
+                                                val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
+                                            argp.append(f'[{a["name"]}{val}]')
+                                        elif a["type"] == "name_from_enum":
+                                            val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
+                                            argp.append(f'[{a["name"]}{val}]')
+                                        
+                                    if len(state_info["args"]) > 0:
+                                        label = f'{label_prefix} {state_info["name"]} {"".join(argp)}'
+                                    else:
+                                        label = f'{label_prefix} {state_info["name"]}'
 
-                                    if state == 0x0006: 
-                                       label = f'{label_prefix} BUTTON INPUT [{name_from_enum(InputType, state, slice=True)} {format_value(args_list[0],mve.PaddedButton,replace_char= "+")}]'
-                                       last_bool = 'BUTTON INPUT CHECK'
-
-                                    if state == 0x20: # hold input with frame duration check?
-                                        label = f'{label_prefix} BUTTON INPUT [{name_from_enum(InputType, state, slice=True,slice_index = 1)} {format_value(args_list[0],mve.PaddedButton,replace_char="+")} for <b>{b2i(self.bytes, state_index + 7, big_endian=True)}<b> frames]'
-                                        last_bool = 'BUTTON INPUT CHECK'
-                                
-                                if state == 0x0009:
-                                    label = f'{label_prefix} LAST ANIMATION FRAME'
-                                    last_bool = "LAST ANIMATION FRAME CHECK"
-
-                                if state == 0x000b:
-                                    label = f'{label_prefix} SPECIAL STATE [state:{format_value(args_list[0],SpecialState)}]'
-                                    last_bool = 'SPECIAL STATE CHECK'
-
-                                if state == 0x000e:
-                                    label = f'{label_prefix} ARRIVED FROM MOVE [move_id:{format_value(args_list[0],decode=True)}]'
-                                    last_bool = 'ARRIVED FROM CHECK'
-
-                                if state == 0x0011:
-                                    label = f'{label_prefix} PLAYER CHARACTER [character:{format_value(args_list[0],CharacterID)}]'
-                                    last_bool = 'PLAYER CHARACTER CHECK'
-
-                                if state == 0x0014:
-                                    label = f'{label_prefix} OPPONENT DISTANCE [0:{format_value(args_list[0])}][1:{format_value(args_list[1])}]'
-                                    last_bool = 'OPPONENT DISTANCE CHECK'
-
-                                if state == 0x008f:
-                                    label = f'{label_prefix} SWITCHING TO MOVE [0:{format_value(args_list[0])}][move_id:{format_value(args_list[1],decode=True)}]'
-                                    last_bool = 'SWITCH CHECK'
-                                
-                                if state == 0x10:
-                                    label = f'{label_prefix} FIRST RUN'
-                                    last_bool = 'FIRST RUN CHECK'
-
-                                if state == 0x16:
-                                    label = f'{label_prefix} ROUND OVER'
-                                    last_bool = 'ROUND OVER CHECK'
-
-                                if state == 0x35:
-                                    label = f'{label_prefix} COUNTER HIT'
-                                    last_bool = 'COUNTER HIT CHECK'
-
-                                if state == 0x3c:
-                                    label = f'{label_prefix} OPPONENT CHARACTER [character:{format_value(args_list[0],CharacterID)}]'
-                                    last_bool = 'OPPONENT CHARACTER CHECK'
-                                
-                                if state == 0x54:
-                                    label = f'{label_prefix} EXITING MOVE'
-                                    last_bool = 'EXITING MOVE CHECK'
-
-                                if state == 0x5a:
-                                    label = f'{label_prefix} OPPONENT GENDER'
-                                    last_bool = 'OPPONENT GENDER CHECK'
-                                
-                                if state == 0x61:
-                                    label = f'{label_prefix} OPPONENT STATE [state:{format_value(args_list[0],OpponentState)}]'
-                                    last_bool = 'OPPONENT STATE CHECK'
-
-                                if state == 0x66:
-                                    label = f'{label_prefix} OPPONENT STATE [state:{format_value(args_list[0],OpponentState)}]'
-                                    last_bool = 'OPPONENT STATE CHECK'
-
-                                if state == 0x6b:
-                                    label = f'{label_prefix} PLAYER STYLE [style:{format_value(args_list[0],CharacterID)}]'
-                                    last_bool = 'PLAYER STYLE CHECK'
-
-                                if state == 0x75:
-                                    label = f'{label_prefix} WEAPON VARIATION [variation:{format_value(args_list[0])}]'
-                                    last_bool = 'WEAPON VARIATION CHECK'
-
-                                if state == 0x7b:
-                                    label = f'{label_prefix} PLAYER HP PERCENT [value:{format_value(args_list[0],prefix="below ")}%]'
-                                    last_bool = 'PLAYER HP PERCENT CHECK'
-
-                                if state == 0x009c:
-                                    label = f'{label_prefix} PLAYER DISTANCE [0:{format_value(args_list[0])}][1:{format_value(args_list[1])}]'
-                                    last_bool = 'PLAYER DISTANCE CHECK'
-
-                                if state == 0x138a:
-                                    label = f'{label_prefix} PLAYER CHARACTER VALUE [target_value:{format_value(args_list[0],CharacterValue)}][value:{format_value(args_list[1],negative=True)} to {format_value(args_list[2],negative=True)}]'
-                                    last_bool = 'PLAYER CHARACTER VALUE CHECK'
-
-                                if state == 0x13ae or state == 0x13af or state == 0x24:
-                                    label = f'{label_prefix} DIRECTION INPUT [<b>{name_from_enum(mve.PaddedButton, b2i(self.bytes, state_index + 4, big_endian=True),slice=True)}<b>]'
-                                    last_bool = 'DIRECTION INPUT CHECK'
-
-                                if state == 0x13bd:
-                                    label = f'{label_prefix} OPPONENT HP PERCENT [value:{format_value(args_list[0],prefix="below ")}%]'
-                                    last_bool = 'OPPONENT HP PERCENT CHECK'
-
-                                if state == 0x13c5:
-                                    label = f'{label_prefix} PLAYER CHARACTER (MIMIC) [character:{format_value(args_list[0],CharacterID)}]'
-                                    last_bool = 'PLAYER CHARACTER CHECK'
-
-                                if state == 0x13ce:
-                                    label = f'{label_prefix} OPPONENT CHARACTER VALUE [target_value:{format_value(args_list[0],CharacterValue)}][value:{format_value(args_list[1],negative=True)} to {format_value(args_list[2],negative=True)}]'
-                                    last_bool = 'OPPONENT CHARACTER VALUE CHECK'
-
-                                if state == 0x13da:
-                                    label = f'{label_prefix} TRAINING MODE'
-                                    last_bool = 'TRAINING MODE CHECK'
+                                    last_bool = state_info["last"]
+                                        
                             
 
                                 
                             except:
                                 state = 'ERROR'
 
-                    elif first_arg == 0x0d:
+                    elif first_arg == 0x0d: #custom conditon checks
                         try:
-                            if state == 0x3300:
-                                label = f'{label_prefix} BRAVE EDGE METER CHECK (VODKAVERSE) | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
+                            found = False
+                            if self.movelist.character_id != '000' and custom == True:
+                                for index_id in xA5_char_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == "0d":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == "0d":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            if found == False:
+                                for index_id in xA5_custom_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == "0d":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == "0d":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                                
+                            if found == False:
+                                for index_id in xA5_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == "0d":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == "0d":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            if found:
+                                argp = []
+                                for i, a in enumerate(state_info["args"]):
+                                    if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
+                                        break
+                                    if a["name"] != "":
+                                        a["name"] = f'{a["name"]}:'
+                                    if a["type"] == "format_value":
+                                        if a["range"] == True:
+                                            val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),**a["data"])}'
+                                        else:
+                                            val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
+                                        argp.append(f'[{a["name"]}{val}]')
+                                    elif a["type"] == "name_from_enum":
+                                        val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
+                                        argp.append(f'[{a["name"]}{val}]')
+                                    
+                                if len(state_info["args"]) > 0:
+                                    label = f'{label_prefix} {state_info["name"]} {"".join(argp)} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
+                                else:
+                                    label = f'{label_prefix} {state_info["name"]} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
 
+                                last_bool = state_info["last"]
+                    
                             else:
                                 label = f'{label_prefix} CUSTOM CHECK | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
+                            found = False
                         except:
                             state = 'ERROR'
 
-                    elif first_arg == 0x23:
+                    elif first_arg == 0x23: # Random Number
                         try:
                             label_prefix = '<b>RANDOM NUMBER<b>:'
                             label = f'{label_prefix} between <b>0<b> and {format_value(self.bytes[state_index: state_index + 3])}'
@@ -1095,7 +1172,7 @@ class Cancel:
                         except:
                             state = 'ERROR'
 
-                    elif first_arg == 0x25:
+                    elif first_arg == 0x25: #Frame Check
                         try:
                             if second_arg == 0x02:
                                 
@@ -1128,7 +1205,18 @@ class Cancel:
                             is_soul_charge = True
                             state_index = state_index + 3
                             state = b2i(self.bytes, state_index + 1, big_endian=True)
+                        with open('./Data/Scripts/Common/25.json','r') as a25_script:
+                            a25_data = json.load(a25_script)
 
+                        
+                        if os.path.exists(f'{character_script_path}/25.json') and self.movelist.character_id != '000':
+                            custom = True
+                            with open(f'{character_script_path}/25.json') as x25_char_script:
+                                x25_char_data = json.load(x25_char_script)
+
+                        if os.path.exists(f'{custom_script_path}/25.json'):
+                            with open(f'{custom_script_path}/25.json') as x25_custom_script:
+                                x25_custom_data = json.load(x25_custom_script)
 
                         alias = decode_move_id(state, self.movelist)
 
@@ -1136,6 +1224,9 @@ class Cancel:
                         i = 0
                         arg_bytes = self.bytes[state_index + 3: index - 3]
                         args_list = [arg_bytes[i:i + 3] for i in range(0, len(arg_bytes), 3)]
+
+                        i = 0
+                        params = [format_value(arg_bytes[i:i + 3]) for i in range(6, len(arg_bytes), 3)]
                             
                         if is_soul_charge:
                             tag = '<sc>'
@@ -1147,178 +1238,83 @@ class Cancel:
                         state = 'ERROR'
                         state_args = 'ERROR'
 
+                    
+                
+
+                    
                     if first_arg == 0x03: #0x1a Throw hurt | 0x03f9 throw damage | 0x0025 deal ##% of total throw damage | 0x13c0 throw damage 
                         try:
                             label = ''
-                            if state_id == 0x0002:
-                                label = f'<b>USE TRANSITION ANIMATION<b>'
-                            if state_id == 0x0004:
-                                label = f'<b>APPLY MOVEMENT<b>: [angle:{format_value(args_list[0])}][distance:{format_value(args_list[1])}]'
-                            if state_id == 0x000e:
-                                label = f'<b>ANIMATION BUFFER<b>: [amount:{format_value(args_list[0],suffix=" frames")}]'
-                            if state_id == 0x0015:
-                                label = f'<b>ANIMATION SPEED OVERRIDE<b>: [speed:{format_value(args_list[0],encoded_percent=True, percent_base=0x5640)}]'
+                            found = False
+                            if self.movelist.character_id != '000' and custom == True:
+                                for index_id in x25_char_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                        
+                            if found == False:
+                                for index_id in x25_custom_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            if found == False:
+                                for index_id in a25_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id["state"][i] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id["state"] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            if found:
+                                argp = []
+                                for i, a in enumerate(state_info["args"]):
+                                    if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
+                                        break
+                                    if a["name"] != "":
+                                        a["name"] = f'{a["name"]}:'
+                                    if a["type"] == "format_value":
+                                        if a["range"] == True:
+                                            val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),movelist=self.movelist,**a["data"])}'
+                                        else:
+                                            val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
+                                        argp.append(f'[{a["name"]}{val}]')
+                                    elif a["type"] == "name_from_enum":
+                                        val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
+                                        argp.append(f'[{a["name"]}{val}]')
+                                    
+                                if len(state_info["args"]) > 0:
+                                    label = f'{state_info["name"]} {"".join(argp)}'
+                                else:
+                                    label = f'{state_info["name"]}'
+
+                                last_bool = state_info["last"]
+                           
                             
-                            if state_id == 0x0018:
-                                label = f'<b>MOVE SPEED OVERRIDE<b>: [speed:{format_value(args_list[0],encoded_percent=True, percent_base=0x5640)}]'
-
-                            if state_id == 0x001a:
-                                label = f'<b>THROW<b>: [hurt_script_id:{format_value(args_list[0])}][animation_id:{format_value(args_list[1])}]'
-                            if state_id == 0x0022:
-                                label = f'<b>SET ELEVATION<b>: [height:{format_value(args_list[0])}'
-                            if state_id == 0x0025:
-                                label = f'<b>THROW DAMAGE<b>: [amount:{format_value(args_list[0],suffix="% of total damage")}]'
-                            if state_id == 0x0028:
-                                label = f'<b>SET HAND POSE<b>: [hand:{format_value(args_list[0],Hand)}][1:{format_value(args_list[1])}][pose_id:{format_value(args_list[2])}]'
-                            if state_id == 0x002f:
-                                if second_arg == 0x02:
-                                    label = f'<b>SELECT CAMERA<b>: [0:{format_value(args_list[0])}]'
-                                if second_arg == 0x03:
-                                    label = f'<b>SELECT CAMERA<b>: [0:{format_value(args_list[0])}][1:{format_value(args_list[1])}]'
-                            if state_id == 0x33:
-                                label = f'<b>CANCEL SWITCH<b>'
-                            if state_id == 0x004d:
-                                label = f'<b>CAMERA SHAKE<b>: [strength:{format_value(args_list[0])}]'
-                            
-                            if state_id == 0x03e8:
-                                if second_arg == 0x02:
-                                    label = f'<b>ADD ATTACK STREAK<b>: [part:{format_value(args_list[0],TracePart, negative = True)}]'
-                                elif second_arg == 0x03:
-                                    label = f'<b>ADD ATTACK STREAK<b>: [part:{format_value(args_list[0],TracePart, negative = True)}][duration:{format_value(args_list[1], suffix=" frames")}]'
-                                elif second_arg == 0x04:
-                                    label = f'<b>ADD ATTACK STREAK<b>: [part:{format_value(args_list[0],TracePart, negative = True)}][duration:{format_value(args_list[1], suffix=" frames")}][length:{format_value(args_list[2])}]'
-                                elif second_arg >= 0x05:
-                                    label = f'<b>ADD ATTACK STREAK<b>: [part:{format_value(args_list[0],TracePart, negative = True)}][duration:{format_value(args_list[1], suffix=" frames")}][length:{format_value(args_list[2])}][kind:{format_value(args_list[3], TraceKind)}]'
-                            
-                            if state_id == 0x03ec:
-                                    if second_arg == 0x01:
-                                        label = f'<b>REMOVE ALL ATTACK STREAKS<b>'
-                                    if second_arg == 0x02:
-                                        label = f'<b>REMOVE ATTACK STREAK<b>: [part:{format_value(args_list[0],TracePart, negative = True)}]'
-
-
-                            if state_id == 0x03eb:
-                                label = f'<b>SET FACIAL EXPRESSION<b>: [expression:{format_value(args_list[0],FacialExpression)}]'
-                            if state_id == 0x07d0:
-                                label = f'<b>PLAY SOUND<b>: [id:{format_value(args_list[0])}]'
-                            if state_id == 0x07d1:
-                                label = f'<b>PLAY VOICE LINE<b>: [category:{format_value(args_list[0],VoiceCategory)}][id:{format_value(args_list[1])}]'
-                            if state_id == 0x07df:
-                                label = f'<b>PLAY RANDOM VOICE LINE<b>: [category:{format_value(args_list[0],RandomVoiceCategory)}]'
-
-                            if state_id == 0x0bbb:
-                                label = f'<b>SET CHARACTER VISIBILITY<b>: [visible:{format_value(args_list[0],BoolFlag,replace_char="")}][character:{format_value(args_list[1],CharacterIndex)}]'
-
-                            if state_id == 0x13a1:
-                                label = f'<b>SET CHARACTER VALUE<b>: [target:{format_value(args_list[0],CharacterValue)}][value:{format_value(args_list[1])}]'
-                            if state_id == 0x13a6:
-                                label = f'<b>SET WEAPON PART VISIBILITY<b>: [part:{format_value(args_list[0])}][visible:{format_value(args_list[1],BoolFlag,replace_char="")}]'
-                            if state_id == 0x13a8:
-                                if second_arg == 0x02:
-                                    label = f'<b>SET GAME SPEED (LESS THAN OR EQUAL TO 100%)<b>: [speed:{format_value(args_list[0],encoded_percent=True,percent_base=0x3c00)}]'
-                                if second_arg == 0x03:    
-                                    label = f'<b>SET GAME SPEED (LESS THAN OR EQUAL TO 100%)<b>: [speed:{format_value(args_list[0],encoded_percent=True, percent_base=0x3c00)}][duration:{format_value(args_list[1],suffix=" frames")}]'
-                            if state_id == 0x13ce:
-                                if second_arg == 0x02:
-                                    label = f'<b>SET OPPONENT SPEED (LESS THAN OR EQUAL TO 100%)<b>: [speed:{format_value(args_list[0],encoded_percent=True, percent_base=0x3c00)}]'
-                                if second_arg == 0x03:    
-                                    label = f'<b>SET OPPONENT SPEED (LESS THAN OR EQUAL TO 100%)<b>: [speed:{format_value(args_list[0],encoded_percent=True, percent_base=0x3c00)}][duration:{format_value(args_list[1],suffix=" frames")}]'
-                            
-                            if state_id == 0x13d0:
-                                label = f'<b>SET LETHAL HIT SITUATION<b>: [situation:{format_value(args_list[0],LH_Situation)}]'
-                            if state_id == 0x13d1:
-                                label = f'<b>SET LETHAL HIT CONDITION<b>: [condition:{format_value(args_list[0],LH_Condition)}]'
-                            if state_id == 0x13d8:
-                                label = f'<b>APPLY DAMAGE SCALING<b>: [{format_value(args_list[0],suffix="%")}]'
                             if state_id == 0x13da:
                                 label = f'<b>ADD/REMOVE METER<b>: [target:{format_value(args_list[0],CharacterIndex)}][type:{format_value(args_list[1],MeterType)}][percentage_base:{format_value(args_list[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list[3], negative=True, encoded_percent=True, percent_base=240 if bs2i(args_list[2],1,big_endian=True) != 1 else 120)}]'
-                            if state_id == 0x13e0:
-                                label = f'<b>CHANGE CHARACTER VALUE BY AMOUNT<b>: [target_value:{format_value(args_list[0])}][amount:{format_value(args_list[1])}]'
-
-                            if state_id == 0x13e1:
-                                label = f'<b>SET LETHAL HIT STATE<b>: [enabled:{format_value(args_list[0],BoolFlag,replace_char="")}]'
-
-                            if state_id == 0x13e2:
-                                label = f'<b>SET CHARACTER VALUE<b>: [target_value:{format_value(args_list[0])}][value:{format_value(args_list[1])}]'
-
-                            if state_id == 0x2afb:
-                                label = f'<b>APPLY SCREEN FILTER<b>: [in:{format_value(args_list[0])}][duration:{format_value(args_list[1])}][out:{format_value(args_list[2])}][sat:{format_value(args_list[3])}][lgt:{format_value(args_list[4])}][reds:{format_value(args_list[5])}][greens:{format_value(args_list[6])}][??:{format_value(args_list[7])}][blues:{format_value(args_list[8])}]'
-                            if state_id == 0x2332:
-                                if second_arg == 0x02:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}]'
+                           
                             
-                                if second_arg == 0x03:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}]'
-                            
-                                if second_arg == 0x04:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}]'
-                            
-                                if second_arg == 0x05:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}]'
-                            
-                                if second_arg == 0x06:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}]'
-                            
-                                if second_arg == 0x07:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}][zoom:{format_value(args_list[5])}]'
-                            
-                                if second_arg == 0x08:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}][zoom:{format_value(args_list[5])}][vertical_angle:{format_value(args_list[6],negative=True)}]'
-                            
-                                if second_arg == 0x09:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}][zoom:{format_value(args_list[5])}][vertical_angle:{format_value(args_list[6],negative=True)}][left/right_span:{format_value(args_list[7],negative=True)}]'
-                            
-                                if second_arg == 0x0a:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}][zoom:{format_value(args_list[5])}][vertical_angle:{format_value(args_list[6],negative=True)}][left/right_span:{format_value(args_list[7],negative=True)}][roll:{format_value(args_list[8],negative=True)}]'
-                            
-                            if state_id == 0x2333:
-                                if second_arg == 0x02:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}]'
-                            
-                                if second_arg == 0x03:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}]'
-                            
-                                if second_arg == 0x04:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}]'
-                            
-                                if second_arg == 0x05:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}]'
-                            
-                                if second_arg == 0x06:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}]'
-                            
-                                if second_arg == 0x07:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}][zoom:{format_value(args_list[5])}]'
-                            
-                                if second_arg == 0x08:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}][zoom:{format_value(args_list[5])}][vertical_angle:{format_value(args_list[6],negative=True)}]'
-                            
-                                if second_arg == 0x09:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}][zoom:{format_value(args_list[5])}][vertical_angle:{format_value(args_list[6],negative=True)}][left/right_span:{format_value(args_list[7],negative=True)}]'
-                            
-                                if second_arg == 0x0a:
-                                    label = f'<b>MOVE CAMERA<b>: [type:{format_value(args_list[0])}][??:{format_value(args_list[1])}][target:{format_value(args_list[2],ViewTarget)}][??:{format_value(args_list[3])}][??:{format_value(args_list[4])}][zoom:{format_value(args_list[5])}][vertical_angle:{format_value(args_list[6],negative=True)}][left/right_span:{format_value(args_list[7],negative=True)}][roll:{format_value(args_list[8],negative=True)}]'
-                            
-                            if state_id == 0x2718:
-                                if second_arg == 0x02:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}]'
-                                if second_arg == 0x03:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}][category:{format_value(args_list[1],AssetType)}]'
-                                if second_arg == 0x04:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}][category:{format_value(args_list[1],AssetType)}][{format_value(args_list[2])}]'
-                                if second_arg == 0x05:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}][category:{format_value(args_list[1],AssetType)}][{format_value(args_list[2])}][{format_value(args_list[3])}]'
-                                if second_arg == 0x06:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}][category:{format_value(args_list[1],AssetType)}][{format_value(args_list[2])}][{format_value(args_list[3])}][{format_value(args_list[4])}]'
-                                if second_arg == 0x07:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}][category:{format_value(args_list[1],AssetType)}][{format_value(args_list[2])}][{format_value(args_list[3])}][{format_value(args_list[4])}][{format_value(args_list[5])}]'
-                                if second_arg == 0x08:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}][category:{format_value(args_list[1],AssetType)}][{format_value(args_list[2])}][{format_value(args_list[3])}][{format_value(args_list[4])}][{format_value(args_list[5])}][target:{format_value(args_list[6],EffectTarget)}]'
-                                if second_arg == 0x09:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}][category:{format_value(args_list[1],AssetType)}][{format_value(args_list[2])}][{format_value(args_list[3])}][{format_value(args_list[4])}][{format_value(args_list[5])}][target:{format_value(args_list[6],EffectTarget)}][effect_part:{format_value(args_list[7],EffectPart)}]'
-                                if second_arg == 0x0a:
-                                    label = f'<b>ADD VFX<b>: [id:{format_value(args_list[0])}][category:{format_value(args_list[1],AssetType)}][{format_value(args_list[2])}][{format_value(args_list[3])}][{format_value(args_list[4])}][{format_value(args_list[5])}][target:{format_value(args_list[6],EffectTarget)}][effect_part:{format_value(args_list[7],EffectPart)}][behavior:{format_value(args_list[8])}]'
-
                         except:
                             state = 'ERROR'
                         list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: {state}' if label == "" else label, index))
@@ -1327,7 +1323,7 @@ class Cancel:
                         if second_arg == 0x02:
                             list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}][entry_frame:{format_value(args_list[0],prefix="frame ")}]', index))
                         elif second_arg >= 0x03:
-                            list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}][entry_frame:{format_value(args_list[0],prefix="frame ")}][switch:{format_value(args_list[1],prefix="on frame ")}]', index))
+                            list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}][entry_frame:{format_value(args_list[0],prefix="frame ")}][switch:{format_value(args_list[1],prefix="on frame ")}][input_params:({params})]', index))
                         else:
                             list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]', index))
                     
@@ -1335,7 +1331,8 @@ class Cancel:
                         if second_arg == 0x02:
                             list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}][entry_frame:{format_value(args_list[0],prefix="frame ")}]', index))
                         elif second_arg >= 0x03:
-                            list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}][entry_frame:{format_value(args_list[0],prefix="frame ")}][switch:{format_value(args_list[1],prefix="on frame ")}]', index))
+                            
+                            list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}][entry_frame:{format_value(args_list[0],prefix="frame ")}][switch:{format_value(args_list[1],prefix="on frame ")}][input_params:({params})]', index))
                         else:
                             list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]', index))
 
@@ -1348,110 +1345,72 @@ class Cancel:
                     elif first_arg == 0x0d: # 0x3041 - CE VO | 0x3031 - Throw logic
                         try:
                             label = ''
-                            if state_id == 0x00ff:
-                                label = f'STOP TIME'
-
-                            if state_id == 0x00f9:
-                                label = f'RE ATTACK AURA'
-
-                            if state_id == 0x3020:
-                                label = f'RETURN STATE [state:{format_value(args_list[0],ReturnState)}][cancel_frames:{format_value(args_list[1])}][blending_frames:{format_value(args_list[2])}]'
-
-                            if state_id == 0x305c:
-                                label = f'TRACKING'
-                                
-                            if state_id == 0x305d:
-                                label = f'SPECIAL STATE [state:{format_value(args_list[0],SpecialState)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix = "frame ")}]'
-
-                            if state_id == 0x3064:
-                                if second_arg == 0x02:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}]'
-                                if second_arg == 0x03:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}]'
-                                if second_arg == 0x04:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}]'
-                                if second_arg == 0x05:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}]'
-                                if second_arg == 0x06:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}]'
-                                if second_arg == 0x07:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}][vertical:{format_value(args_list[5],BoolFlag,replace_char="")}]'
-                                if second_arg == 0x08:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}][vertical:{format_value(args_list[5],BoolFlag,replace_char="")}][kick:{format_value(args_list[6],BoolFlag,replace_char="")}]'
-                                if second_arg == 0x09:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}][vertical:{format_value(args_list[5],BoolFlag,replace_char="")}][kick:{format_value(args_list[6],BoolFlag,replace_char="")}][??:{format_value(args_list[7],BoolFlag,replace_char="")}]'
-                                if second_arg == 0x0a:
-                                    label = f'GUARD IMPACT CONDITION [GI_type:{format_value(args_list[0],GI_Type)}][start:{format_value(args_list[1],prefix="frame ")}][end:{format_value(args_list[2],prefix="frame ")}][attack_level:{format_value(args_list[3],AttackLevel)}][horizontal:{format_value(args_list[4],BoolFlag,replace_char="")}][vertical:{format_value(args_list[5],BoolFlag,replace_char="")}][kick:{format_value(args_list[6],BoolFlag,replace_char="")}][??:{format_value(args_list[7],BoolFlag,replace_char="")}][RI_effect:{format_value(args_list[8],BoolFlag,replace_char="")}]'
-
-                            if state_id == 0x3084:
-                                label = f'SCALING (Throw) [0:{format_value(args_list[0],SpecialState)}][amount:{format_value(args_list[1],suffix="%")}][2:{format_value(args_list[2])}]'
-
-                            if state_id == 0x3090:
-                                label = f'USE METER (CE)'
-
-                            if state_id == 0x30a8:
-                                if second_arg == 0x02:
-                                    label = f'ATTACK STREAK [part:{format_value(args_list[0],TracePart)}]'
-                                if second_arg == 0x03:
-                                    label = f'ATTACK STREAK [part:{format_value(args_list[0],TracePart)}][play_voice:{format_value(args_list[1],BoolFlag, replace_char="")}]'
-                                if second_arg == 0x04:
-                                    label = f'ATTACK STREAK [part:{format_value(args_list[0],TracePart)}][play_voice:{format_value(args_list[1],BoolFlag, replace_char="")}][sfx:{format_value(args_list[2])}]'
-                                if second_arg == 0x05:
-                                    label = f'ATTACK STREAK [part:{format_value(args_list[0],TracePart)}][play_voice:{format_value(args_list[1],BoolFlag, replace_char="")}][sfx:{format_value(args_list[2])}][start:{format_value(args_list[3],prefix = "frame ",auto=True)}]'
-                                if second_arg == 0x06:
-                                    label = f'ATTACK STREAK [part:{format_value(args_list[0],TracePart)}][play_voice:{format_value(args_list[1],BoolFlag, replace_char="")}][sfx:{format_value(args_list[2])}][start:{format_value(args_list[3],prefix = "frame ", auto = True)}][end:{format_value(args_list[4],prefix = "frame ", auto = True)}]'
-
-                            if state_id == 0x30ad:
-                                label = f'EARTHQUAKE [start:{format_value(args_list[0],prefix="frame ")}][bone:{format_value(args_list[1],EffectPart)}]'
-
-                            if state_id == 0x30ae:
-                                label = f'JF ATTACK FLASH (WITH BODY GLOW)'
-
-                            if state_id == 0x30af:
-                                label = f'JF ATTACK FLASH'
-
-                            if state_id == 0x30b0:
-                                label = f'GROUND HIT EFFECT [weapon_id:{format_value(args_list[0],EffectPart)}][1:{format_value(args_list[1])}][2:{format_value(args_list[2])}][ground_break:{format_value(args_list[3],BoolFlag,replace_char="")}]'
-
-                            if state_id == 0x30d3:
-                                label = f'SWITCH MOVE (SOUL CHARGE) MOVE[id:<b>{format_value(args_list[0], decode=True, movelist=self.movelist )}<b>]'
-
-                            if state_id == 0x30d4:
-                                label = f'SOUL CHARGE ATTACK [drain_amount:{format_value(args_list[0])}][show_flare:{format_value(args_list[1],BoolFlag, replace_char="")}]'
+                            found = False
+                            if self.movelist.character_id != '000' and custom == True:
+                                for index_id in x25_char_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            if found == False:
+                                for index_id in x25_custom_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
+                                            state_info = index_id
+                                            found = True
+                                            break
                             
-                            if state_id == 0x30d5:
-                                label = f'ENABLE SOUL CHARGE'
+                            if found == False:
+                                for index_id in a25_data:
+                                    
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id["state"][i] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id["state"] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            if found:
+                                argp = []
+                                for i, a in enumerate(state_info["args"]):
+                                    if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
+                                        break
+                                    if a["name"] != "":
+                                        a["name"] = f'{a["name"]}:'
+                                    if a["type"] == "format_value":
+                                        if a["range"] == True:
+                                            val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),movelist=self.movelist,**a["data"])}'
+                                        else:
+                                            val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
+                                        argp.append(f'[{a["name"]}{val}]')
+                                    elif a["type"] == "name_from_enum":
+                                        val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
+                                        argp.append(f'[{a["name"]}{val}]')
+                                    
+                                if len(state_info["args"]) > 0:
+                                    label = f'{state_info["name"]} {"".join(argp)}'
+                                else:
+                                    label = f'{state_info["name"]}'
+
+                                last_bool = state_info["last"]
                             
-                            if state_id == 0x30d6:
-                                label = f'SWITCH ON STATE WHILE SOUL CHARGED [HIT_move_id:{format_value(args_list[0],decode=True)}][BLOCK_move_id:{format_value(args_list[1],decode=True)}][entry_frame:{format_value(args_list[2])}][switch:{format_value(args_list[0], prefix="on ")}]'
-
-                            if state_id == 0x30f2:
-                                label = f'CHARACTER FLICKER [start:{format_value(args_list[0],prefix="frame ")}][flicker_start:{format_value(args_list[1],prefix="frame ")}][flicker_end:{format_value(args_list[2],prefix="frame ")}][end:{format_value(args_list[3],prefix="frame ")}]'
-
-                            if state_id == 0x30ff:
-                                label = f'ATTACK STATE [crouching:{format_value(args_list[0],BoolFlag,replace_char="")}][rising:{format_value(args_list[1],BoolFlag,replace_char="")}][multi_press:{format_value(args_list[2],BoolFlag,replace_char="")}][8wayrun:{format_value(args_list[3],BoolFlag,replace_char="")}]'
-
-                            if state_id == 0x3111:
-                                label = f'STOP TIMER'
-
-                            if state_id == 0x3124:
-                                label = f'HURT VOICE'
-
-                            if state_id == 0x3221:
-                                label = f'PERSONA CHANGE % [{format_value(args_list[0],suffix="%")}]'
-
-                            if state_id == 0x3256:
-                                label= f'SOUL CHARGE DRAIN [amount:{format_value(args_list[0],suffix="%")}]'
-                            
-                            if state_id == 0x325a:
-                                if second_arg == 0x02:
-                                    label= f'CHARACTER TRAIT [start:{format_value(args_list[0])}]'
-                                if second_arg == 0x03:    
-                                    label= f'CHARACTER TRAIT [start:{format_value(args_list[0])}][end:{format_value(args_list[1])}]'
-
-                            if state_id == 0x3301:
-                                label = f'BRAVE EDGE ATTACK (VODKAVERSE)'
-
                             
 
                         except:
@@ -1462,17 +1421,71 @@ class Cancel:
                     elif first_arg == 0x14:
                         try:
                             label = ''
-                            if state_id == 0x17:
-                                label = f'<b>SET STUN<b>: [type:{format_value(args_list[0], AirStunType)}]'
+                            found = False
+                            if self.movelist.character_id != '000' and custom == True:
+                                for index_id in x25_char_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            if found == False:
+                                for index_id in x25_custom_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            
+                            if found == False:
+                                for index_id in a25_data:
+                                    if index_id["multiple_state"] == True:
+                                        for i, idx in enumerate(index_id["state"]):
+                                            if index_id["state"][i] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
+                                                state_info = index_id
+                                                found = True
+                                                break
+                                    else:
+                                        if index_id["state"] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
+                                            state_info = index_id
+                                            found = True
+                                            break
+                            if found:
+                                argp = []
+                                for i, a in enumerate(state_info["args"]):
+                                    if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
+                                        break
+                                    if a["name"] != "":
+                                        a["name"] = f'{a["name"]}:'
+                                    if a["type"] == "format_value":
+                                        if a["range"] == True:
+                                            val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),movelist=self.movelist,**a["data"])}'
+                                        else:
+                                            val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
+                                        argp.append(f'[{a["name"]}{val}]')
+                                    elif a["type"] == "name_from_enum":
+                                        val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
+                                        argp.append(f'[{a["name"]}{val}]')
+                                    
+                                if len(state_info["args"]) > 0:
+                                    label = f'{state_info["name"]} {"".join(argp)}'
+                                else:
+                                    label = f'{state_info["name"]}'
 
-                            if state_id == 0x21:
-                                label = f'<b>OVERRIDE STUN CANCEL<b>: [type:{format_value(args_list[0], StunOverride)}]'
-
-                            if state_id == 0x38:
-                                label = f'<b>STOP TIME<b>: [0:{format_value(args_list[0])}]'
-
-                            if state_id == 0x3e:
-                                label = f'<b>FREEZE OPPONENT<b>: [freeze:{format_value(args_list[0],BoolFlag,replace_char="")}]'
+                                last_bool = state_info["last"]
+                            
 
                         except:
                             state= 'ERROR'
@@ -1876,6 +1889,7 @@ class Movelist:
     THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29]
 
     def __init__(self, raw_bytes, name):
+        self.character_id = '000'
         self.bytes = raw_bytes
         self.name = name.split('/')[-1].split('_')[0].capitalize()
         self.verbose = False

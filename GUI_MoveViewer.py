@@ -1,3 +1,4 @@
+import json
 import os
 from tkinter import *
 from tkinter.ttk import *
@@ -38,6 +39,14 @@ class GUI_MoveViewer:
     ]
 
     def __init__(self, master,verbose=False):
+        if not os.path.exists(f'./Data/Scripts/Custom'):
+                dir = f'./Data/Scripts/Custom'
+                empty_json = '[\n\n]'
+                os.mkdir(dir)
+                with open(f'{dir}/A5.json', 'w') as xA5:
+                    xA5.write(empty_json)
+                with open(f'{dir}/25.json', 'w') as x25:
+                    x25.write(empty_json)
         self.master = master
         self.verbose = verbose
         #self.master.geometry(str(1850) + 'x' + str(990))
@@ -56,6 +65,9 @@ class GUI_MoveViewer:
         self.movelist_name_var = StringVar()
         self.movelist_name_var.set('???')
 
+        self.character_id_var = StringVar()
+        self.character_id_var.set('000')
+
         self.main_window = Frame(master)
         self.main_window.pack(fill= BOTH, expand=True, anchor=S+W)
         self.main_window.rowconfigure(0,weight=2)
@@ -69,17 +81,19 @@ class GUI_MoveViewer:
         loader_frame = Frame(self.main_window, style='Loader.TFrame')
         loader_frame.grid(sticky=N+W+E+S, column=0)
 
+        loader_frame_char = Frame(loader_frame)
         loader_frame_top = Frame(loader_frame)
         loader_frame_bot = Frame(loader_frame)
         loader_frame_hit = Frame(loader_frame)
         loader_frame_clip = Frame(loader_frame)
         loader_frame_tools = Frame(loader_frame)
 
-        loader_frame_top.grid(sticky=N + E + W, row=0, column=0, padx=5, pady=5)
-        loader_frame_bot.grid(sticky=N + E + W, row=1, column=0, padx=5, pady=5)
-        loader_frame_hit.grid(sticky=N + E + W, row=2, column=0, padx=5, pady=5)
-        loader_frame_clip.grid(sticky=N + E + W, row=3, column=0, padx=5, pady=5)
-        loader_frame_tools.grid(sticky=N + E + W + S, row=4, column=0, padx=5, pady=5)
+        loader_frame_char.grid(sticky=N + E + W, row=0, column=0, padx=5, pady=5)
+        loader_frame_top.grid(sticky=N + E + W, row=1, column=0, padx=5, pady=5)
+        loader_frame_bot.grid(sticky=N + E + W, row=2, column=0, padx=5, pady=5)
+        loader_frame_hit.grid(sticky=N + E + W, row=3, column=0, padx=5, pady=5)
+        loader_frame_clip.grid(sticky=N + E + W, row=4, column=0, padx=5, pady=5)
+        loader_frame_tools.grid(sticky=N + E + W + S, row=5, column=0, padx=5, pady=5)
     
 
         self.movelist_menu_label = Label(loader_frame_top, text="Movelist", font=bold_label_font)
@@ -100,6 +114,15 @@ class GUI_MoveViewer:
         self.save_movelist_button = Button(loader_frame_top, text="Inject Movelist", command=lambda: self.inject_movelist_dialog())
         self.save_movelist_button.pack()
         master.bind('<Control-i>', lambda x: self.inject_movelist_dialog())
+
+        self.character_id_menu_label = Label(loader_frame_char,text="Character ID", font=bold_label_font)
+        self.character_id_menu_label.pack()
+        self.character_id_label = Label(loader_frame_char,textvariable=self.character_id_var)
+        self.character_id_label.pack()
+        self.character_id_entry = Entry(loader_frame_char)
+        self.character_id_entry.pack()
+        self.character_id_button = Button(loader_frame_char,text="Set ID", command=lambda:self.set_character_id(self.character_id_entry.get() if self.character_id_entry.get() != "" else '000'))
+        self.character_id_button.pack()
 
         #display_frame = Frame(self.main_window)
         self.display_frame = Notebook(self.main_window)
@@ -314,6 +337,7 @@ class GUI_MoveViewer:
         except:
             pass
 
+        
 
     def load_movelist(self, path):
         try:
@@ -369,6 +393,9 @@ class GUI_MoveViewer:
         if move_successful and hitbox_successful and cancel_successful:
             self.inject_movelist_dialog()
             time.sleep(3)
+
+            if self.do_fix_goto.get() == False:
+                self.do_fix_goto.set(True)
             
             if self.reload_on_save_var.get() == True:
                 self.load_moveid(self.move_id_textvar.get(),manual=True)
@@ -424,6 +451,25 @@ class GUI_MoveViewer:
 
     def prev_move_id_command(self):
         self.load_moveid(int(self.move_id_textvar.get()) - 1)
+
+    def set_character_id(self, id):
+        try:
+            self.movelist.character_id = id
+            self.character_id_var.set(id)
+            if not os.path.exists(f'./Data/Scripts/{self.movelist.character_id}'):
+                character_dir = f'./Data/Scripts/{self.movelist.character_id}'
+                empty_json = '[\n\n]'
+                os.mkdir(character_dir)
+                with open(f'{character_dir}/A5.json', 'w') as xA5:
+                    xA5.write(empty_json)
+                with open(f'{character_dir}/25.json', 'w') as x25:
+                    x25.write(empty_json)
+        except:
+            print("ID isn't valid.")
+            self.movelist.character_id = '000'
+            self.character_id_var.set('000')
+            return
+        
 
     def load_moveid(self, move_id, is_encoded=False, manual=False):
         try:
@@ -535,7 +581,7 @@ class GUI_MoveViewer:
         self.load_movelist(filename)
 
     def save_movelist_dialog(self):
-        filename = asksaveasfilename(defaultextension=".sc6_movelist")
+        filename = asksaveasfilename(defaultextension=".khd")
         if filename == '':
             return
         else:

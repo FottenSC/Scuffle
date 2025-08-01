@@ -365,6 +365,12 @@ class MeterType(Enum):
     GUARD_METER = 0x04
     GUARD_METER_ = 0x05
 
+class MeterAmount(Enum):
+    _0 = 0x00
+    _12 = 0x01
+    _24 = 0x02
+    _36 = 0x03
+
 class MeterCalcBase(Enum):
     _120 = 0x00
     _240 = 0x01
