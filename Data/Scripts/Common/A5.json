@@ -1,0 +1,740 @@
+
+[
+    {
+        "state": "0x0005",
+        "type": "01",
+        "multiple_state": false,
+        "name": "BUTTON INPUT",
+        "last": "BUTTON INPUT CHECK",
+        "args": 
+        [
+            {
+                "index": -1,
+                "prefix": "",
+                "name": "",
+                "cls": "InputType",
+                "type": "name_from_enum",
+                "data":
+                {
+                    "replace_char": " ",
+                    "format": false,
+                    "slice": true,
+                    "slice_index": 0
+                }
+                
+            },
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "",
+                "type": "format_value",
+                "range": false,
+                "cls": "PaddedButton",
+                "data":
+                {
+                    "auto": false,
+                    "decode": false,
+                    "negative": false,
+                    "prefix": "",
+                    "suffix": "",
+                    "offset": 0,
+                    "replace_char": "+",
+                    "format": false,
+                    "slice": false,
+                    "slice_index": 0,
+                    "encoded_percent": false,
+                    "percent_base": 15360,
+                    "movelist": null,
+                    "end": false
+                }
+                
+            }
+        ],
+        "input_params": false
+    },
+    {
+        "state": "0x0006",
+        "type": "01",
+        "multiple_state": false,
+        "name": "BUTTON INPUT",
+        "last": "BUTTON INPUT CHECK",
+        "args": 
+        [
+            {
+                "index": -1,
+                "prefix": "",
+                "name": "",
+                "cls": "InputType",
+                "type": "name_from_enum",
+                "data":
+                {
+                    "replace_char": " ",
+                    "format": false,
+                    "slice": true,
+                    "slice_index": 0
+                }
+                
+            },
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "",
+                "type": "format_value",
+                "range": false,
+                "cls": "PaddedButton",
+                "data":
+                {
+                    "auto": false,
+                    "decode": false,
+                    "negative": false,
+                    "prefix": "",
+                    "suffix": "",
+                    "offset": 0,
+                    "replace_char": "+",
+                    "format": false,
+                    "slice": false,
+                    "slice_index": 0,
+                    "encoded_percent": false,
+                    "percent_base": 15360,
+                    "movelist": null,
+                    "end": false
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x0020",
+        "type": "01",
+        "multiple_state": false,
+        "name": "BUTTON INPUT",
+        "last": "BUTTON INPUT CHECK",
+        "args": 
+        [
+            {
+                "index": -1,
+                "prefix": "",
+                "name": "",
+                "cls": "InputType",
+                "type": "name_from_enum",
+                "data":
+                {
+                    "replace_char": " ",
+                    "format": false,
+                    "slice": true,
+                    "slice_index": 1
+                }
+                
+            },
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "",
+                "type": "format_value",
+                "range": false,
+                "cls": "PaddedButton",
+                "data":
+                {
+                    "auto": false,
+                    "decode": false,
+                    "negative": false,
+                    "prefix": "",
+                    "suffix": "",
+                    "offset": 0,
+                    "replace_char": "+",
+                    "format": false,
+                    "slice": false,
+                    "slice_index": 0,
+                    "encoded_percent": false,
+                    "percent_base": 15360,
+                    "movelist": null,
+                    "end": false
+                }
+                
+            },
+            {
+                "index": 1,
+                "prefix": "",
+                "name": "",
+                "type": "format_value",
+                "range": false,
+                "cls": null,
+                "data":
+                {
+                    "auto": false,
+                    "decode": false,
+                    "negative": false,
+                    "prefix": "for ",
+                    "suffix": " frames",
+                    "offset": 0,
+                    "replace_char": " ",
+                    "format": false,
+                    "slice": false,
+                    "slice_index": 0,
+                    "encoded_percent": false,
+                    "percent_base": 15360,
+                    "movelist": null,
+                    "end": false
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x0009",
+        "type": "01",
+        "multiple_state": false,
+        "name": "LAST ANIMATION FRAME",
+        "last": "LAST ANIMATION FRAME CHECK",
+        "args": 
+        [],
+        "input_params":false
+    },
+    {
+        "state": "0x000b",
+        "type": "01",
+        "multiple_state": false,
+        "name": "SPECIAL STATE",
+        "last": "SPECIAL STATE CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "state",
+                "cls": "SpecialState",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x000e",
+        "type": "01",
+        "multiple_state": false,
+        "name": "ARRIVED FROM MOVE",
+        "last": "ARRIVED FROM CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "move_id",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    "decode": true
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x0011",
+        "type": "01",
+        "multiple_state": false,
+        "name": "PLAYER CHARACTER",
+        "last": "PLAYER CHARACTER CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "character",
+                "cls": "CharacterID",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x0014",
+        "type": "01",
+        "multiple_state": false,
+        "name": "OPPONENT DISTANCE",
+        "last": "OPPONENT DISTANCE CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "0",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            },
+            {
+                "index": 1,
+                "prefix": "",
+                "name": "1",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    "decode": true
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x008f",
+        "type": "01",
+        "multiple_state": false,
+        "name": "SWITCHING TO MOVE",
+        "last": "SWITCH CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "0",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            },
+            {
+                "index": 1,
+                "prefix": "",
+                "name": "move_id",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    "decode": true
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x0010",
+        "type": "01",
+        "multiple_state": false,
+        "name": "FIRST RUN",
+        "last": "FIRST RUN CHECK",
+        "args": 
+        [],
+        "input_params":false
+    },
+    {
+        "state": "0x0016",
+        "type": "01",
+        "multiple_state": false,
+        "name": "ROUND OVER",
+        "last": "ROUND OVER CHECK",
+        "args": 
+        [],
+        "input_params":false
+    },
+    {
+        "state": "0x0035",
+        "type": "01",
+        "multiple_state": false,
+        "name": "COUNTER HIT",
+        "last": "COUNTER HIT CHECK",
+        "args": 
+        [],
+        "input_params":false
+    },
+    {
+        "state": "0x003c",
+        "type": "01",
+        "multiple_state": false,
+        "name": "OPPONENT CHARACTER",
+        "last": "OPPONENT CHARACTER CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "character",
+                "cls": "CharacterID",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x0054",
+        "type": "01",
+        "multiple_state": false,
+        "name": "EXITING MOVE",
+        "last": "EXITING MOVE CHECK",
+        "args": 
+        [],
+        "input_params":false
+    },
+    {
+        "state": "0x005a",
+        "type": "01",
+        "multiple_state": false,
+        "name": "OPPONENT GENDER",
+        "last": "OPPONENT GENDER CHECK",
+        "args": 
+        [],
+        "input_params":false
+    },
+    {
+        "state": "0x0061",
+        "type": "01",
+        "multiple_state": false,
+        "name": "OPPONENT STATE",
+        "last": "OPPONENT STATE CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "state",
+                "cls": "OpponentState",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x0066",
+        "type": "01",
+        "multiple_state": false,
+        "name": "OPPONENT STATE",
+        "last": "OPPONENT STATE CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "state",
+                "cls": "OpponentState",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x006b",
+        "type": "01",
+        "multiple_state": false,
+        "name": "PLAYER STYLE",
+        "last": "PLAYER STYLE CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "style",
+                "cls": "CharacterID",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x0075",
+        "type": "01",
+        "multiple_state": false,
+        "name": "WEAPON VARIATION",
+        "last": "WEAPON VARIATION CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "variation",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x007b",
+        "type": "01",
+        "multiple_state": false,
+        "name": "PLAYER HP PERCENT",
+        "last": "PLAYER HP PERCENT CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "value",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    "prefix": "below ",
+                    "suffix": "%"
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x009c",
+        "type": "01",
+        "multiple_state": false,
+        "name": "PLAYER DISTANCE",
+        "last": "PLAYER DISTANCE CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "0",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            },
+            {
+                "index": 1,
+                "prefix": "",
+                "name": "1",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x138a",
+        "type": "01",
+        "multiple_state": false,
+        "name": "PLAYER CHARACTER VALUE",
+        "last": "PLAYER CHARACTER VALUE CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "target_value",
+                "cls": "CharacterValue",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            },
+            {
+                "index": [1,2],
+                "name": "value",
+                "cls": null,
+                "type": "format_value",
+                "range": true,
+                "data":
+                {
+                    "negative": true
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": ["0x13ae", "0x13af", "0x0024"],
+        "type": "01",
+        "multiple_state": true,
+        "name": "DIRECTION INPUT",
+        "last": "DIRECTION INPUT CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "",
+                "cls": "PaddedButton",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    "slice": true
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x13bd",
+        "type": "01",
+        "multiple_state": false,
+        "name": "OPPONENT HP PERCENT",
+        "last": "OPPONENT HP PERCENT CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "value",
+                "cls": null,
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    "prefix": "below ",
+                    "suffix": "%"
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x13c5",
+        "type": "01",
+        "multiple_state": false,
+        "name": "PLAYER CHARACTER (MIMIC)",
+        "last": "PLAYER CHARACTER CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "character",
+                "cls": "CharacterID",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                  
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x13ce",
+        "type": "01",
+        "multiple_state": false,
+        "name": "OPPONENT CHARACTER VALUE",
+        "last": "OPPONENT CHARACTER VALUE CHECK",
+        "args": 
+        [
+            {
+                "index": 0,
+                "prefix": "",
+                "name": "target_value",
+                "cls": "CharacterValue",
+                "type": "format_value",
+                "range": false,
+                "data":
+                {
+                    
+                }
+                
+            },
+            {
+                "index": [1,2],
+                "name": "value",
+                "cls": null,
+                "type": "format_value",
+                "range": true,
+                "data":
+                {
+                    "negative": true
+                }
+                
+            }
+        ],
+        "input_params":false
+    },
+    {
+        "state": "0x13da",
+        "type": "01",
+        "multiple_state": false,
+        "name": "TRAINING MODE",
+        "last": "TRAINING MODE CHECK",
+        "args": 
+        [],
+        "input_params":false
+    }, 
+    {
+        "state": "0x3300",
+        "type": "0d",
+        "multiple_state": false,
+        "name": "BRAVE EDGE METER CHECK (VODKAVERSE)",
+        "last": "BRAVE EDGE CHECK",
+        "args": 
+        [],
+        "input_params":false
+    }
+]
+
+
