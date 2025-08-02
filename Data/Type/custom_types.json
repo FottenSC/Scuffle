@@ -1,0 +1,20 @@
+[
+    {
+        "name": "SampleType",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "A"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Sample"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Type"
+            }
+        ]
+
+    }
+]
