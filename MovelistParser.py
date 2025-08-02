@@ -164,9 +164,13 @@ def find_script_info(movelist, state, char_data, custom_data, data, type, second
                 a["name"] = f'{a["name"]}:'
             if a["type"] == "format_value":
                 if a["range"] == True:
-                    val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),**a["data"])}'
+                    try:
+                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["cls"]), movelist=movelist, **a["data"])} to {format_value(args_list[a["index"][1]], string_to_class(a["cls"]), movelist=movelist, **a["data"])}'
+                    except:
+                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["cls"]), movelist=movelist, **a["data"])} to {format_value(args_list[a["index"][0]], string_to_class(a["cls"]), movelist=movelist, **a["data"])}'
+
                 else:
-                    val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
+                    val = format_value(args_list[a["index"]], string_to_class(a["cls"]), movelist=movelist, **a["data"])
                 argp.append(f'[{a["name"]}{val}]')
             elif a["type"] == "name_from_enum":
                 val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
@@ -1113,7 +1117,7 @@ class Cancel:
                         state_args = 'ERROR'
 
                     if first_arg == 0x01: #condition checks
-                            found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "01", second_arg, args_list, custom)
+                            #found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "01", second_arg, args_list, custom)
                             try:
                                 found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "01", second_arg, args_list, custom)
                                 if found:
