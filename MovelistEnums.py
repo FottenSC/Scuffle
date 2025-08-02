@@ -683,7 +683,8 @@ class OpponentState(Enum):
 class CharacterValue(Enum):
     Soul_Gauge = 0x00
     Guard_Gauge = 0x02
-    KO = 0x09
+    Stun_Hits_Received = 0x03
+    Ring_Out_Voiceline = 0x09
     Soul_Charge = 0x0a
     Guard_Break = 0x0d
 

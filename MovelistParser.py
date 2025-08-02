@@ -101,19 +101,99 @@ def string_to_class(string):
         "format_value": format_value,
         "name_from_enum": name_from_enum
     }
+    with open('./Data/Types/custom_types.json', 'r') as io_custom_types:
+                    custom_types = json.load(io_custom_types)
+    for t in custom_types:
+        if t["name"] == string:
+            return string
+                
     for s in conversion_table.keys():
         if s == string:
             return conversion_table[s]
+    
+def find_script_info(movelist, state, char_data, custom_data, data, type, second_arg, args_list, custom):
+    found = False
+    state_info = None
+    argp = []
+    if movelist.character_id != '000' and custom == True:
+        for index_id in char_data:
+            if index_id["multiple_state"] == True:
+                for i, idx in enumerate(index_id["state"]):
+                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == type:
+                        state_info = index_id
+                        found = True
+                        break
+            else:
+                if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == type:
+                    state_info = index_id
+                    found = True
+                    break
+    if found == False:
+        for index_id in custom_data:
+            if index_id["multiple_state"] == True:
+                for i, idx in enumerate(index_id["state"]):
+                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == type:
+                        state_info = index_id
+                        found = True
+                        break
+            else:
+                if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == type:
+                    state_info = index_id
+                    found = True
+                    break
         
+    if found == False:
+        for index_id in data:
+            if index_id["multiple_state"] == True:
+                for i, idx in enumerate(index_id["state"]):
+                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == type:
+                        state_info = index_id
+                        found = True
+                        break
+            else:
+                if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == type:
+                    state_info = index_id
+                    found = True
+                    break
+    if found:
+        argp = []
+        for i, a in enumerate(state_info["args"]):
+            if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
+                break
+            if a["name"] != "":
+                a["name"] = f'{a["name"]}:'
+            if a["type"] == "format_value":
+                if a["range"] == True:
+                    val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),**a["data"])}'
+                else:
+                    val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
+                argp.append(f'[{a["name"]}{val}]')
+            elif a["type"] == "name_from_enum":
+                val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
+                argp.append(f'[{a["name"]}{val}]')
+
+    return found, state_info, argp
+    
 
 def format_value(bytes, cls=None, auto = False, decode = False, movelist = None, negative = False, end = False, prefix = "", suffix = "", offset = 0, replace_char = " ", format = False, slice= False, slice_index = 0, encoded_percent = False, percent_base = 0x3c00):
     value = bs2i(bytes,1,big_endian=True) if negative else b2i(bytes,1,big_endian=True)
     type = int(bytes[0])
     result = 0
-    
     if type == 0x89: #constant
         if cls != None:
-            result = f'{prefix}<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>{suffix}'
+            found = False
+            with open('./Data/Types/custom_types.json', 'r') as io_custom_types:
+                    custom_types = json.load(io_custom_types)
+            for t in custom_types:
+                if t["name"] == cls:
+                    for k in t["values"]:
+                        if k["input_value"] == value:
+                            result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                            found = True
+                            break
+            if found == False:
+                result = f'{prefix}<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>{suffix}'
+                    
         else:
             if value == 0 and auto:
                 result = f'<b>Auto<b>'
@@ -143,7 +223,19 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
             result = f'<b>current frame + {value ^ 0x7800}<b>' if (value ^ 0x7800) > 0 else '<b>current frame<b>'
         
         elif cls != None:
-            result = f'<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>'
+            found = False
+            with open('./Data/Types/custom_types.json', 'r') as io_custom_types:
+                    custom_types = json.load(io_custom_types)
+            for t in custom_types:
+                if t["name"] == cls:
+                    for k in t["values"]:
+                        if k["input_value"] == value:
+                            result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                            found = True
+                            break
+            
+            if found == False:
+                result = f'<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>'
         else:
             if value == 0 and auto:
                 result = f'<b>Auto<b>'
@@ -1002,10 +1094,13 @@ class Cancel:
                         with open('./Data/Scripts/Common/A5.json','r') as xA5_script:
                             xA5_data = json.load(xA5_script)
 
+                        xA5_char_data = json.loads('[\n\n]')
+                        custom = False
                         if os.path.exists(f'{character_script_path}/A5.json') and self.movelist.character_id != '000':
                             custom = True
                             with open(f'{character_script_path}/A5.json') as xA5_char_script:
                                 xA5_char_data = json.load(xA5_char_script)
+                        
                         
                        
                         if os.path.exists(f'{custom_script_path}/A5.json'):
@@ -1018,149 +1113,34 @@ class Cancel:
                         state_args = 'ERROR'
 
                     if first_arg == 0x01: #condition checks
-                            
+                            found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "01", second_arg, args_list, custom)
                             try:
-                                found = False
-                                if self.movelist.character_id != '000' and custom == True:
-                                    for index_id in xA5_char_data:
-                                        if index_id["multiple_state"] == True:
-                                            for i, idx in enumerate(index_id["state"]):
-                                                if index_id['state'][i] == str(f"0x{state:#04x}") and index_id["type"] == "01":
-                                                    state_info = index_id
-                                                    found = True
-                                                    break
-                                        else:
-                                            if index_id['state'] == str(f"0x{state:#04x}") and index_id["type"] == "01":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                if found == False:
-                                    for index_id in xA5_custom_data:
-                                        if index_id["multiple_state"] == True:
-                                            for i, idx in enumerate(index_id["state"]):
-                                                if index_id['state'][i] == str(f"0x{state:#04x}") and index_id["type"] == "01":
-                                                    state_info = index_id
-                                                    found = True
-                                                    break
-                                        else:
-                                            if index_id['state'] == str(f"0x{state:#04x}") and index_id["type"] == "01":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                
-                                if found == False:
-                                    for index_id in xA5_data:
-                                        if index_id["multiple_state"] == True:
-                                            for i, idx in enumerate(index_id["state"]):
-                                                if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == "01":
-                                                    state_info = index_id
-                                                    found = True
-                                                    break
-                                        else:
-                                            if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == "01":
-                                                state_info = index_id
-                                                found = True
-                                                break
+                                found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "01", second_arg, args_list, custom)
                                 if found:
-                                    argp = []
-                                    for i, a in enumerate(state_info["args"]):
-                                        if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
-                                            break
-                                        if a["name"] != "":
-                                            a["name"] = f'{a["name"]}:'
-                                        if a["type"] == "format_value":
-                                            if a["range"] == True:
-                                                val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),**a["data"])}'
-                                            else:
-                                                val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
-                                            argp.append(f'[{a["name"]}{val}]')
-                                        elif a["type"] == "name_from_enum":
-                                            val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
-                                            argp.append(f'[{a["name"]}{val}]')
-                                        
                                     if len(state_info["args"]) > 0:
                                         label = f'{label_prefix} {state_info["name"]} {"".join(argp)}'
                                     else:
                                         label = f'{label_prefix} {state_info["name"]}'
 
                                     last_bool = state_info["last"]
-                                        
                             
-
-                                
                             except:
                                 state = 'ERROR'
 
                     elif first_arg == 0x0d: #custom conditon checks
                         try:
-                            found = False
-                            if self.movelist.character_id != '000' and custom == True:
-                                for index_id in xA5_char_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == "0d":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == "0d":
-                                            state_info = index_id
-                                            found = True
-                                            break
-                            if found == False:
-                                for index_id in xA5_custom_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == "0d":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == "0d":
-                                            state_info = index_id
-                                            found = True
-                                            break
-                                
-                            if found == False:
-                                for index_id in xA5_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == "0d":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == "0d":
-                                            state_info = index_id
-                                            found = True
-                                            break
+                            found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "0d", second_arg, args_list, custom)
                             if found:
-                                argp = []
-                                for i, a in enumerate(state_info["args"]):
-                                    if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
-                                        break
-                                    if a["name"] != "":
-                                        a["name"] = f'{a["name"]}:'
-                                    if a["type"] == "format_value":
-                                        if a["range"] == True:
-                                            val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),**a["data"])}'
-                                        else:
-                                            val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
-                                        argp.append(f'[{a["name"]}{val}]')
-                                    elif a["type"] == "name_from_enum":
-                                        val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
-                                        argp.append(f'[{a["name"]}{val}]')
-                                    
                                 if len(state_info["args"]) > 0:
                                     label = f'{label_prefix} {state_info["name"]} {"".join(argp)} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
                                 else:
                                     label = f'{label_prefix} {state_info["name"]} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
 
                                 last_bool = state_info["last"]
-                    
                             else:
                                 label = f'{label_prefix} CUSTOM CHECK | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
                             found = False
+
                         except:
                             state = 'ERROR'
 
@@ -1205,10 +1185,11 @@ class Cancel:
                             is_soul_charge = True
                             state_index = state_index + 3
                             state = b2i(self.bytes, state_index + 1, big_endian=True)
-                        with open('./Data/Scripts/Common/25.json','r') as a25_script:
-                            a25_data = json.load(a25_script)
+                        with open('./Data/Scripts/Common/25.json','r') as x25_script:
+                            x25_data = json.load(x25_script)
 
-                        
+                        x25_char_data = json.loads('[\n\n]')
+                        custom = False
                         if os.path.exists(f'{character_script_path}/25.json') and self.movelist.character_id != '000':
                             custom = True
                             with open(f'{character_script_path}/25.json') as x25_char_script:
@@ -1245,76 +1226,18 @@ class Cancel:
                     if first_arg == 0x03: #0x1a Throw hurt | 0x03f9 throw damage | 0x0025 deal ##% of total throw damage | 0x13c0 throw damage 
                         try:
                             label = ''
-                            found = False
-                            if self.movelist.character_id != '000' and custom == True:
-                                for index_id in x25_char_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
-                                            state_info = index_id
-                                            found = True
-                                            break
-                        
-                            if found == False:
-                                for index_id in x25_custom_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
-                                            state_info = index_id
-                                            found = True
-                                            break
-                            if found == False:
-                                for index_id in a25_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id["state"][i] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id["state"] == str(f"0x{state_id:04x}") and index_id["type"] == "03":
-                                            state_info = index_id
-                                            found = True
-                                            break
+                            found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "03", second_arg, args_list, custom)
                             if found:
-                                argp = []
-                                for i, a in enumerate(state_info["args"]):
-                                    if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
-                                        break
-                                    if a["name"] != "":
-                                        a["name"] = f'{a["name"]}:'
-                                    if a["type"] == "format_value":
-                                        if a["range"] == True:
-                                            val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),movelist=self.movelist,**a["data"])}'
-                                        else:
-                                            val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
-                                        argp.append(f'[{a["name"]}{val}]')
-                                    elif a["type"] == "name_from_enum":
-                                        val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
-                                        argp.append(f'[{a["name"]}{val}]')
-                                    
                                 if len(state_info["args"]) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
                                     label = f'{state_info["name"]}'
 
                                 last_bool = state_info["last"]
-                           
-                            
+
                             if state_id == 0x13da:
                                 label = f'<b>ADD/REMOVE METER<b>: [target:{format_value(args_list[0],CharacterIndex)}][type:{format_value(args_list[1],MeterType)}][percentage_base:{format_value(args_list[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list[3], negative=True, encoded_percent=True, percent_base=240 if bs2i(args_list[2],1,big_endian=True) != 1 else 120)}]'
-                           
-                            
+
                         except:
                             state = 'ERROR'
                         list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: {state}' if label == "" else label, index))
@@ -1345,65 +1268,8 @@ class Cancel:
                     elif first_arg == 0x0d: # 0x3041 - CE VO | 0x3031 - Throw logic
                         try:
                             label = ''
-                            found = False
-                            if self.movelist.character_id != '000' and custom == True:
-                                for index_id in x25_char_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
-                                            state_info = index_id
-                                            found = True
-                                            break
-                            if found == False:
-                                for index_id in x25_custom_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
-                                            state_info = index_id
-                                            found = True
-                                            break
-                            
-                            if found == False:
-                                for index_id in a25_data:
-                                    
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id["state"][i] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id["state"] == str(f"0x{state_id:04x}") and index_id["type"] == "0d":
-                                            state_info = index_id
-                                            found = True
-                                            break
+                            found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "0d", second_arg, args_list, custom)
                             if found:
-                                argp = []
-                                for i, a in enumerate(state_info["args"]):
-                                    if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
-                                        break
-                                    if a["name"] != "":
-                                        a["name"] = f'{a["name"]}:'
-                                    if a["type"] == "format_value":
-                                        if a["range"] == True:
-                                            val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),movelist=self.movelist,**a["data"])}'
-                                        else:
-                                            val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
-                                        argp.append(f'[{a["name"]}{val}]')
-                                    elif a["type"] == "name_from_enum":
-                                        val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
-                                        argp.append(f'[{a["name"]}{val}]')
-                                    
                                 if len(state_info["args"]) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
@@ -1411,8 +1277,6 @@ class Cancel:
 
                                 last_bool = state_info["last"]
                             
-                            
-
                         except:
                             state = 'ERROR'
 
@@ -1421,71 +1285,14 @@ class Cancel:
                     elif first_arg == 0x14:
                         try:
                             label = ''
-                            found = False
-                            if self.movelist.character_id != '000' and custom == True:
-                                for index_id in x25_char_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
-                                            state_info = index_id
-                                            found = True
-                                            break
-                            if found == False:
-                                for index_id in x25_custom_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id['state'][i] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id['state'] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
-                                            state_info = index_id
-                                            found = True
-                                            break
-                            
-                            if found == False:
-                                for index_id in a25_data:
-                                    if index_id["multiple_state"] == True:
-                                        for i, idx in enumerate(index_id["state"]):
-                                            if index_id["state"][i] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
-                                                state_info = index_id
-                                                found = True
-                                                break
-                                    else:
-                                        if index_id["state"] == str(f"0x{state_id:04x}") and index_id["type"] == "14":
-                                            state_info = index_id
-                                            found = True
-                                            break
+                            found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "14", second_arg, args_list, custom)
                             if found:
-                                argp = []
-                                for i, a in enumerate(state_info["args"]):
-                                    if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
-                                        break
-                                    if a["name"] != "":
-                                        a["name"] = f'{a["name"]}:'
-                                    if a["type"] == "format_value":
-                                        if a["range"] == True:
-                                            val = f'{format_value(args_list[a["index"][0]],string_to_class(a["cls"]),**a["data"])} to {format_value(args_list[a["index"][1]],string_to_class(a["cls"]),movelist=self.movelist,**a["data"])}'
-                                        else:
-                                            val = format_value(args_list[a["index"]],string_to_class(a["cls"]),**a["data"])
-                                        argp.append(f'[{a["name"]}{val}]')
-                                    elif a["type"] == "name_from_enum":
-                                        val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
-                                        argp.append(f'[{a["name"]}{val}]')
-                                    
                                 if len(state_info["args"]) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
                                     label = f'{state_info["name"]}'
 
                                 last_bool = state_info["last"]
-                            
 
                         except:
                             state= 'ERROR'
