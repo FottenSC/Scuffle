@@ -1,0 +1,6 @@
+JSON CUSTOM TYPE STRUCTURE:
+
+"name": (type: string) - name of type
+"values": (type: array) - maps input values to name outputs
+	"input_value": (type: int) - value to match.
+	"output_value": (type: string) - returned name.
