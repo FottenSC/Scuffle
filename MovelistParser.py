@@ -1300,14 +1300,14 @@ class Cancel:
 
                         except:
                             state= 'ERROR'
-                        list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: [id:{format_value(self.bytes[state_index: state_index + 3],decode=False, movelist=self.movelist)}]' if label == "" else label, index))
+                        list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: [id:{format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}]' if label == "" else label, index))
 
                     elif first_arg == 0x26:
                         list_of_bytes.append((current_bytes, f'<b>SET ACTIVE HITBOX<b>: {format_value(self.bytes[state_index: state_index + 3], prefix = "hitbox ", offset = 1)}', index))
                     
 
                     else:
-                        list_of_bytes.append((current_bytes, '<b>SYSTEM SCRIPT<b>: [id:{}] ?? ({}) '.format(format_value(self.bytes[state_index: state_index + 3],decode=False, movelist=self.movelist), state_args), index))
+                        list_of_bytes.append((current_bytes, '<b>SYSTEM SCRIPT<b>: [id:{}] ?? ({}) '.format(format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist), state_args), index))
                     current_bytes =  b''
                 if inst == CC.EXE_19:
                     try:
