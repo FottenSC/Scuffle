@@ -32,20 +32,7 @@
                 "cls": "PaddedButton",
                 "data":
                 {
-                    "auto": false,
-                    "decode": false,
-                    "negative": false,
-                    "prefix": "",
-                    "suffix": "",
-                    "offset": 0,
-                    "replace_char": "+",
-                    "format": false,
-                    "slice": false,
-                    "slice_index": 0,
-                    "encoded_percent": false,
-                    "percent_base": 15360,
-                    "movelist": null,
-                    "end": false
+                    "replace_char": "+" 
                 }
                 
             }
@@ -84,20 +71,7 @@
                 "cls": "PaddedButton",
                 "data":
                 {
-                    "auto": false,
-                    "decode": false,
-                    "negative": false,
-                    "prefix": "",
-                    "suffix": "",
-                    "offset": 0,
-                    "replace_char": "+",
-                    "format": false,
-                    "slice": false,
-                    "slice_index": 0,
-                    "encoded_percent": false,
-                    "percent_base": 15360,
-                    "movelist": null,
-                    "end": false
+                    "replace_char": "+"
                 }
                 
             }
@@ -136,20 +110,7 @@
                 "cls": "PaddedButton",
                 "data":
                 {
-                    "auto": false,
-                    "decode": false,
-                    "negative": false,
-                    "prefix": "",
-                    "suffix": "",
-                    "offset": 0,
-                    "replace_char": "+",
-                    "format": false,
-                    "slice": false,
-                    "slice_index": 0,
-                    "encoded_percent": false,
-                    "percent_base": 15360,
-                    "movelist": null,
-                    "end": false
+                    "replace_char": "+"
                 }
                 
             },
@@ -162,20 +123,8 @@
                 "cls": null,
                 "data":
                 {
-                    "auto": false,
-                    "decode": false,
-                    "negative": false,
                     "prefix": "for ",
-                    "suffix": " frames",
-                    "offset": 0,
-                    "replace_char": " ",
-                    "format": false,
-                    "slice": false,
-                    "slice_index": 0,
-                    "encoded_percent": false,
-                    "percent_base": 15360,
-                    "movelist": null,
-                    "end": false
+                    "suffix": " frames"
                 }
                 
             }
