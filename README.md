@@ -5,7 +5,7 @@ Soul Calibur 6 Live Frame Data Reader -- based on the useful parts of the popula
 
 # Usage
 
-Download the latest release from https://github.com/LogzatioStudios150/Scuffle/releases. Run the .exe at the same as Soul Calibur 6 (PC version only) and it will read the memory to display internal frame data. The frame data overlay should display at the top of the screen, works only in windowed or windowed borderless mode (NO FULLSCREEN).
+Download the latest release from https://github.com/FottenSC/Scuffle/releases/. Run the .exe at the same as Soul Calibur 6 (PC version only) and it will read the memory to display internal frame data. The frame data overlay should display at the top of the screen, works only in windowed or windowed borderless mode (NO FULLSCREEN).
 
 # Technical
 
