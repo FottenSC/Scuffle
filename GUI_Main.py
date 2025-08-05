@@ -248,7 +248,7 @@ class GUI_Main(Tk):
             if self.launcher.p1_move_id != self.old_move_id and self.launcher.p1_move_id != 0x59: #0x59 is the hex for 'coming to a stop' move_id
                 self.old_move_id = self.launcher.p1_move_id
                 try:
-                    self.move_viewer.load_moveid(self.launcher.p1_move_id)
+                    self.move_viewer.load_moveid(str(self.launcher.p1_move_id))
                 except:
                     self.move_viewer = None
 
