@@ -447,10 +447,10 @@ class GUI_MoveViewer:
         self.load_hitbox()
 
     def next_move_id_command(self):
-        self.load_moveid(int(self.move_id_textvar.get()) + 1)
+        self.load_moveid(str(int(self.move_id_textvar.get()) + 1))
 
     def prev_move_id_command(self):
-        self.load_moveid(int(self.move_id_textvar.get()) - 1)
+        self.load_moveid(str(int(self.move_id_textvar.get()) - 1))
 
     def set_character_id(self, id):
         try:
@@ -473,7 +473,11 @@ class GUI_MoveViewer:
 
     def load_moveid(self, move_id, is_encoded=False, manual=False):
         try:
-            id = int(move_id)
+            if move_id[0:2] == "0x":
+                id = int(move_id[2:],16)
+                id = MovelistParser.decode_move_id(id,self.movelist)
+            else:
+                id = int(move_id)
         except:
             print('unrecognized move_id: {}'.format(move_id))
             return
