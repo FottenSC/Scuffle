@@ -42,13 +42,13 @@ def b4f (bytes, index : int):
 
 def encode_move_id(decoded_move_id, movelist):
     move_id = decoded_move_id
-    if move_id > movelist.block_T_start:  # this is kinda an escape value for stances??? and neutral???
+    if move_id >= movelist.block_T_start:  # this is kinda an escape value for stances??? and neutral???
         move_id -= movelist.block_T_start
         move_id += 0x3000
-    elif move_id > movelist.block_S_start:
+    elif move_id >= movelist.block_S_start:
         move_id -= movelist.block_S_start
         move_id += 0x2000
-    elif move_id > movelist.block_R_start:
+    elif move_id >= movelist.block_R_start:
         move_id -= movelist.block_R_start
         move_id += 0x1000
     return move_id
