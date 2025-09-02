@@ -21,8 +21,10 @@ class ColorSchemeEnum(Enum):
     background = 0
     transparent = 1
     p1_text = 2
-    p2_text = 3
-    system_text = 4
+    p1s_text = 3
+    p2_text = 4
+    p2s_text = 5
+    system_text = 6
     mid = 11
     high = 12
     low = 13
@@ -33,7 +35,9 @@ class CurrentColorScheme:
         ColorSchemeEnum.background : 'gray10',
         ColorSchemeEnum.transparent: 'white',
         ColorSchemeEnum.p1_text: 'ivory2',
+        ColorSchemeEnum.p1s_text: '#93A1A1',
         ColorSchemeEnum.p2_text: 'LightSkyBlue1',
+        ColorSchemeEnum.p2s_text: '#5F90C0',
         ColorSchemeEnum.system_text: 'lawn green',
         ColorSchemeEnum.mid: '#FFEB44',
         ColorSchemeEnum.high: '#FF789A',

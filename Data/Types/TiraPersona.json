@@ -1,0 +1,16 @@
+[
+    {
+        "name": "TiraPersona",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "Jolly"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Gloomy"
+            }
+        ]
+
+    }
+]

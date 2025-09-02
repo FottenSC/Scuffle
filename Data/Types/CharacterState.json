@@ -1,0 +1,12 @@
+[
+    {
+        "name": "CharacterState",
+        "values": [
+            {
+                "input_value": 25,
+                "output_value": "Tira Persona"
+            }
+        ]
+
+    }
+]

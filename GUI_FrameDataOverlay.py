@@ -66,7 +66,9 @@ class TextRedirector(object):
         #self.fa_p2_var = fa_p2_var
         self.style = style
         self.widget.tag_config("p1", foreground=CurrentColorScheme.dict[ColorSchemeEnum.p1_text])
+        self.widget.tag_config("p1s", foreground=CurrentColorScheme.dict[ColorSchemeEnum.p1s_text])
         self.widget.tag_config("p2", foreground=CurrentColorScheme.dict[ColorSchemeEnum.p2_text])
+        self.widget.tag_config("p2s", foreground=CurrentColorScheme.dict[ColorSchemeEnum.p2s_text])
         self.widget.tag_config("MID", foreground=CurrentColorScheme.dict[ColorSchemeEnum.mid])
         self.widget.tag_config("HIGH", foreground=CurrentColorScheme.dict[ColorSchemeEnum.high])
         self.widget.tag_config("LOW", foreground=CurrentColorScheme.dict[ColorSchemeEnum.low])
@@ -128,6 +130,16 @@ class TextRedirector(object):
                 data = data.replace('p1:', '')
                 player_text_tag = 'p1'
                 note_placeholder = self.p1_note
+            elif "p1s:" in output_str:
+                #self.fa_p1_var.set(fa)
+                data = data.replace('p1s:', '')
+                player_text_tag = 'p1s'
+                note_placeholder = self.p1_note
+            elif "p2s:" in output_str:
+                #self.fa_p2_var.set(fa)
+                data = data.replace('p2s:', '')
+                player_text_tag = 'p2s'
+                note_placeholder = self.p2_note
             else:
                 #self.fa_p2_var.set(fa)
                 data = data.replace('p2:', '')

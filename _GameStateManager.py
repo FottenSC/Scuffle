@@ -1,37 +1,54 @@
+import math
+import AddressMap
 import SoulCaliburGameState
 import time
 import GameplayEnums
 import MovelistParser
 from typing import List
 from threading import Thread
+from ByteTools import *
 
 class GameStateManager:
     def __init__(self):
         self.game_reader = SoulCaliburGameState.SC6GameReader()
-        self.p1_move_id = 0
+        self.p1_primary_move_id = 0
+        self.p1_secondary_move_id = 0
+        self.active = 0
         #self.p1_backfiller = FrameBackCounter(True)
         #self.p2_backfiller = FrameBackCounter(False)
-        self.move_ids_record = [[], []]
-        self.bhc_stuns_record = [[], []]
-        self.entry_times = [[], []]
-        self.time_spent_in_move_id_count = [[], []]
+        self.primary_move_ids_record = [[], []]
+        self.secondary_move_ids_record = [[], []]
+        self.primary_bhc_stuns_record = [[], []]
+        self.secondary_bhc_stuns_record = [[], []]
+        self.primary_entry_times = [[], []]
+        self.secondary_entry_times = [[], []]
+        self.time_spent_in_primary_move_id_count = [[], []]
+        self.time_spent_in_secondary_move_id_count = [[], []]
 
     def Update(self, do_print_debug_vars, show_all_hitboxes, verbose_log=False):
         
         successful_update = self.game_reader.UpdateCurrentSnapshot()
         if successful_update:
             try:
-                snapshots = self.game_reader.snapshots
+                primary_snapshots = self.game_reader.primary_snapshots
+                secondary_snapshots = self.game_reader.secondary_snapshots
                 #self.p1_backfiller.update(snapshots)
                 #self.p2_backfiller.update(snapshots)
-                if len(snapshots) > 4:
-                    self.p1_move_id = snapshots[-1].p1.movement_block.movelist_id
-                    did_p1_attack_change = snapshots[-2].p1.movement_block.movelist_id != snapshots[-3].p1.movement_block.movelist_id
-                    if did_p1_attack_change:
-                        old_id = snapshots[-3].p1.movement_block.movelist_id
-                        self.count_time_in_move_id(self.time_spent_in_move_id_count[0], old_id, snapshots, True)
+                if len(primary_snapshots) > 4:
+                    if self.game_reader.p1_movelist != None:
+                        self.p1_primary_move_id = MovelistParser.decode_move_id(primary_snapshots[-1].p1.movement_block.movelist_id,self.game_reader.p1_movelist)
+                        did_p1_primary_attack_change = MovelistParser.decode_move_id(primary_snapshots[-2].p1.movement_block.movelist_id, self.game_reader.p1_movelist) != MovelistParser.decode_move_id(primary_snapshots[-3].p1.movement_block.movelist_id,self.game_reader.p1_movelist)
+                    else:
+                        self.p1_primary_move_id = primary_snapshots[-1].p1.movement_block.movelist_id
+                        did_p1_primary_attack_change = primary_snapshots[-2].p1.movement_block.movelist_id != primary_snapshots[-3].p1.movement_block.movelist_id
+                    if did_p1_primary_attack_change:
+                        if self.game_reader.p1_movelist != None:
+                            old_id = MovelistParser.decode_move_id(primary_snapshots[-3].p1.movement_block.movelist_id,self.game_reader.p1_movelist)
+                        else:
+                            old_id = primary_snapshots[-3].p1.movement_block.movelist_id
+                        self.count_time_in_move_id(self.time_spent_in_primary_move_id_count[0], old_id, primary_snapshots, True)
                         
-                        s = self.create_frame_entry('p1', snapshots[-1].p1, self.move_ids_record[0], self.bhc_stuns_record[0], self.entry_times[0], self.game_reader.p1_movelist,verbose=verbose_log) if self.game_reader.p1_movelist != None else None
+                        s = self.create_frame_entry('p1', primary_snapshots[-1].p1, self.primary_move_ids_record[0], self.primary_bhc_stuns_record[0], self.primary_entry_times[0], self.game_reader.p1_movelist,verbose=verbose_log) if self.game_reader.p1_movelist != None else None
 
                         if s != None:
                             for entry in s:
@@ -39,13 +56,46 @@ class GameStateManager:
                                 if not show_all_hitboxes:
                                     break
 
+                    did_p2_primary_attack_change = primary_snapshots[-2].p2.movement_block.movelist_id != primary_snapshots[-3].p2.movement_block.movelist_id
+                    if did_p2_primary_attack_change:
+                        old_id = primary_snapshots[-3].p2.movement_block.movelist_id
+                        self.count_time_in_move_id(self.time_spent_in_primary_move_id_count[1], old_id, primary_snapshots, False)
+                        s = self.create_frame_entry('p2', primary_snapshots[-1].p2, self.primary_move_ids_record[1],self.primary_bhc_stuns_record[1], self.primary_entry_times[1], self.game_reader.p2_movelist,verbose=verbose_log) if self.game_reader.p2_movelist != None else None
+
+                        if s != None:
+                            for entry in s:
+                                print(entry)
+                                if not show_all_hitboxes:
+                                    break
+
+                if len(secondary_snapshots) > 4:
+                    if self.game_reader.p1_movelist != None:
+                        self.p1_secondary_move_id = MovelistParser.decode_move_id(secondary_snapshots[-1].p1.movement_block.movelist_id,self.game_reader.p1_movelist)
+                        did_p1_secondary_attack_change = MovelistParser.decode_move_id(secondary_snapshots[-2].p1.movement_block.movelist_id, self.game_reader.p1_movelist) != MovelistParser.decode_move_id(secondary_snapshots[-3].p1.movement_block.movelist_id,self.game_reader.p1_movelist)
+                    else:
+                        self.p1_secondary_move_id = secondary_snapshots[-1].p1.movement_block.movelist_id
+                        did_p1_secondary_attack_change = secondary_snapshots[-2].p1.movement_block.movelist_id != secondary_snapshots[-3].p1.movement_block.movelist_id
+                    if did_p1_secondary_attack_change:
+                        if self.game_reader.p1_movelist != None:
+                            old_id = MovelistParser.decode_move_id(secondary_snapshots[-3].p1.movement_block.movelist_id,self.game_reader.p1_movelist)
+                        else:
+                            old_id = secondary_snapshots[-3].p1.movement_block.movelist_id
+                        self.count_time_in_move_id(self.time_spent_in_secondary_move_id_count[0], old_id, secondary_snapshots, True)
+                        
+                        s = self.create_frame_entry('p1s', secondary_snapshots[-1].p1, self.secondary_move_ids_record[0], self.secondary_bhc_stuns_record[0], self.secondary_entry_times[0], self.game_reader.p1_movelist,verbose=verbose_log) if self.game_reader.p1_movelist != None else None
+
+                        if s != None:
+                            for entry in s:
+                                print(entry)
+                                if not show_all_hitboxes:
+                                    break
 
                     #did_p2_attack_change = snapshots[-1].p2.global_block.last_attack_address != snapshots[-2].p2.global_block.last_attack_address
-                    did_p2_attack_change = snapshots[-2].p2.movement_block.movelist_id != snapshots[-3].p2.movement_block.movelist_id
-                    if did_p2_attack_change:
-                        old_id = snapshots[-3].p2.movement_block.movelist_id
-                        self.count_time_in_move_id(self.time_spent_in_move_id_count[1], old_id, snapshots, False)
-                        s = self.create_frame_entry('p2', snapshots[-1].p2, self.move_ids_record[1],self.bhc_stuns_record[1], self.entry_times[1], self.game_reader.p2_movelist,verbose=verbose_log) if self.game_reader.p2_movelist != None else None
+                    did_p2_secondary_attack_change = secondary_snapshots[-2].p2.movement_block.movelist_id != secondary_snapshots[-3].p2.movement_block.movelist_id
+                    if did_p2_secondary_attack_change:
+                        old_id = secondary_snapshots[-3].p2.movement_block.movelist_id
+                        self.count_time_in_move_id(self.time_spent_in_primary_move_id_count[1], old_id, secondary_snapshots, False)
+                        s = self.create_frame_entry('p2s', secondary_snapshots[-1].p2, self.secondary_move_ids_record[1],self.secondary_bhc_stuns_record[1], self.secondary_entry_times[1], self.game_reader.p2_movelist,verbose=verbose_log) if self.game_reader.p2_movelist != None else None
 
                         if s != None:
                             for entry in s:
@@ -55,7 +105,7 @@ class GameStateManager:
 
 
                 if do_print_debug_vars:
-                    print(self.game_reader.snapshots[-1])
+                    print(self.game_reader.primary_snapshots[-1])
             except Exception as e:
                 print(e)
                 raise e
@@ -94,20 +144,22 @@ class GameStateManager:
 
     def create_frame_entry(self, name, p, record, bhc_stuns, times, movelist,verbose=False):
         id = p.movement_block.movelist_id
+        id = MovelistParser.decode_move_id(id,movelist)
         if len(record) == 0 or record[-1] != id:
             record.append(id)
         #bhc_stuns.append((0, 0, 0))
         #if id != 0x59 and id <= movelist.block_Q_length:  # 0x59 is the 'coming to a stop' move_id from 8 way run and above q_length are 'imaginary' moves
         if movelist != None:
-            end = movelist.block_Q_length 
+            end = movelist.block_Q_length
             if verbose:
-                end = movelist.length
+                end = MovelistParser.decode_move_id(0x3300, movelist)
+                
                 
 
-            if (id >= 0x0100 and id <= end) or id == 219 or id == 221: #219 is soul charge, the only interesting move below 0x0100
+            if (id >= 0x00a0 and id <= end) or (id >= MovelistParser.decode_move_id(0x3000, movelist) and id <= MovelistParser.decode_move_id(0x3000 + movelist.block_T_length, movelist)) or id == 219 or id == 221: #219 is soul charge, the only interesting move below 0x0100
                     if len(bhc_stuns) > 1:
                         stun = bhc_stuns[-1] #declare here in case we add a new one in FrameStringFromMovelist
-                    s = GameStateManager.FrameStringFromMovelist(name, p, record, bhc_stuns, self.game_reader.snapshots[-1].timer,verbose)
+                    s = GameStateManager.FrameStringFromMovelist(name, p, record, bhc_stuns, self.game_reader.primary_snapshots[-1].timer,verbose,movelist, self.game_reader)
                     #times.append(self.game_reader.timer - p.movement_block.short_timer)
                     times.append(self.game_reader.timer)
                     if len(times) > 1 and len(bhc_stuns) > 2:
@@ -129,7 +181,7 @@ class GameStateManager:
 
         return None
 
-    def FrameStringFromMovelist(p_str, p : SoulCaliburGameState.PlayerSnapshot, move_ids, stuns, timer, verbose=False):
+    def FrameStringFromMovelist(p_str, p : SoulCaliburGameState.PlayerSnapshot, move_ids, stuns, timer, verbose = False, movelist = None, game_reader:SoulCaliburGameState.SC6GameReader = None):
 
         def pretty_frame_data_entry(fd : MovelistParser.FrameData):
             guard_damage = p.startup_block.guard_damage
@@ -159,9 +211,11 @@ class GameStateManager:
             return strings
 
 
-
-        id = p.movement_block.movelist_id
-        move = p.movelist.all_moves[id]
+        if movelist != None:
+            id = MovelistParser.decode_move_id(p.movement_block.movelist_id,movelist)
+        else:
+            id = 0
+        move:List[MovelistParser.Move] = p.movelist.all_moves[id]
 
         delta = 0
         if len(move_ids) > 1 and move_ids[-2] < len(p.movelist.all_moves):
@@ -209,7 +263,7 @@ class GameStateManager:
         else:
             frame_datas = move.get_frame_data(delta=delta)
         try:  
-            if len(frame_datas) == 0 and verbose == False:
+            if len(frame_datas) == 0:
                 return no_hitbox_data()
             else:
                 added_stun = False
@@ -221,7 +275,7 @@ class GameStateManager:
                         added_stun = True
                     if len(frame_datas) > 1:
                         #fractions = {(1, 2) : '⅓', (1, 2) : '⅓',}
-                        fd.notes.append('½')#.format(counter, len(frame_datas)))
+                        fd.notes.append(f'½')#.format(counter, len(frame_datas)))
                     pretty_frame_data_entry(fd)
                     counter += 1
                 return strings

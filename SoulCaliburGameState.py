@@ -1,18 +1,19 @@
 import AddressMap
-
-from ByteTools import *
 import ModuleEnumerator
 import PIDSearcher
 import GameplayEnums
 import MovelistParser
 from threading import Thread
+from ByteTools import *
+from typing import List
 
 class SC6GameReader:
         def __init__(self):
             self.pid = -1
             self.process_handle = None
             self.test_block = 0
-            self.snapshots = []
+            self.primary_snapshots:List[GameSnapshot] =  []
+            self.secondary_snapshots:List[GameSnapshot] = []
             self.p1_movelist = None
             self.last_p1_movelist_address = None
             self.p2_movelist = None
@@ -120,9 +121,22 @@ class SC6GameReader:
                     #p1_movement_block = GetDataBlockAtEndOfPointerOffsetList(process_handle, self.module_address, AddressMap.p1_movement_block_breadcrumb, 0x100)
                     #p2_movement_block = GetDataBlockAtEndOfPointerOffsetList(process_handle, self.module_address, AddressMap.p2_movement_block_breadcrumb, 0x100)
 
-                    p1_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_move_id_address, is_short =True)
-                    p2_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_move_id_address, is_short=True)
+                    self.p1_primary_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_primary_move_id_address, is_short =True)
+                    self.p2_primary_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_primary_move_id_address, is_short=True)
 
+                    self.p1_secondary_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_secondary_move_id_address, is_short =True)
+                    self.p2_secondary_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_secondary_move_id_address, is_short =True)
+
+                    self.p1_hitbox_index = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_hitbox_index_address, is_short =True)
+                    self.p2_hitbox_index = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_hitbox_index_address, is_short =True)
+                    
+                    self.p1_frame = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_frame_address, is_short =True)
+                    self.p2_frame = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_frame_address, is_short =True)
+                    
+                    self.p1_exit_frame = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_exit_frame_address, is_short =True)
+                    
+                    self.p1_previous_move_id = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_previous_move_id_address, is_short =True)
+                   
                     p1_gdam = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_guard_damage_address, is_short=True)
                     p2_gdam = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_guard_damage_address, is_short=True)
 
@@ -132,8 +146,11 @@ class SC6GameReader:
                     p2_input = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p2_input_address, is_short=True)
                     p2_global = SC6GlobalBlock(p2_input)
 
-                    value_p1 = PlayerSnapshot(self.p1_movelist, p1_gdam, p1_move_id, p1_global)
-                    value_p2 = PlayerSnapshot(self.p2_movelist, p2_gdam, p2_move_id, p2_global)
+                    primary_value_p1 = PlayerSnapshot(self.p1_movelist, p1_gdam, self.p1_primary_move_id, p1_global)
+                    primary_value_p2 = PlayerSnapshot(self.p2_movelist, p2_gdam, self.p2_primary_move_id, p2_global)
+                    
+                    secondary_value_p1 = PlayerSnapshot(self.p1_movelist, p1_gdam, self.p1_secondary_move_id, p1_global)
+                    secondary_value_p2 = PlayerSnapshot(self.p2_movelist, p2_gdam, self.p2_secondary_move_id, p2_global)
                     
                     p1_movelist_address = GetValueFromAddress(self.process_handle, self.module_address + AddressMap.p1_movelist_address, is64bit=True)
 
@@ -151,12 +168,14 @@ class SC6GameReader:
                         
                         
                     self.last_p1_movelist_address = p1_movelist_address
-                        
-
-                    self.snapshots.append(GameSnapshot(value_p1, value_p2, self.timer))
+                    
+                    self.primary_snapshots.append(GameSnapshot(primary_value_p1, primary_value_p2, self.timer))                 
+                    self.secondary_snapshots.append(GameSnapshot(secondary_value_p1, secondary_value_p2, self.timer))
                     MAX_FRAMES_TO_KEEP = 1000
-                    if len(self.snapshots) > MAX_FRAMES_TO_KEEP:
-                        self.snapshots = self.snapshots[MAX_FRAMES_TO_KEEP // 2: -1]
+                    if len(self.primary_snapshots) > MAX_FRAMES_TO_KEEP:
+                        self.primary_snapshots = self.primary_snapshots[MAX_FRAMES_TO_KEEP // 2: -1]
+                    if len(self.secondary_snapshots) > MAX_FRAMES_TO_KEEP:
+                        self.secondary_snapshots = self.secondary_snapshots[MAX_FRAMES_TO_KEEP // 2: -1]
                     return True
 
 
@@ -192,8 +211,8 @@ class PlayerSnapshot:
 class GameSnapshot:
     def __init__(self, p1_snapshot : PlayerSnapshot, p2_snapshot : PlayerSnapshot, timer):
         self.timer = timer
-        self.p1 = p1_snapshot
-        self.p2 = p2_snapshot
+        self.p1:PlayerSnapshot = p1_snapshot
+        self.p2:PlayerSnapshot = p2_snapshot
 
     def __repr__(self):
         return "{} ||| {}".format(self.p1, self.p2)
@@ -208,7 +227,7 @@ if __name__ == "__main__":
         successful_update = myReader.UpdateCurrentSnapshot()
 
         if successful_update:
-            new_state = myReader.snapshots[-1]
+            new_state = myReader.primary_snapshots[-1]
             print("you're open {}".format(new_state.timer))
 
         time.sleep(.005)

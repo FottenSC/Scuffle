@@ -185,7 +185,7 @@ class GUI_MoveIdMeter:
 
             #print(game_state.game_reader.timer)
             last_x_frames = missing_frames
-            if len(game_state.game_reader.snapshots) > last_x_frames:
+            if len(game_state.game_reader.primary_snapshots) > last_x_frames:
 
                 prev_p1_move_id = -1
                 prev_p2_move_id = -1
@@ -213,7 +213,7 @@ class GUI_MoveIdMeter:
                 i = -1
 
                 for target_frame in range(self.current_frame, self.current_frame - last_x_frames, -1):
-                    snapshot = game_state.game_reader.snapshots[i]
+                    snapshot = game_state.game_reader.primary_snapshots[i]
                     if (target_frame != snapshot.timer):
                         #print('missing {}'.format(target_frame))
                         self.p1_text.insert(END, ' ')

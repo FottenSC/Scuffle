@@ -43,12 +43,26 @@ class GUI_MoveViewer:
                 dir = f'./Data/Scripts/Custom'
                 empty_json = '[\n\n]'
                 os.mkdir(dir)
-                with open(f'{dir}/A5.json', 'w') as xA5:
-                    xA5.write(empty_json)
-                with open(f'{dir}/25.json', 'w') as x25:
-                    x25.write(empty_json)
+                os.mkdir(f'{dir}/A5/')
+                os.mkdir(f'{dir}/25/')
+
+                with open(f'{dir}/A5/01.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{dir}/A5/0d.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{dir}/25/03.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{dir}/25/0d.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{dir}/25/14.json', 'w') as file:
+                    file.write(empty_json)
         self.master = master
         self.verbose = verbose
+        self.backward_history = []
+        self.forward_history = []
+        self.backward_enabled = StringVar(value=DISABLED)
+        self.forward_enabled = StringVar(value=DISABLED)
+
         #self.master.geometry(str(1850) + 'x' + str(990))
         master.title("SCUFFLE Move Editor")
         master.iconbitmap('Data/icon.ico')
@@ -147,45 +161,58 @@ class GUI_MoveViewer:
         move_id_entry_container.grid(row=0, column=0)
 
         move_id_frame_label = Label(move_id_entry_container, text="Move Id", font=bold_label_font)
-        move_id_frame_label.pack()
+        move_id_frame_label.grid(row=0,column=0,columnspan=2)
+
+        
 
         self.move_id_textvar = StringVar()
         self.move_id_textvar.set('-')
         self.encoded_move_id_textvar = StringVar()
         self.encoded_move_id_textvar.set('-')
         self.move_id_label = Label(move_id_entry_container, textvariable=self.encoded_move_id_textvar, font = bold_label_font)
-        self.move_id_label.pack()
+        self.move_id_label.grid(row=1,column=0)
 
         move_id_label_container = Frame(move_id_entry_container)
-        move_id_label_container.pack()
+        move_id_label_container.grid(row=2,column=0)
 
         self.move_id_entry = Entry(move_id_label_container)
-        self.move_id_entry.bind('<Return>', lambda x: self.load_moveid(self.move_id_entry.get()))
+        self.move_id_entry.bind('<Return>', lambda x: self.load_moveid(self.move_id_entry.get(),clear_history=True))
         master.bind('<Control-m>', lambda x: self.move_id_entry.focus())
-
-        self.load_button = Button(move_id_entry_container, text="Load", command=lambda:self.load_moveid(self.move_id_entry.get()))
-        self.load_button.pack()
+        
+        move_id_load_button_container = Frame(move_id_entry_container)
+        move_id_load_button_container.grid(row=3, column=0)
+        self.load_button = Button(move_id_load_button_container, text="Load", command=lambda:self.load_moveid(self.move_id_entry.get(),clear_history=True))
+        self.prev_load_button = Button(move_id_load_button_container, text="<", width=1, state=DISABLED, command=lambda:self.load_moveid_from_history(mode=0))
+        self.next_load_button = Button(move_id_load_button_container, text=">", width=1, state=DISABLED, command=lambda:self.load_moveid_from_history(mode=1))
+        self.clear_history_button = Button(move_id_load_button_container, text="🗑️", width=2, state=DISABLED, command=lambda:self.clear_all_history())
+        self.prev_load_button.grid(row=0,column=0)
+        self.load_button.grid(row=0,column=1)
+        self.next_load_button.grid(row=0,column=2)
+        self.clear_history_button.grid(row=0,column=3)
         master.bind('<Control-l>', lambda x: self.load_moveid(self.move_id_textvar.get()))
+        master.bind('<Alt-[>', lambda x: self.load_moveid_from_history(x, 0))
+        master.bind('<Alt-]>', lambda x: self.load_moveid_from_history(x, 1))
+        master.bind('<Alt-x>', lambda x: self.clear_all_history())
 
         next_move_id_button = Button(move_id_label_container, text=">", width = 1, command=lambda: self.next_move_id_command())
         prev_move_id_button = Button(move_id_label_container, text="<", width = 1, command=lambda: self.prev_move_id_command())
         next_move_id_button.grid(row=0, column=2)
         self.move_id_entry.grid(row=0, column=1)
         prev_move_id_button.grid(row=0, column=0)
-        master.bind('<Control-[>', lambda x: self.prev_move_id_command() )
-        master.bind('<Control-]>', lambda x: self.next_move_id_command() )
+        master.bind('<Control-[>', lambda x: self.prev_move_id_command())
+        master.bind('<Control-]>', lambda x: self.next_move_id_command())
 
         s.configure('Save.TButton', font=font_config.get_property("Side Panel","save_changes_font", "Consolas 14 bold"))
         s.configure('Bold.TButton', font=bold_label_font)
         save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=(False,)).start())
-        save_move.pack()    
+        save_move.grid(row=4)   
         master.bind('<Control-s>', lambda x: Thread(target=self.save_move_bytes_command, args=(self.do_fix_goto.get(),)).start())
         
 
         update_pointers = Checkbutton(move_id_entry_container, variable=self.do_fix_goto, onvalue=True, offvalue=False,text="Update Goto pointers")
         save_move_reload = Checkbutton(move_id_entry_container, variable=self.reload_on_save_var, onvalue=True, offvalue=False, text="Reload after save   ") 
-        update_pointers.pack()
-        save_move_reload.pack()
+        update_pointers.grid(row=6)
+        save_move_reload.grid(row=7)
         master.bind('<Control-r>', lambda x: self.reload_on_save_var.set(not self.reload_on_save_var.get()))
         master.bind('<Control-p>', lambda x: self.do_fix_goto.set(not self.do_fix_goto.get()))
         
@@ -447,31 +474,70 @@ class GUI_MoveViewer:
         self.load_hitbox()
 
     def next_move_id_command(self):
-        self.load_moveid(str(int(self.move_id_textvar.get()) + 1))
+        self.load_moveid(str(int(self.move_id_textvar.get()) + 1), clear_history=True)
 
     def prev_move_id_command(self):
-        self.load_moveid(str(int(self.move_id_textvar.get()) - 1))
+        self.load_moveid(str(int(self.move_id_textvar.get()) - 1), clear_history=True)
 
     def set_character_id(self, id):
         try:
             self.movelist.character_id = id
             self.character_id_var.set(id)
-            if not os.path.exists(f'./Data/Scripts/{self.movelist.character_id}'):
+            if not os.path.exists(f'./Data/Scripts/{self.movelist.character_id}') and self.character_id_var.get() != '000':
                 character_dir = f'./Data/Scripts/{self.movelist.character_id}'
                 empty_json = '[\n\n]'
                 os.mkdir(character_dir)
-                with open(f'{character_dir}/A5.json', 'w') as xA5:
-                    xA5.write(empty_json)
-                with open(f'{character_dir}/25.json', 'w') as x25:
-                    x25.write(empty_json)
+                os.mkdir(f'{character_dir}/A5/')
+                os.mkdir(f'{character_dir}/25/')
+
+                with open(f'{character_dir}/A5/01.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{character_dir}/A5/0d.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{character_dir}/25/03.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{character_dir}/25/0d.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{character_dir}/25/14.json', 'w') as file:
+                    file.write(empty_json)
+
+                    
         except:
             print("ID isn't valid.")
             self.movelist.character_id = '000'
             self.character_id_var.set('000')
             return
+    
+    def clear_all_history(self):
+        self.backward_history.clear()
+        self.forward_history.clear()
+        self.prev_load_button['state'] = DISABLED
+        self.next_load_button['state'] = DISABLED
+        self.clear_history_button['state'] = DISABLED
+
+    def load_moveid_from_history(self, command = None, mode=0):
+        if mode == 0:
+            if len(self.backward_history) > 0:
+                self.forward_history.append(str(hex(MovelistParser.encode_move_id(int(self.move_id_textvar.get()),self.movelist))))
+                self.next_load_button['state'] = NORMAL
+                self.load_moveid(self.backward_history.pop(),forward=False)
+                if len(self.backward_history) == 0:
+                    self.prev_load_button['state'] = DISABLED
+                else:
+                    self.prev_load_button['state'] = NORMAL
+        if mode == 1:
+            if len(self.forward_history) > 0:
+                self.prev_load_button['state'] = NORMAL
+                self.backward_history.append(str(hex(MovelistParser.encode_move_id(int(self.move_id_textvar.get()),self.movelist))))
+                self.load_moveid(self.forward_history.pop())
+                if len(self.forward_history) == 0:
+                    self.next_load_button['state'] = DISABLED
+                else:
+                    self.next_load_button['state'] = NORMAL
+        
         
 
-    def load_moveid(self, move_id, is_encoded=False, manual=False):
+    def load_moveid(self, move_id, track_history = True, clear_history = False, forward = True, manual = False):
         try:
             if move_id[0:2] == "0x":
                 id = int(move_id[2:],16)
@@ -482,10 +548,22 @@ class GUI_MoveViewer:
             print('unrecognized move_id: {}'.format(move_id))
             return
 
-        if is_encoded:
-            id = MovelistParser.decode_move_id(id, self.movelist)
+        if clear_history:
+            self.forward_history.clear()
+            self.next_load_button['state'] = DISABLED
+            if self.move_id_textvar.get() != "-" and self.move_id_textvar.get() != str(id):
+                self.backward_history.append(str(hex(MovelistParser.encode_move_id(int(self.move_id_textvar.get()),self.movelist))))
 
         if id < len(self.movelist.all_moves) and id >= 0:
+            if self.move_id_textvar.get() != str(id) and self.move_id_textvar.get() != "-" and track_history and forward:
+                self.prev_load_button['state'] = NORMAL
+                if len(self.backward_history) > 0 or len(self.forward_history) > 0:
+                    self.clear_history_button['state'] = NORMAL
+                if len(self.backward_history) > 20:
+                    last = self.backward_history.pop()
+                    self.backward_history.clear()
+                    self.backward_history.append(last)
+
             self.move_id_textvar.set('{}'.format(id))
             self.encoded_move_id_textvar.set('{} ({})'.format(id,hex(MovelistParser.encode_move_id(id,self.movelist))))
             move = self.movelist.all_moves[id]
@@ -581,7 +659,7 @@ class GUI_MoveViewer:
     def load_movelist_dialog(self):
         #Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
 
-        filename = askopenfilename(initialdir = '{}/{}'.format(os.getcwd(), '/movelists'))  # show an "Open" dialog box and return the path to the selected file
+        filename = askopenfilename(initialdir = '{}/{}'.format(os.getcwd(), '/movelists'),filetypes=[('Header File', '*.khd *.sc6_movelist'),('All Files','*.*')])  # show an "Open" dialog box and return the path to the selected file
         self.load_movelist(filename)
 
     def save_movelist_dialog(self):

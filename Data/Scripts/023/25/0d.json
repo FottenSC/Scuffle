@@ -1,0 +1,23 @@
+[
+    {
+		"state": "0x3250",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "PERSONA CHANGE %",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"suffix": "%"
+				}
+			}
+		]
+	}
+]

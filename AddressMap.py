@@ -17,12 +17,24 @@ p2_input_address = 0x461D5D0
 p1_movelist_address = 0x45C96A0 #p1/p2 movelist address: xianghua movelist starting bytes: 4B 48 31 31 00 00 00 00 00 00 00 00 99 0B 2D 00 38 43 03 00 48 D2 03 00 90 D2 03 00 00 00 3B 02 = (alternate bytes for 0th move indes: 3B 02 22 00 5D 02 09 07 66 09 33 02 86 1A 40 00 67 00 00 00 00 00 00 00 00 00 C8 42 00 00 C8 42 FF FF 00 00 00 00 00 00)
 p2_movelist_address = 0x46606D0 #other starting bytes available in /movelists although they may have changed slightly if the patch touches the movelist
 
-p1_move_id_address = 0x45C8A52 #xianghua aab is 257/259/262 #there's a lot, pick the third one (or the one with immediate response time and that goes to '89' while transitioning from 8 way run to standing still)
-p2_move_id_address = 0x465FA82
+p1_primary_move_id_address = 0x45C8A52 #xianghua aab is 257/259/262 #there's a lot, pick the third one (or the one with immediate response time and that goes to '89' while transitioning from 8 way run to standing still)
+p2_primary_move_id_address = 0x465FA82
+
+p1_secondary_move_id_address = 0x475A4B2 #xianghua aab is 257/259/262 #there's a lot, pick the third one (or the one with immediate response time and that goes to '89' while transitioning from 8 way run to standing still)
+p2_secondary_move_id_address = 0x47F18A2 #xianghua aab is 257/259/262 #there's a lot, pick the third one (or the one with immediate response time and that goes to '89' while transitioning from 8 way run to standing still)
 
 p1_guard_damage_address = 0x457BFE8 #xianghua aab is 4/4/16
 p2_guard_damage_address = 0x457C1C8
 
+p1_hitbox_index_address = 0x475A4A8
+p2_hitbox_index_address = 0x47F1898
+
+p1_frame_address = 0x475A04C
+p2_frame_address = 0x475A04C
+
+p1_exit_frame_address = 0x470D34A
+
+p1_previous_move_id_address = 0x470E314
 
 
 MOVELIST_BYTES = 0x150000 #memory allocated for movelist,
@@ -75,8 +87,22 @@ p2_movelist_address = address_config.get_hex_property(section_global, 'p2_moveli
 address_config.add_comment("p1/p2 Move Id (2 bytes): Xianghua's a/a/b string has move ids 257/259/262.")
 address_config.add_comment("p1/p2 Move Id: There will be multiple matches, pick the third green address.")
 address_config.add_comment("p1/p2 Move Id: Alternately you are looking for a match that responds without delay and briefly shows '89' while transitioning from 8-way run to standing.")
-p1_move_id_address = address_config.get_hex_property(section_global, 'p1_move_id_address', p1_move_id_address)
-p2_move_id_address = address_config.get_hex_property(section_global, 'p2_move_id_address', p2_move_id_address)
+p1_primary_move_id_address = address_config.get_hex_property(section_global, 'p1_primary_move_id_address', p1_primary_move_id_address)
+p2_primary_move_id_address = address_config.get_hex_property(section_global, 'p2_primary_move_id_address', p2_primary_move_id_address)
+
+p1_hitbox_index_address = address_config.get_hex_property(section_global, 'p1_hitbox_index_address', p1_hitbox_index_address)
+p2_hitbox_index_address = address_config.get_hex_property(section_global, 'p2_hitbox_index_address', p2_hitbox_index_address)
+
+p1_frame_address = address_config.get_hex_property(section_global, 'p1_frame_address', p1_frame_address)
+p2_frame_address = address_config.get_hex_property(section_global, 'p2_frame_address', p2_frame_address)
+
+p1_exit_frame_address = address_config.get_hex_property(section_global, 'p1_exit_frame_address', p1_exit_frame_address)
+
+p1_previous_move_id_address = address_config.get_hex_property(section_global, 'p1_previous_move_id_address', p1_previous_move_id_address)
+
+
+p1_secondary_move_id_address = address_config.get_hex_property(section_global, 'p1_secondary_move_id_address', p1_secondary_move_id_address)
+p2_secondary_move_id_address = address_config.get_hex_property(section_global, 'p2_secondary_move_id_address', p2_secondary_move_id_address)
 
 address_config.add_comment("p1/p2 Guard Damage (2 bytes): Xianghua's a/a/b string has gdam 4/4/16. A+B has guard damage 38.")
 p1_guard_damage_address = address_config.get_hex_property(section_global, 'p1_guard_damage_address', p1_guard_damage_address)

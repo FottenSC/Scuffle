@@ -1,0 +1,38 @@
+```NEW KEYBOARD SHORTCUTS
+Ctrl + L - reload current move
+Ctrl + Shift + L - load movelist from file
+
+Ctrl + S - save changes to memory
+Ctrl + Shift + S - save changes to file
+
+Ctrl + I - inject movelist
+
+Ctrl + R - toggle auto-reload
+Ctrl + P - toggle goto pointer updating when saving
+
+Ctrl + 1 - switch to move tab
+Ctrl + 2 - switch to hitbox tab
+Ctrl + 3 - switch to scripting tab
+
+Ctrl + M - focus move id entry box
+
+Ctrl + E - focus Encoded entry box
+Ctrl + D - focus Decoded entry box
+
+Ctrl + Shift + E - focus HEX entry box
+Ctrl + Shift + D - focus DEC entry box
+
+Ctrl + [ - decrease move id
+Ctrl + ] - increase move id
+Ctrl + Shift + [ - decrease hitbox id
+Ctrl + Shift + ] - increase hitbox id
+
+Alt + [ - move backward in manually loaded move id history list
+Alt + ] - move forward in manually loaded move id history list
+Alt + X - Clear manually loaded move id history list
+
+
+Ctrl + , - copy move to clipboard
+Ctrl + . - copy hitbox to clipboard
+Ctrl + / - copy scripting to clipboard
+```

@@ -35,8 +35,8 @@ if __name__ == "__main__":
         (p1_movelist_address, 'p1_movelist_address', 8, []),
         (p2_movelist_address, 'p2_movelist_address', 8, []),
 
-        (p1_move_id_address, 'p1_move_id_address', 8, []),
-        (p2_move_id_address, 'p2_move_id_address', 8, []),
+        (p1_primary_move_id_address, 'p1_move_id_address', 8, []),
+        (p2_primary_move_id_address, 'p2_move_id_address', 8, []),
 
         (p1_guard_damage_address, 'p1_guard_damage_address', 2, []),
         (p2_guard_damage_address, 'p2_guard_damage_address', 2, []),

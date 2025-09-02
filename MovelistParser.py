@@ -5,6 +5,7 @@ see HowTheMovelistBytesWork.md for a full description of how the movelist is par
 
 
 import struct
+import AddressMap
 import MovelistEnums as mve
 from MovelistEnums import *
 import GameplayEnums
@@ -97,12 +98,21 @@ def string_to_class(string):
         "ViewTarget": ViewTarget,
         "OpponentState": OpponentState,
         "CharacterValue": CharacterValue,
+        "CharacterGender": CharacterGender,
         "CharacterID": CharacterID,
         "format_value": format_value,
         "name_from_enum": name_from_enum
     }
-    with open('./Data/Types/custom_types.json', 'r') as io_custom_types:
-                    custom_types = json.load(io_custom_types)
+    custom_type_dir = './Data/Types/'
+    custom_types = None
+    for _type in os.listdir(custom_type_dir):
+        type_path = os.path.join(custom_type_dir, _type)
+        if os.path.isfile(type_path) and os.path.splitext(type_path)[1] == '.json':
+            with open(type_path, 'r') as io_custom_type:
+                if custom_types == None:
+                    custom_types = json.load(io_custom_type)
+                else:
+                    custom_types += json.load(io_custom_type)
     for t in custom_types:
         if t["name"] == string:
             return string
@@ -183,11 +193,20 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
     value = bs2i(bytes,1,big_endian=True) if negative else b2i(bytes,1,big_endian=True)
     type = int(bytes[0])
     result = 0
+
+    custom_type_dir = './Data/Types/'
+    custom_types = None
+    for _type in os.listdir(custom_type_dir):
+        type_path = os.path.join(custom_type_dir, _type)
+        if os.path.isfile(type_path) and os.path.splitext(type_path)[1] == '.json':
+            with open(type_path, 'r') as io_custom_type:
+                if custom_types == None:
+                    custom_types = json.load(io_custom_type)
+                else:
+                    custom_types += json.load(io_custom_type)
     if type == 0x89: #constant
         if cls != None:
             found = False
-            with open('./Data/Types/custom_types.json', 'r') as io_custom_types:
-                    custom_types = json.load(io_custom_types)
             for t in custom_types:
                 if t["name"] == cls:
                     for k in t["values"]:
@@ -228,8 +247,6 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         
         elif cls != None:
             found = False
-            with open('./Data/Types/custom_types.json', 'r') as io_custom_types:
-                    custom_types = json.load(io_custom_types)
             for t in custom_types:
                 if t["name"] == cls:
                     for k in t["values"]:
@@ -411,31 +428,33 @@ class Move:
 
     def get_frame_data(self, delta = 0):
         data = []
+        
 
-        cf = self.cancel.get_cancelable_frames()
+        
+        
+        # for attack in self.attacks:
+        #     if isinstance(attack, Throw):
+        #         break
+        #     else:
 
-        tf = self.cancel.get_technical_frames()
+                
+        for i, a in enumerate(self.attacks):
+            cf = self.cancel.get_cancelable_frames()
+            tf = self.cancel.get_technical_frames()
+            tf.append(f'[HITBOX {i + 1}]')
 
-        for attack in self.attacks:
-            if isinstance(attack, Throw):
-                break
-            else:
-                if attack.physics_grounded[0] > 0:
-                    tf.append('GRND')
-                    break
-        for a in self.attacks:
             t = self.total_frames - cf
             com = self.movelist.get_command_by_move_id(self.move_id)
             
-            if isinstance(attack, Throw):
+            if isinstance(a, Throw):
                 startup = self.movelist.last_attack.startup
                 
-                recovery = t - startup
+                recovery = 0
 
 
-                block_stun = self.movelist.last_attack.block_stun
-                hit_stun = self.movelist.last_attack.hit_stun
-                counter_stun = self.movelist.last_attack.counter_stun
+                block_stun = 0 #self.movelist.last_attack.block_stun
+                hit_stun = 0 #self.movelist.last_attack.hit_stun
+                counter_stun = 0 #self.movelist.last_attack.counter_stun
 
                 cl = self.movelist.last_attack.counter_launch
                 #c = recovery - counter_stun
@@ -447,12 +466,14 @@ class Move:
                     pass
 
                 active_frames = self.movelist.last_attack.active - startup + 1
-                data.append(FrameData(self.move_id, com, t, startup + 1, block_stun, self.movelist.last_attack.hit_launch, self.movelist.last_attack.hit_stun, cl, counter_stun, a.damage, attack_type, active_frames, recovery, delta, tf))
+                data.append(FrameData(self.move_id, com, -1, startup + 1, 0, self.movelist.last_attack.hit_launch, 0, cl, 0, a.damage, attack_type, -1, recovery, delta, tf))
                 
 
                     
    
             else:
+                if a.physics_grounded[0] > 0:
+                    tf.append('GRND')
                 startup = a.startup
                 recovery = t - startup
 
@@ -474,10 +495,11 @@ class Move:
                 self.movelist.last_attack = a
                 #if not attack_type.startswith('throw'):
                 data.append(FrameData(self.move_id, com, t, startup + 1, block_stun, a.hit_launch, a.hit_stun, cl, counter_stun, a.damage, attack_type, active_frames, recovery, delta, tf))
+                
             
 
             
-            return data
+        return data
 
     def get_gui_guide(self):
         guide = [
@@ -504,12 +526,12 @@ class Move:
             (0x36, 0x38, b2i, "???"),
             (0x38, 0x3C, lambda x, y: '{:04x}'.format(b4i(x, y)), "address of script information"),
 
-            (0x3C, 0x3E, b2i, "hitbox 1 index"),
-            (0x3E, 0x40, b2i, "hitbox 2 index"),
-            (0x40, 0x42, b2i, "hitbox 3 index"),
-            (0x42, 0x44, b2i, "hitbox 4 index"),
-            (0x44, 0x46, b2i, "hitbox 5 index"),
-            (0x46, 0x48, b2i, "hitbox 6 index"),
+            (0x3C, 0x3E, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 1 index"),
+            (0x3E, 0x40, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 2 index"),
+            (0x40, 0x42, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 3 index"),
+            (0x42, 0x44, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 4 index"),
+            (0x44, 0x46, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 5 index"),
+            (0x46, 0x48, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 6 index"),
         ]
         return self.bytes, guide
 
@@ -827,7 +849,12 @@ class Cancel:
 
     def get_cancelable_frames(self): #the number of frames 'early' the move can be canceled
         try:
-            right_split = self.bytes.split(b'\x8b\x30\x20')[1] #or self.bytes.split(b'\x8b\x30\x21')[1]
+            byte_sets = [b'\x8b\x30\x20', b'\x8b\x30\x21']
+            for set in byte_sets:
+                right_split = self.bytes.split(set) #or self.bytes.split(b'\x8b\x30\x21')[1]
+                if len(right_split) > 1:
+                    right_split = right_split[1]
+                    break
             cancelable_frames = int(right_split[5]) #usually this is something like 89 00 c9 89 00 0a where we want the 0a
         except:
             #print('Unable to find cancelable frames for move {}'.format(self.move_id))
@@ -1076,8 +1103,15 @@ class Cancel:
                 first_arg = int(args_bytes[0])
                 second_arg = int(args_bytes[1])
                 index += 3
-                custom_script_path = f'./Data/Scripts/Custom'
-                character_script_path = f'./Data/Scripts/{self.movelist.character_id}'
+                custom_base_path = f'./Data/Scripts/Custom'
+                custom_A5_script_path = f'./Data/Scripts/Custom/A5'
+                custom_25_script_path = f'./Data/Scripts/Custom/25'
+                common_base_path = './Data/Scripts/Common'
+                common_A5_script_path = f'{common_base_path}/A5'
+                common_25_script_path = f'{common_base_path}/25'
+                character_base_path = f'./Data/Scripts/{self.movelist.character_id}'
+                character_A5_script_path = f'./Data/Scripts/{self.movelist.character_id}/A5'
+                character_25_script_path = f'./Data/Scripts/{self.movelist.character_id}/25'
                 
 
                 if inst == CC.START:
@@ -1095,21 +1129,41 @@ class Cancel:
                         arg_bytes = self.bytes[state_index + 3: index - 3]
                         args_list = [arg_bytes[i:i + 3] for i in range(0, len(arg_bytes), 3)]
 
-                        with open('./Data/Scripts/Common/A5.json','r') as xA5_script:
-                            xA5_data = json.load(xA5_script)
+                        xA5_data = None
+                        for file in os.listdir(common_A5_script_path):
+                            file_path = os.path.join(common_A5_script_path,file)
+                            if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                                with open(file_path,'r') as xA5_script:
+                                    if xA5_data == None:
+                                        xA5_data = json.load(xA5_script)
+                                    else:
+                                        xA5_data += json.load(xA5_script)
 
-                        xA5_char_data = json.loads('[\n\n]')
+
+                        xA5_char_data = None
                         custom = False
-                        if os.path.exists(f'{character_script_path}/A5.json') and self.movelist.character_id != '000':
+                        if os.path.exists(character_A5_script_path) and self.movelist.character_id != '000':
                             custom = True
-                            with open(f'{character_script_path}/A5.json') as xA5_char_script:
-                                xA5_char_data = json.load(xA5_char_script)
+                            for file in os.listdir(character_A5_script_path):
+                                file_path = os.path.join(character_A5_script_path,file)
+                                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                                    with open(file_path,'r') as xA5_char_script:
+                                        if xA5_char_data == None:
+                                            xA5_char_data = json.load(xA5_char_script)
+                                        else:
+                                            xA5_char_data += json.load(xA5_char_script)
                         
                         
-                       
-                        if os.path.exists(f'{custom_script_path}/A5.json'):
-                            with open(f'{custom_script_path}/A5.json') as xA5_custom_script:
-                                xA5_custom_data = json.load(xA5_custom_script)
+                        xA5_custom_data = None
+                        if os.path.exists(custom_A5_script_path):
+                            for file in os.listdir(custom_A5_script_path):
+                                file_path = os.path.join(custom_A5_script_path,file)
+                                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                                    with open(file_path,'r') as xA5_custom_script:
+                                        if xA5_custom_data == None:
+                                            xA5_custom_data = json.load(xA5_custom_script)
+                                        else:
+                                            xA5_custom_data += json.load(xA5_custom_script)
 
                             
                     except:
@@ -1121,10 +1175,10 @@ class Cancel:
                             try:
                                 found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "01", second_arg, args_list, custom)
                                 if found:
-                                    if len(state_info["args"]) > 0:
+                                    if len(argp) > 0:
                                         label = f'{label_prefix} {state_info["name"]} {"".join(argp)}'
                                     else:
-                                        label = f'{label_prefix} {state_info["name"]}'
+                                        label = f'{label_prefix} {state_info["name"]} {state_info["no_arg_text"]}'
 
                                     last_bool = state_info["last"]
                             
@@ -1135,10 +1189,10 @@ class Cancel:
                         try:
                             found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "0d", second_arg, args_list, custom)
                             if found:
-                                if len(state_info["args"]) > 0:
+                                if len(argp) > 0:
                                     label = f'{label_prefix} {state_info["name"]} {"".join(argp)} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
                                 else:
-                                    label = f'{label_prefix} {state_info["name"]} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
+                                    label = f'{label_prefix} {state_info["name"]} {state_info["no_arg_text"]} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
 
                                 last_bool = state_info["last"]
                             else:
@@ -1189,19 +1243,41 @@ class Cancel:
                             is_soul_charge = True
                             state_index = state_index + 3
                             state = b2i(self.bytes, state_index + 1, big_endian=True)
-                        with open('./Data/Scripts/Common/25.json','r') as x25_script:
-                            x25_data = json.load(x25_script)
+                        x25_data = None
+                        for file in os.listdir(common_25_script_path):
+                            file_path = os.path.join(common_25_script_path,file)
+                            if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                                with open(file_path,'r') as x25_script:
+                                    if x25_data == None:
+                                        x25_data = json.load(x25_script)
+                                    else:
+                                        x25_data += json.load(x25_script)
 
-                        x25_char_data = json.loads('[\n\n]')
+
+                        x25_char_data = None
                         custom = False
-                        if os.path.exists(f'{character_script_path}/25.json') and self.movelist.character_id != '000':
+                        if os.path.exists(character_25_script_path) and self.movelist.character_id != '000':
                             custom = True
-                            with open(f'{character_script_path}/25.json') as x25_char_script:
-                                x25_char_data = json.load(x25_char_script)
-
-                        if os.path.exists(f'{custom_script_path}/25.json'):
-                            with open(f'{custom_script_path}/25.json') as x25_custom_script:
-                                x25_custom_data = json.load(x25_custom_script)
+                            for file in os.listdir(character_25_script_path):
+                                file_path = os.path.join(character_25_script_path,file)
+                                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                                    with open(file_path,'r') as x25_char_script:
+                                        if x25_char_data == None:
+                                            x25_char_data = json.load(x25_char_script)
+                                        else:
+                                            x25_char_data += json.load(x25_char_script)
+                        
+                        
+                        x25_custom_data = None
+                        if os.path.exists(custom_25_script_path):
+                            for file in os.listdir(custom_25_script_path):
+                                file_path = os.path.join(custom_25_script_path,file)
+                                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                                    with open(file_path,'r') as x25_custom_script:
+                                        if x25_custom_data == None:
+                                            x25_custom_data = json.load(x25_custom_script)
+                                        else:
+                                            x25_custom_data += json.load(x25_custom_script)
 
                         alias = decode_move_id(state, self.movelist)
 
@@ -1232,10 +1308,10 @@ class Cancel:
                             label = ''
                             found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "03", second_arg, args_list, custom)
                             if found:
-                                if len(state_info["args"]) > 0:
+                                if len(argp) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
-                                    label = f'{state_info["name"]}'
+                                    label = f'{state_info["name"]} {state_info["no_arg_text"]}'
 
                                 last_bool = state_info["last"]
 
@@ -1274,10 +1350,10 @@ class Cancel:
                             label = ''
                             found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "0d", second_arg, args_list, custom)
                             if found:
-                                if len(state_info["args"]) > 0:
+                                if len(argp) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
-                                    label = f'{state_info["name"]}'
+                                    label = f'{state_info["name"]} {state_info["no_arg_text"]}'
 
                                 last_bool = state_info["last"]
                             
@@ -1291,10 +1367,10 @@ class Cancel:
                             label = ''
                             found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "14", second_arg, args_list, custom)
                             if found:
-                                if len(state_info["args"]) > 0:
+                                if len(argp) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
-                                    label = f'{state_info["name"]}'
+                                    label = f'{state_info["name"]} {state_info["no_arg_text"]}'
 
                                 last_bool = state_info["last"]
 
@@ -1557,13 +1633,13 @@ class Link:
             if self.move_id < len(movelist.all_moves):
                 end = movelist.block_Q_length
                 if verbose:
-                    end = movelist.block_T_length
-                if self.move_id > 0x0100 and self.move_id < end:
+                    end = decode_move_id(0x3300, movelist)
+                if (self.move_id > 0x0100 and self.move_id < end) or (self.move_id >= decode_move_id(0x3000, movelist) and self.move_id <= decode_move_id(0x3000 + movelist.block_T_length, movelist)):
                     return True
-                if self.encoded_move_id >= 0x3200 and self.encoded_move_id < 0x3216:
-
-                    if movelist.all_moves[self.move_id].cancel.has_at_least_one_button_press():
-                        return True
+                if self.encoded_move_id >= 0x3200 and self.encoded_move_id < 0x3300: #0x3216:
+                    return True
+                    # if movelist.all_moves[self.move_id].cancel.has_at_least_one_button_press():
+                    #     return True
         return False
 
 

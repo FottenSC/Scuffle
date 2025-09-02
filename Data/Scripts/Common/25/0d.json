@@ -1,0 +1,840 @@
+[
+	{
+		"state": "0x00f9",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "RE ATTACK AURA",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": "0x00ff",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "STOP TIME",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": [
+			"0x3020",
+			"0x3021"
+		],
+		"type": "0d",
+		"multiple_state": true,
+		"name": "RETURN STATE",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "state",
+				"cls": "ReturnState",
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "cancel_frames",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "blending_frames",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			}
+		]
+	},
+	{
+		"state": "0x305a",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "LETHAL HIT METER GAIN",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "amount",
+				"cls": "MeterAmount",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"suffix": "%",
+					"replace_char": ""
+				}
+			}
+		]
+	},
+	{
+		"state": "0x305c",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "TRACKING",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": "0x305d",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "SPECIAL STATE",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "state",
+				"cls": "SpecialState",
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "start",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "end",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			}
+		]
+	},
+	{
+		"state": "0x3064",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "GUARD IMPACT CONDITION",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "GI_type",
+				"cls": "GI_Type",
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "start",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "end",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 3,
+				"prefix": "",
+				"name": "attack_level",
+				"cls": "AttackLevel",
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 4,
+				"prefix": "",
+				"name": "horizontal",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 5,
+				"prefix": "",
+				"name": "vertical",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 6,
+				"prefix": "",
+				"name": "kick",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 7,
+				"prefix": "",
+				"name": "??",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 8,
+				"prefix": "",
+				"name": "RI_effect",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			}
+		]
+	},
+	{
+		"state": "0x3084",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "SCALING (Throw)",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "0",
+				"cls": "SpecialState",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "amount",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"suffix": "%"
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "2",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			}
+		]
+	},
+	{
+		"state": "0x3084",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "SCALING (Throw)",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "0",
+				"cls": "SpecialState",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "amount",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"suffix": "%"
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "2",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			}
+		]
+	},
+	{
+		"state": "0x3090",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "USE METER (CE)",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": "0x30a8",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "ATTACK STREAK",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "part",
+				"cls": "TracePart",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "play_voice",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "sound_effect",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 3,
+				"prefix": "",
+				"name": "start",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"auto": true,
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 4,
+				"prefix": "",
+				"name": "end",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"auto": true,
+					"prefix": "frame "
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30ad",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "EARTHQUAKE",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "start",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "bone",
+				"cls": "EffectPart",
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30ae",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "JF ATTACK FLASH (WITH BODY GLOW)",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": "0x30af",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "JF ATTACK FLASH",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": "0x30b0",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "GROUND HIT EFFECT",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "weapon_id",
+				"cls": "EffectPart",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "1",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "2",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 3,
+				"prefix": "",
+				"name": "ground_break",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30d3",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "SWITCH MOVE (SOUL CHARGE)",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "MOVE",
+				"name": "id",
+				"cls": "EffectPart",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"decode": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30d4",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "SOUL CHARGE ATTACK",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "drain_amount",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "show_flare",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30d5",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "ENABLE SOUL CHARGE",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": "0x30d6",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "SWITCH ON STATE WHILE SOUL CHARGED",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "HIT_move_id",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"decode": true
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "BLOCK_move_id",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"decode": true
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "entry_frame",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 3,
+				"prefix": "",
+				"name": "switch",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "on "
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30f2",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "CHARACTER FLICKER",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "start",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "flicker_start",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "flicker_end",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"index": 3,
+				"prefix": "",
+				"name": "end",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"prefix": "frame "
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30ff",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "ATTACK STATE",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "crouching",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "rising",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 2,
+				"prefix": "",
+				"name": "multi_press",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"index": 3,
+				"prefix": "",
+				"name": "8wayrun",
+				"cls": "BoolFlag",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": ""
+				}
+			}
+		]
+	},
+	{
+		"state": "0x3111",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "STOP TIMER",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": "0x3124",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "HURT VOICE",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	},
+	{
+		"state": "0x3256",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "SOUL CHARGE DRAIN",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "amount",
+				"cls": "MeterAmount",
+				"type": "format_value",
+				"range": false,
+				"data": {
+					"replace_char": "",
+					"suffix": "%"
+				}
+			}
+		]
+	},
+	{
+		"state": "0x325a",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "CHARACTER TRAIT",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+			{
+				"index": 0,
+				"prefix": "",
+				"name": "start",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			},
+			{
+				"index": 1,
+				"prefix": "",
+				"name": "end",
+				"cls": null,
+				"type": "format_value",
+				"range": false,
+				"data": {
+
+				}
+			}
+		]
+	},
+	{
+		"state": "0x3300",
+		"type": "0d",
+		"multiple_state": false,
+		"name": "BRAVE EDGE ATTACK (VODKAVERSE)",
+		"last": "",
+		"no_arg_text": "",
+		"args": [
+
+		]
+	}
+]

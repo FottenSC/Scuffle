@@ -3,8 +3,11 @@ __pycache__/
 *.py[oc]
 build/
 dist/
+dist/SCUFFLE/
+Data/Scripts/Custom/
 wheels/
 *.egg-info
+.vscode/
 
 # Virtual environments
 .venv

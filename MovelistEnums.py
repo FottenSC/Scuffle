@@ -180,6 +180,7 @@ class EffectPart(Enum):
 
 class EffectTarget(Enum):
     Player = 0x01
+    Weapon = 0x02
     Opponent = 0x03
     Player__On_Ground = 0x05
     Opponent__On_Ground = 0x06
@@ -687,6 +688,10 @@ class CharacterValue(Enum):
     Ring_Out_Voiceline = 0x09
     Soul_Charge = 0x0a
     Guard_Break = 0x0d
+
+class CharacterGender(Enum):
+    Male = 0x00
+    Female = 0x01
 
 class CharacterID(Enum):
     Mitsurugi = 0x01
