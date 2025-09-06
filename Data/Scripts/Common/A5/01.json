@@ -54,6 +54,7 @@
 			},
 			{
 				"index": 1,
+				"name": "",
 				"data": {
 					"prefix": "for ",
 					"suffix": " frames"

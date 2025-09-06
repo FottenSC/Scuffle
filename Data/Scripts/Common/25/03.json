@@ -1,7 +1,7 @@
 [
 	{
 		"state": "0x0002",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>USE TRANSITION ANIMATION<b>:",
 		"args": [
 			{
@@ -17,7 +17,7 @@
 	},
 	{
 		"state": "0x0004",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>APPLY MOVEMENT<b>:",
 		"args": [
 			{
@@ -30,7 +30,7 @@
 	},
 	{
 		"state": "0x000e",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>ANIMATION BUFFER<b>:",
 		"args": [
 			{
@@ -43,7 +43,7 @@
 	},
 	{
 		"state": "0x0015",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>ANIMATION SPEED OVERRIDE<b>:",
 		"args": [
 			{
@@ -57,7 +57,7 @@
 	},
 	{
 		"state": "0x0018",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>MOVE SPEED OVERRIDE<b>:",
 		"args": [
 			{
@@ -71,7 +71,7 @@
 	},
 	{
 		"state": "0x001a",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>THROW<b>:",
 		"args": [
 			{
@@ -87,7 +87,7 @@
 	},
 	{
 		"state": "0x0022",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET ELEVATION<b>:",
 		"args": [
 			{
@@ -97,7 +97,7 @@
 	},
 	{
 		"state": "0x0025",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>THROW DAMAGE<b>:",
 		"no_arg_text": "[amount:remaining damage]",
 		"args": [
@@ -111,7 +111,7 @@
 	},
 	{
 		"state": "0x0028",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET HAND POSE<b>:",
 		"args": [
 			{
@@ -128,7 +128,7 @@
 	},
 	{
 		"state": "0x002f",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SELECT CAMERA<b>:",
 		"args": [
 			{
@@ -141,12 +141,12 @@
 	},
 	{
 		"state": "0x0033",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>CANCEL SWITCH<b>:"
 	},
 	{
 		"state": "0x004d",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>CAMERA SHAKE<b>:",
 		"args": [
 			{
@@ -156,7 +156,7 @@
 	},
 	{
 		"state": "0x03e8",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>ADD ATTACK STREAK<b>:",
 		"args": [
 			{
@@ -183,7 +183,7 @@
 	},
 	{
 		"state": "0x03ec",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>REMOVE ATTACK STREAK<b>:",
 		"no_arg_text": "Remove all attack streaks",
 		"args": [
@@ -198,7 +198,7 @@
 	},
 	{
 		"state": "0x03eb",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET FACIAL EXPRESSION<b>:",
 		"args": [
 			{
@@ -209,7 +209,7 @@
 	},
 	{
 		"state": "0x03f9",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET HIT SPARK LOCATION<b>:",
 		"args": [
 			{
@@ -222,7 +222,7 @@
 	},
 	{
 		"state": "0x07d0",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>PLAY SOUND<b>:",
 		"args": [
 			{
@@ -232,7 +232,7 @@
 	},
 	{
 		"state": "0x07d1",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>PLAY VOICE LINE<b>:",
 		"args": [
 			{
@@ -246,7 +246,7 @@
 	},
 	{
 		"state": "0x07df",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>PLAY RANDOM VOICE LINE<b>:",
 		"args": [
 			{
@@ -257,7 +257,7 @@
 	},
 	{
 		"state": "0x0bbb",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET CHARACTER VISIBILITY<b>:",
 		"args": [
 			{
@@ -275,7 +275,7 @@
 	},
 	{
 		"state": "0x13a1",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET CHARACTER VALUE<b>:",
 		"args": [
 			{
@@ -289,7 +289,7 @@
 	},
 	{
 		"state": "0x13a6",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET WEAPON PART VISIBILITY<b>:",
 		"args": [
 			{
@@ -306,7 +306,7 @@
 	},
 	{
 		"state": "0x13a8",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET GAME SPEED (LESS THAN OR EQUAL TO 100%)<b>:",
 		"args": [
 			{
@@ -326,7 +326,7 @@
 	},
 	{
 		"state": "0x13c0",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>HIT PROPERTIES<b>:",
 		"args": [
 			{
@@ -342,7 +342,7 @@
 	},
 	{
 		"state": "0x13d0",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET LETHAL HIT SITUATION<b>:",
 		"args": [
 			{
@@ -353,7 +353,7 @@
 	},
 	{
 		"state": "0x13d1",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET LETHAL HIT CONDITION<b>:",
 		"args": [
 			{
@@ -364,7 +364,7 @@
 	},
 	{
 		"state": "0x13d8",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>APPLY DAMAGE SCALING<b>:",
 		"args": [
 			{
@@ -385,7 +385,7 @@
 	},
 	{
 		"state": "0x13d9",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>HIT EFFECT PHYSICS OVERRIDE<b>:",
 		"args": [
 			{
@@ -422,7 +422,7 @@
 	},
 	{
 		"state": "0x13e0",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>CHANGE CHARACTER VALUE BY AMOUNT<b>:",
 		"args": [
 			{
@@ -435,7 +435,7 @@
 	},
 	{
 		"state": "0x13e1",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET LETHAL HIT STATE<b>:",
 		"args": [
 			{
@@ -449,7 +449,7 @@
 	},
 	{
 		"state": "0x13e2",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>SET CHARACTER VALUE<b>:",
 		"args": [
 			{
@@ -465,7 +465,7 @@
 	},
 	{
 		"state": "0x2afb",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>APPLY SCREEN FILTER<b>:",
 		"args": [
 			{
@@ -517,7 +517,7 @@
 			"0x2332",
 			"0x2333"
 		],
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>MOVE CAMERA<b>:",
 		"args": [
 			{
@@ -564,7 +564,7 @@
 	},
 	{
 		"state": "0x2718",
-		"type": "03",
+		"script_type": "03",
 		"name": "<b>ADD VFX<b>:",
 		"args": [
 			{
