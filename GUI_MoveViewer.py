@@ -56,6 +56,11 @@ class GUI_MoveViewer:
                     file.write(empty_json)
                 with open(f'{dir}/25/14.json', 'w') as file:
                     file.write(empty_json)
+        
+        
+        
+
+
         self.master = master
         self.verbose = verbose
         self.backward_history = []
@@ -375,10 +380,11 @@ class GUI_MoveViewer:
             print(e)
 
     def set_movelist(self, movelist):
-        self.movelist = movelist
+        self.movelist:MovelistParser.Movelist = movelist
         self.movelist.verbose = self.verbose
         try:
             self.movelist_name_var.set(self.movelist.name)
+            self.movelist.load_json()
         except:
             pass
 
@@ -501,6 +507,9 @@ class GUI_MoveViewer:
                 with open(f'{character_dir}/25/14.json', 'w') as file:
                     file.write(empty_json)
 
+            if self.movelist != None:
+                self.movelist.load_json()
+
                     
         except:
             print("ID isn't valid.")
@@ -566,7 +575,7 @@ class GUI_MoveViewer:
 
             self.move_id_textvar.set('{}'.format(id))
             self.encoded_move_id_textvar.set('{} ({})'.format(id,hex(MovelistParser.encode_move_id(id,self.movelist))))
-            move = self.movelist.all_moves[id]
+            move:MovelistParser.Move = self.movelist.all_moves[id]
 
             bytes, guide = move.get_gui_guide()
 

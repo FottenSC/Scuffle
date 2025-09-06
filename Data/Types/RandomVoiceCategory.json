@@ -1,0 +1,66 @@
+[
+    {
+        "name": "RandomVoiceCategory",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "Light Hurt"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Medium Hurt"
+            },
+            {
+                "input_value": 4,
+                "output_value": "Light Attack"
+            },
+            {
+                "input_value": 5,
+                "output_value": "Medium Attack"
+            },
+            {
+                "input_value": 6,
+                "output_value": "Heavy Attack"
+            },
+            {
+                "input_value": 7,
+                "output_value": "Light Ukemi"
+            },
+
+            {
+                "input_value": 8,
+                "output_value": "Heavy Ukemi"
+            },
+            {
+                "input_value": 9,
+                "output_value": "Whiff GI 1"
+            },
+            {
+                "input_value": 10,
+                "output_value": "Whiff GI 2"
+            },
+            {
+                "input_value": 11,
+                "output_value": "Special Hurt"
+            },
+            {
+                "input_value": 12,
+                "output_value": "Grunts 1"
+            },
+            {
+                "input_value": 13,
+                "output_value": "Grunts 2"
+            },
+            {
+                "input_value": 14,
+                "output_value": "Intro"
+            },
+            {
+                "input_value": 15,
+                "output_value": "Outro"
+            }
+            
+        ]
+
+    }
+]

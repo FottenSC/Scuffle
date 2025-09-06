@@ -1,0 +1,20 @@
+[
+    {
+        "name": "AssetType",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "Common"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Character"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Stage"
+            }
+        ]
+
+    }
+]

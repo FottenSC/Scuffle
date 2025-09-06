@@ -182,6 +182,8 @@ class GUI_Main(Tk):
                 self.move_viewer = None
             self.move_viewer = GUI_MoveViewer.GUI_MoveViewer(Toplevel(self),verbose=self.verbose_logging.get())
             self.move_viewer.set_movelist(self.launcher.game_reader.p1_movelist)
+            self.move_viewer.set_character_id(self.launcher.game_reader.p1_movelist.character_id)
+            self.launcher.game_reader.p1_movelist.load_json()
         except Exception as e:
             print(e)
 
@@ -278,6 +280,7 @@ class GUI_Main(Tk):
                         
                     self.launcher.game_reader.do_write_movelist = True
                     self.launcher.game_reader.p1_movelist = self.move_viewer.movelist
+                    self.move_viewer.set_character_id(self.launcher.game_reader.p1_movelist.character_id)
                     self.move_viewer.do_inject_movelist = False
                     
             except:
@@ -308,8 +311,9 @@ class GUI_Main(Tk):
                     self.launcher.game_reader.p1_movelist = self.launcher.game_reader.p1_movelist
                     if self.launcher.game_reader.p1_movelist != None:
                         try:
-                            
+                            character_id = self.move_viewer.character_id_var.get()
                             self.move_viewer.set_movelist(self.launcher.game_reader.p1_movelist)
+                            self.move_viewer.set_character_id(character_id)
                             self.launcher.game_reader.MarkMovelistAsOld()
                             if self.move_viewer.tool_encode_string != "":
                                 self.move_viewer.decode()

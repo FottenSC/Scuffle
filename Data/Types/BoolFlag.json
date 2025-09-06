@@ -1,0 +1,16 @@
+[
+    {
+        "name": "BoolFlag",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "False"
+            },
+            {
+                "input_value": 1,
+                "output_value": "True"
+            }
+        ]
+
+    }
+]

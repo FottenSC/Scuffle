@@ -1,0 +1,102 @@
+[
+    {
+        "name": "AirStunType",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "None ~ Allow Air Control"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Air ~ Vertical Spiral"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Air ~ Vertical Spiral Bounce"
+            },
+            {
+                "input_value": 4,
+                "output_value": "Air ~ Vertical Roll"
+            },
+            {
+                "input_value": 5,
+                "output_value": "Air ~ Horizontal Spiral"
+            },
+            {
+                "input_value": 6,
+                "output_value": "Bind ~ Bounce"
+            },
+
+            {
+                "input_value": 7,
+                "output_value": "Bind ~ Stun"
+            },
+            {
+                "input_value": 8,
+                "output_value": "Bind ~ Knockback"
+            },
+            {
+                "input_value": 9,
+                "output_value": "Air Bind ~ Vertical Spiral ~ Disable Ukemi"
+            },
+            {
+                "input_value": 10,
+                "output_value": "Bind ~ Grounded"
+            },
+            {
+                "input_value": 11,
+                "output_value": "Bind ~ Long Grounded Recovery"
+            },
+            {
+                "input_value": 12,
+                "output_value": "Bind ~ Vertical Roll"
+            },
+            {
+                "input_value": 13,
+                "output_value": "Air ~ Relaunch"
+            },
+            {
+                "input_value": 14,
+                "output_value": "Unknown ~ Flip Forward"
+            },
+            {
+                "input_value": 15,
+                "output_value": "Bind ~ Pull Toward"
+            },
+            {
+                "input_value": 16,
+                "output_value": "Short Bind ~ Knockback"
+            },
+            {
+                "input_value": 17,
+                "output_value": "Air ~ Faster Vertical Roll"
+            },
+            {
+                "input_value": 18,
+                "output_value": "Bind ~ Rolling Restand"
+            },
+            {
+                "input_value": 19,
+                "output_value": "Bind ~ Knockback 2"
+            },
+            {
+                "input_value": 20,
+                "output_value": "Grounded Bind ~ Gets up"
+            },
+            {
+                "input_value": 21,
+                "output_value": "Air Bind ~ Vertical Spiral ~ Allow Ukemi"
+            },
+            {
+                "input_value": 22,
+                "output_value": "Bind ~ Inverted Knockback"
+            },
+            {
+                "input_value": 23,
+                "output_value": "None ~ Disable Air Control"
+            }
+            
+        ]
+
+    }
+]

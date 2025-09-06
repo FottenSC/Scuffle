@@ -1,0 +1,28 @@
+[
+    {
+        "name": "OpponentState",
+        "values": [
+            {
+                "input_value": 3,
+                "output_value": "Grounded"
+            },
+            {
+                "input_value": [7,15],
+                "output_value": "Airborne"
+            },
+            {
+                "input_value": 34,
+                "output_value": "Hurt"
+            },
+            {
+                "input_value": 35,
+                "output_value": "Missed Attack"
+            },
+            {
+                "input_value": 57,
+                "output_value": "Blocked Attack"
+            }
+        ]
+
+    }
+]

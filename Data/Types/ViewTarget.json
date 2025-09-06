@@ -1,0 +1,20 @@
+[
+    {
+        "name": "ViewTarget",
+        "values": [
+            {
+                "input_value": 1,
+                "output_value": "opponent"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Player"
+            },
+            {
+                "input_value": 10,
+                "output_value": "Stage"
+            }
+        ]
+
+    }
+]

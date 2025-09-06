@@ -1,3 +1,5 @@
+import os
+import json
 import AddressMap
 import ModuleEnumerator
 import PIDSearcher
@@ -23,6 +25,7 @@ class SC6GameReader:
             self.do_fix_goto = True
             self.is_movelist_new = False
             self.consecutive_frames_of_zero_timer = 0
+           
             
             #self.module_address = 0x140000000 #hard coding this until it breaks, then use ModuleEnumerator again
             #self.module_address = 0x7FF60AC30000 #new hardcoded
@@ -102,7 +105,8 @@ class SC6GameReader:
                             p2_movelist_data = GetDataBlockAtEndOfPointerOffsetList(self.process_handle, self.module_address, [AddressMap.p2_movelist_address], AddressMap.MOVELIST_BYTES)
                             self.p1_movelist = MovelistParser.Movelist(p1_movelist_data, 'p1')
                             self.p2_movelist = MovelistParser.Movelist(p2_movelist_data, 'p2')
-                            self.is_movelist_new = True    
+                            self.is_movelist_new = True
+                            
                         else:
                             self.is_movelist_new = False
                             return False

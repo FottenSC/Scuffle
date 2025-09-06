@@ -1,0 +1,28 @@
+[
+    {
+        "name": "EffectTarget",
+        "values": [
+            {
+                "input_value": 1,
+                "output_value": "Player"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Weapon"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Opponent"
+            },
+            {
+                "input_value": 5,
+                "output_value": "On Ground below Origin ~ Player"
+            },
+            {
+                "input_value": 6,
+                "output_value": "On Ground below Origin ~ Opponent"
+            }
+        ]
+
+    }
+]

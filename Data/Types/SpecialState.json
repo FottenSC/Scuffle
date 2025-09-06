@@ -1,0 +1,72 @@
+[
+    {
+        "name": "SpecialState",
+        "values": [
+            {
+                "input_value": 2,
+                "output_value": "Tech Crouch"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Grounded"
+            },
+            {
+                "input_value": 4,
+                "output_value": "Airborne"
+            },
+            {
+                "input_value": 10,
+                "output_value": "Guard Impact"
+            },
+            {
+                "input_value": 27,
+                "output_value": "Attack Hit"
+            },
+            {
+                "input_value": 28,
+                "output_value": "Attack Missed"
+            },
+            {
+                "input_value": 31,
+                "output_value": "Wall Hit"
+            },
+            {
+                "input_value": 35,
+                "output_value": "Invisible"
+            },
+            {
+                "input_value": 40,
+                "output_value": "Ring Out"
+            },
+            {
+                "input_value": 41,
+                "output_value": "Ring Out End / KO?"
+            },
+            {
+                "input_value": 43,
+                "output_value": "Tech Counter"
+            },
+            {
+                "input_value": 46,
+                "output_value": "Blocked Attack"
+            },
+            {
+                "input_value": 104,
+                "output_value": "Crouching Attack"
+            },
+            {
+                "input_value": 105,
+                "output_value": "While Rising Attack"
+            },
+            {
+                "input_value": 106,
+                "output_value": "Multi Press Attack"
+            },
+            {
+                "input_value": 107,
+                "output_value": "8wayrun Attack"
+            }
+        ]
+
+    }
+]

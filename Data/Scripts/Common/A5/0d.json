@@ -1,13 +1,8 @@
 [
 	{
 		"state": "0x3300",
-		"type": "0d",
-		"multiple_state": false,
+		"script_type": "0d",
 		"name": "BRAVE EDGE METER CHECK (VODKAVERSE)",
-		"last": "BRAVE EDGE CHECK",
-		"no_arg_text": "",
-		"args": [
-
-		]
+		"last": "BRAVE EDGE CHECK"
 	}
 ]

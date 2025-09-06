@@ -1,0 +1,56 @@
+[
+    {
+        "name": "ReturnState",
+        "values": [
+            {
+                "input_value": 200,
+                "output_value": "Standing"
+            },
+            {
+                "input_value": 201,
+                "output_value": "Crouching"
+            },
+            {
+                "input_value": 202,
+                "output_value": "Standing Guard"
+            },
+            {
+                "input_value": 203,
+                "output_value": "Crouching Guard"
+            },
+            {
+                "input_value": 208,
+                "output_value": "Grounded (Face Up)"
+            },
+            {
+                "input_value": 209,
+                "output_value": "Grounded (Face Down)"
+            },
+            {
+                "input_value": 210,
+                "output_value": "Standing (Opposite Direction)"
+            },
+            {
+                "input_value": 211,
+                "output_value": "Crouching (Opposite Direction)"
+            },
+            {
+                "input_value": 212,
+                "output_value": "CE?"
+            },
+            {
+                "input_value": 213,
+                "output_value": "CE? (Opposite Direction)"
+            },
+            {
+                "input_value": 220,
+                "output_value": "Grounded (Face Up, Opposite Direction)"
+            },
+            {
+                "input_value": 221,
+                "output_value": "Grounded (Face Down, Opposite Direction)"
+            }
+        ]
+
+    }
+]

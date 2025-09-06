@@ -1,0 +1,53 @@
+[
+    {
+        "name": "LH_Situation",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "Standing"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Crouching"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Standing or Crouching"
+            },
+            {
+                "input_value": 4,
+                "output_value": "Airborne"
+            },
+            {
+                "input_value": 5,
+                "output_value": "Standing or Airborne"
+            },
+            {
+                "input_value": 6,
+                "output_value": "Crouching or Airborne"
+            },
+
+            {
+                "input_value": 7,
+                "output_value": "Standing, Crouching or Airborne"
+            },
+            {
+                "input_value": 8,
+                "output_value": "Jumping"
+            },
+            {
+                "input_value": 9,
+                "output_value": "Downed"
+            },
+            {
+                "input_value": 10,
+                "output_value": "Guard Impacted"
+            },
+            {
+                "input_value": 11,
+                "output_value": "Character Value"
+            }
+        ]
+
+    }
+]

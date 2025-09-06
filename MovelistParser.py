@@ -67,7 +67,7 @@ def decode_move_id(encoded_move_id, movelist):
         move_id += movelist.block_R_start
     return move_id
 
-def string_to_class(string):
+def string_to_class(string, custom_types=None):
     conversion_table = {
         "BoolFlag": BoolFlag,
         "Button": Button,
@@ -99,20 +99,9 @@ def string_to_class(string):
         "OpponentState": OpponentState,
         "CharacterValue": CharacterValue,
         "CharacterGender": CharacterGender,
-        "CharacterID": CharacterID,
-        "format_value": format_value,
-        "name_from_enum": name_from_enum
+        "CharacterID": CharacterID
     }
-    custom_type_dir = './Data/Types/'
-    custom_types = None
-    for _type in os.listdir(custom_type_dir):
-        type_path = os.path.join(custom_type_dir, _type)
-        if os.path.isfile(type_path) and os.path.splitext(type_path)[1] == '.json':
-            with open(type_path, 'r') as io_custom_type:
-                if custom_types == None:
-                    custom_types = json.load(io_custom_type)
-                else:
-                    custom_types += json.load(io_custom_type)
+    
     for t in custom_types:
         if t["name"] == string:
             return string
@@ -121,69 +110,120 @@ def string_to_class(string):
         if s == string:
             return conversion_table[s]
     
-def find_script_info(movelist, state, char_data, custom_data, data, type, second_arg, args_list, custom):
+def find_script_info(movelist, state, char_data, custom_data, data, script_type, second_arg, args_list):
     found = False
     state_info = None
     argp = []
-    if movelist.character_id != '000' and custom == True:
+    if movelist.character_id != '000' and movelist.custom == True:
         for index_id in char_data:
-            if index_id["multiple_state"] == True:
+            if "state" not in index_id:
+                index_id["state"] = "0x0000"
+
+            if "script_type" not in index_id:
+                index_id["script_type"] = "0x01"
+
+            if "name" not in index_id:
+                index_id["name"] = "NO NAME"
+
+            if isinstance(index_id["state"],list):
                 for i, idx in enumerate(index_id["state"]):
-                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == type:
+                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                         state_info = index_id
                         found = True
                         break
             else:
-                if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == type:
+                if index_id['state'] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                     state_info = index_id
                     found = True
                     break
     if found == False:
         for index_id in custom_data:
-            if index_id["multiple_state"] == True:
+            if "state" not in index_id:
+                index_id["state"] = "0x0000"
+
+            if "script_type" not in index_id:
+                index_id["script_type"] = "0x01"
+
+            if "name" not in index_id:
+                index_id["name"] = "NO NAME"
+
+            if isinstance(index_id["state"],list):
                 for i, idx in enumerate(index_id["state"]):
-                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == type:
+                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                         state_info = index_id
                         found = True
                         break
             else:
-                if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == type:
+                if index_id['state'] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                     state_info = index_id
                     found = True
                     break
         
     if found == False:
         for index_id in data:
-            if index_id["multiple_state"] == True:
+            if "state" not in index_id:
+                index_id["state"] = "0x0000"
+
+            if "script_type" not in index_id:
+                index_id["script_type"] = "0x01"
+
+            if "name" not in index_id:
+                index_id["name"] = "NO NAME"
+            
+            if isinstance(index_id["state"],list):
                 for i, idx in enumerate(index_id["state"]):
-                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["type"] == type:
+                    if index_id['state'][i] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                         state_info = index_id
                         found = True
                         break
             else:
-                if index_id['state'] == str(f"0x{state:04x}") and index_id["type"] == type:
+                if index_id['state'] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                     state_info = index_id
                     found = True
                     break
     if found:
         argp = []
+        if "args" not in state_info:
+            state_info["args"] = []
         for i, a in enumerate(state_info["args"]):
-            if i >= second_arg - 1 and state_info["args"][0]["index"] != -1:
-                break
+            if "index" not in a:
+                a["index"] = i
+
+            if "prefix" not in a:
+                a["prefix"] = ""
+
+            if "name" not in a:
+                a["name"] = "" if a["index"] == -1 else f'{a["index"]}'
+
             if a["name"] != "":
-                a["name"] = f'{a["name"]}:'
-            if a["type"] == "format_value":
-                if a["range"] == True:
+                a["name"] = f'{a["name"]}:' if a["name"][-1] != ":" else a["name"]
+            
+            if "value_type" not in a:
+                a["value_type"] = None
+
+            if "format_method" not in a:
+                a["format_method"] = "format_value"
+
+            if "data" not in a:
+                a["data"] = {}
+
+            offset = 1
+            if state_info["args"][0]["index"] == -1:
+                offset = 0
+            if i >= second_arg - offset:
+                break
+            if a["format_method"] == "format_value":
+                if isinstance(a["index"],list):
                     try:
-                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["cls"]), movelist=movelist, **a["data"])} to {format_value(args_list[a["index"][1]], string_to_class(a["cls"]), movelist=movelist, **a["data"])}'
+                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist, **a["data"])} to {format_value(args_list[a["index"][1]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist, **a["data"])}'
                     except:
-                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["cls"]), movelist=movelist, **a["data"])} to {format_value(args_list[a["index"][0]], string_to_class(a["cls"]), movelist=movelist, **a["data"])}'
+                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist, **a["data"])} to {format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist, **a["data"])}'
 
                 else:
-                    val = format_value(args_list[a["index"]], string_to_class(a["cls"]), movelist=movelist, **a["data"])
-                argp.append(f'[{a["name"]}{val}]')
-            elif a["type"] == "name_from_enum":
-                val = name_from_enum(string_to_class(a["cls"]), state, **a["data"])
+                    val = format_value(args_list[a["index"]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist, **a["data"])
+                argp.append(f'{a["prefix"]}[{a["name"]}{val}]')
+            elif a["format_method"] == "name_from_enum":
+                val = name_from_enum(string_to_class(a["value_type"], movelist.custom_types), state, **a["data"])
                 argp.append(f'[{a["name"]}{val}]')
 
     return found, state_info, argp
@@ -210,10 +250,17 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
             for t in custom_types:
                 if t["name"] == cls:
                     for k in t["values"]:
-                        if k["input_value"] == value:
-                            result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
-                            found = True
-                            break
+                        if isinstance(k["input_value"],list):
+                            for v in k["input_value"]:
+                                if v == value:
+                                    result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                                    found = True
+                                    break
+                        else:
+                            if k["input_value"] == value:
+                                result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                                found = True
+                                break
             if found == False:
                 result = f'{prefix}<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>{suffix}'
                     
@@ -228,7 +275,26 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         return result if result != None else "<b>last return<b>"
     
     elif type == 0x8b: #encoded / shortcut
-        if value == 0xffff:
+        if cls != None:
+            found = False
+            for t in custom_types:
+                if t["name"] == cls:
+                    for k in t["values"]:
+                        if isinstance(k["input_value"],list):
+                            for v in k["input_value"]:
+                                if v == value:
+                                    result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                                    found = True
+                                    break
+                        else:
+                            if k["input_value"] == value:
+                                result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                                found = True
+                                break
+            if found == False:
+                result = f'<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>'
+
+        elif value == 0xffff:
             result = 'NONE'
         elif value == 0x7fff:
             if end:
@@ -245,18 +311,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         elif value & 0x7800 == 0x7800 and value != 0x7a00:
             result = f'<b>current frame + {value ^ 0x7800}<b>' if (value ^ 0x7800) > 0 else '<b>current frame<b>'
         
-        elif cls != None:
-            found = False
-            for t in custom_types:
-                if t["name"] == cls:
-                    for k in t["values"]:
-                        if k["input_value"] == value:
-                            result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
-                            found = True
-                            break
             
-            if found == False:
-                result = f'<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>'
         else:
             if value == 0 and auto:
                 result = f'<b>Auto<b>'
@@ -265,7 +320,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
                 
         return result if result != None else "<b>last return<b>"
     
-    elif type == 0x8a or type == 0x19 or type == 0x12 or type == 0x13: #variable / input param
+    elif type == 0x8a or type == 0x19 or type == 0x1a or type == 0x12 or type == 0x13: #variable / input param
         if value & 0xf0 == 0xf0:
             result = f'<b>input param {(value ^ 0xf0) + 1}<b>'
         elif value & 0x0100 == 0x0100:
@@ -400,10 +455,10 @@ class Move:
             return self.modified_bytes
 
     def set_cancel(self, cancel):
-        self.cancel = cancel
+        self.cancel:Cancel = cancel
 
     def set_attacks(self, attacks):
-        self.attacks = attacks
+        self.attacks:Attack|Throw = attacks
 
     def get_weight_to_move_id(self, move_id):
         link = self.cancel.get_link_to_move_id(move_id)
@@ -1103,15 +1158,6 @@ class Cancel:
                 first_arg = int(args_bytes[0])
                 second_arg = int(args_bytes[1])
                 index += 3
-                custom_base_path = f'./Data/Scripts/Custom'
-                custom_A5_script_path = f'./Data/Scripts/Custom/A5'
-                custom_25_script_path = f'./Data/Scripts/Custom/25'
-                common_base_path = './Data/Scripts/Common'
-                common_A5_script_path = f'{common_base_path}/A5'
-                common_25_script_path = f'{common_base_path}/25'
-                character_base_path = f'./Data/Scripts/{self.movelist.character_id}'
-                character_A5_script_path = f'./Data/Scripts/{self.movelist.character_id}/A5'
-                character_25_script_path = f'./Data/Scripts/{self.movelist.character_id}/25'
                 
 
                 if inst == CC.START:
@@ -1129,72 +1175,36 @@ class Cancel:
                         arg_bytes = self.bytes[state_index + 3: index - 3]
                         args_list = [arg_bytes[i:i + 3] for i in range(0, len(arg_bytes), 3)]
 
-                        xA5_data = None
-                        for file in os.listdir(common_A5_script_path):
-                            file_path = os.path.join(common_A5_script_path,file)
-                            if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
-                                with open(file_path,'r') as xA5_script:
-                                    if xA5_data == None:
-                                        xA5_data = json.load(xA5_script)
-                                    else:
-                                        xA5_data += json.load(xA5_script)
-
-
-                        xA5_char_data = None
-                        custom = False
-                        if os.path.exists(character_A5_script_path) and self.movelist.character_id != '000':
-                            custom = True
-                            for file in os.listdir(character_A5_script_path):
-                                file_path = os.path.join(character_A5_script_path,file)
-                                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
-                                    with open(file_path,'r') as xA5_char_script:
-                                        if xA5_char_data == None:
-                                            xA5_char_data = json.load(xA5_char_script)
-                                        else:
-                                            xA5_char_data += json.load(xA5_char_script)
                         
-                        
-                        xA5_custom_data = None
-                        if os.path.exists(custom_A5_script_path):
-                            for file in os.listdir(custom_A5_script_path):
-                                file_path = os.path.join(custom_A5_script_path,file)
-                                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
-                                    with open(file_path,'r') as xA5_custom_script:
-                                        if xA5_custom_data == None:
-                                            xA5_custom_data = json.load(xA5_custom_script)
-                                        else:
-                                            xA5_custom_data += json.load(xA5_custom_script)
-
                             
                     except:
                         state = 'ERROR'
                         state_args = 'ERROR'
 
                     if first_arg == 0x01: #condition checks
-                            #found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "01", second_arg, args_list, custom)
                             try:
-                                found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "01", second_arg, args_list, custom)
+                                found, state_info, argp = find_script_info(self.movelist, state, self.movelist.xA5_char_data, self.movelist.xA5_custom_data, self.movelist.xA5_data, "01", second_arg, args_list)
                                 if found:
                                     if len(argp) > 0:
                                         label = f'{label_prefix} {state_info["name"]} {"".join(argp)}'
                                     else:
-                                        label = f'{label_prefix} {state_info["name"]} {state_info["no_arg_text"]}'
+                                        label = f'{label_prefix} {state_info["name"]}{(" " + state_info["no_arg_text"]) if "no_arg_text" in state_info else ""}'
 
-                                    last_bool = state_info["last"]
+                                    last_bool = state_info["last"] if ("last" in state_info and state_info["last"] != "") else f'{state_info["name"]} CHECK'
                             
                             except:
                                 state = 'ERROR'
 
                     elif first_arg == 0x0d: #custom conditon checks
                         try:
-                            found, state_info, argp = find_script_info(self.movelist, state, xA5_char_data, xA5_custom_data, xA5_data, "0d", second_arg, args_list, custom)
+                            found, state_info, argp = find_script_info(self.movelist, state, self.movelist.xA5_char_data, self.movelist.xA5_custom_data, self.movelist.xA5_data, "0d", second_arg, args_list)
                             if found:
                                 if len(argp) > 0:
                                     label = f'{label_prefix} {state_info["name"]} {"".join(argp)} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
                                 else:
-                                    label = f'{label_prefix} {state_info["name"]} {state_info["no_arg_text"]} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
+                                    label = f'{label_prefix} {state_info["name"]}{(" " + state_info["no_arg_text"]) if "no_arg_text" in state_info else ""} | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
 
-                                last_bool = state_info["last"]
+                                last_bool = state_info["last"] if ("last" in state_info and state_info["last"] != "") else f'{state_info["name"]} CHECK'
                             else:
                                 label = f'{label_prefix} CUSTOM CHECK | SCRIPT[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]'
                             found = False
@@ -1243,41 +1253,7 @@ class Cancel:
                             is_soul_charge = True
                             state_index = state_index + 3
                             state = b2i(self.bytes, state_index + 1, big_endian=True)
-                        x25_data = None
-                        for file in os.listdir(common_25_script_path):
-                            file_path = os.path.join(common_25_script_path,file)
-                            if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
-                                with open(file_path,'r') as x25_script:
-                                    if x25_data == None:
-                                        x25_data = json.load(x25_script)
-                                    else:
-                                        x25_data += json.load(x25_script)
-
-
-                        x25_char_data = None
-                        custom = False
-                        if os.path.exists(character_25_script_path) and self.movelist.character_id != '000':
-                            custom = True
-                            for file in os.listdir(character_25_script_path):
-                                file_path = os.path.join(character_25_script_path,file)
-                                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
-                                    with open(file_path,'r') as x25_char_script:
-                                        if x25_char_data == None:
-                                            x25_char_data = json.load(x25_char_script)
-                                        else:
-                                            x25_char_data += json.load(x25_char_script)
                         
-                        
-                        x25_custom_data = None
-                        if os.path.exists(custom_25_script_path):
-                            for file in os.listdir(custom_25_script_path):
-                                file_path = os.path.join(custom_25_script_path,file)
-                                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
-                                    with open(file_path,'r') as x25_custom_script:
-                                        if x25_custom_data == None:
-                                            x25_custom_data = json.load(x25_custom_script)
-                                        else:
-                                            x25_custom_data += json.load(x25_custom_script)
 
                         alias = decode_move_id(state, self.movelist)
 
@@ -1306,14 +1282,14 @@ class Cancel:
                     if first_arg == 0x03: #0x1a Throw hurt | 0x03f9 throw damage | 0x0025 deal ##% of total throw damage | 0x13c0 throw damage 
                         try:
                             label = ''
-                            found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "03", second_arg, args_list, custom)
+                            found, state_info, argp = find_script_info(self.movelist, state_id, self.movelist.x25_char_data, self.movelist.x25_custom_data, self.movelist.x25_data, "03", second_arg, args_list)
                             if found:
                                 if len(argp) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
-                                    label = f'{state_info["name"]} {state_info["no_arg_text"]}'
+                                    label = f'{state_info["name"]}{(" " + state_info["no_arg_text"]) if "no_arg_text" in state_info else ""}'
 
-                                last_bool = state_info["last"]
+                                last_bool = state_info["last"] if ("last" in state_info and state_info["last"] != "") else state_info["name"]
 
                             if state_id == 0x13da:
                                 label = f'<b>ADD/REMOVE METER<b>: [target:{format_value(args_list[0],CharacterIndex)}][type:{format_value(args_list[1],MeterType)}][percentage_base:{format_value(args_list[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list[3], negative=True, encoded_percent=True, percent_base=240 if bs2i(args_list[2],1,big_endian=True) != 1 else 120)}]'
@@ -1348,35 +1324,35 @@ class Cancel:
                     elif first_arg == 0x0d: # 0x3041 - CE VO | 0x3031 - Throw logic
                         try:
                             label = ''
-                            found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "0d", second_arg, args_list, custom)
+                            found, state_info, argp = find_script_info(self.movelist, state_id, self.movelist.x25_char_data, self.movelist.x25_custom_data, self.movelist.x25_data, "0d", second_arg, args_list)
                             if found:
                                 if len(argp) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
-                                    label = f'{state_info["name"]} {state_info["no_arg_text"]}'
+                                    label = f'{state_info["name"]}{(" " + state_info["no_arg_text"]) if "no_arg_text" in state_info else ""}'
 
-                                last_bool = state_info["last"]
+                                last_bool = state_info["last"] if ("last" in state_info and state_info["last"] != "") else state_info["name"]
                             
                         except:
                             state = 'ERROR'
 
-                        list_of_bytes.append((current_bytes, '<b>MOVE SCRIPT<b>: {} ({})'.format(f'{label} SCRIPT{state}' if label != "" else state, state_args), index))
+                        list_of_bytes.append((current_bytes, '<b>MOVE SCRIPT<b>: {} ({})'.format(f'{label} | SCRIPT{state}' if label != "" else state, state_args), index))
 
                     elif first_arg == 0x14:
                         try:
                             label = ''
-                            found, state_info, argp = find_script_info(self.movelist, state_id, x25_char_data, x25_custom_data, x25_data, "14", second_arg, args_list, custom)
+                            found, state_info, argp = find_script_info(self.movelist, state_id, self.movelist.x25_char_data, self.movelist.x25_custom_data, self.movelist.x25_data, "14", second_arg, args_list)
                             if found:
                                 if len(argp) > 0:
                                     label = f'{state_info["name"]} {"".join(argp)}'
                                 else:
-                                    label = f'{state_info["name"]} {state_info["no_arg_text"]}'
+                                    label = f'{state_info["name"]}{(" " + state_info["no_arg_text"]) if "no_arg_text" in state_info else ""}'
 
-                                last_bool = state_info["last"]
+                                last_bool = state_info["last"] if ("last" in state_info and state_info["last"] != "") else state_info["name"]
 
                         except:
                             state= 'ERROR'
-                        list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: [id:{format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}]' if label == "" else label, index))
+                        list_of_bytes.append((current_bytes, f'<b>SET STATE<b>: [state:{format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}][value:{format_value(self.bytes[state_index + 3: state_index + 6], decode=False, movelist=self.movelist)}]' if label == "" else label, index))
 
                     elif first_arg == 0x26:
                         list_of_bytes.append((current_bytes, f'<b>SET ACTIVE HITBOX<b>: {format_value(self.bytes[state_index: state_index + 3], prefix = "hitbox ", offset = 1)}', index))
@@ -1390,6 +1366,12 @@ class Cancel:
                         list_of_bytes.append((current_bytes, f'<b>SET VARIABLE<b>: {format_value(self.bytes[index - 3:index])} = {"<b>last return value<b>" if self.bytes[index - 6] == 0xa5 or self.bytes[index - 6] == 0x25 else format_value(self.bytes[index - 6:index - 3],negative=True)}', index))
                     except:
                         list_of_bytes.append((current_bytes, f'<b>SET VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
+                    current_bytes = b''
+                if inst == CC.EXE_1A:
+                    try:
+                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE?<b>: {format_value(self.bytes[index - 3:index])} ?? {"<b>last return value<b>" if self.bytes[index - 6] == 0xa5 or self.bytes[index - 6] == 0x25 else format_value(self.bytes[index - 6:index - 3],negative=True)}', index))
+                    except:
+                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE?<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
                 if inst == CC.EXE_12:
                     list_of_bytes.append((current_bytes, f'<b>ADD ONE TO VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
@@ -1773,11 +1755,14 @@ class Movelist:
     STARTER_INT = 0x3131484b
 
     ONE_BYTE_INSTRUCTIONS = [CC.RETURN_8c, CC.RETURN_8d, CC.RETURN_8e, CC.RETURN_8f, CC.RETURN_90, CC.RETURN_91, CC.RETURN_94, CC.RETURN_95, CC.RETURN_98, CC.RETURN_9f, CC.RETURN_a0, CC.RETURN_a1, CC.RETURN_a2, CC.RETURN_a3, CC.RETURN_a4]
-    THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29]
+    THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_1A, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29]
 
     def __init__(self, raw_bytes, name):
         self.character_id = '000'
         self.bytes = raw_bytes
+
+        self.custom_types = self.xA5_data = self.xA5_char_data = self.xA5_custom_data = self.x25_data = self.x25_char_data = self.x25_custom_data = None
+        self.load_json()
         self.name = name.split('/')[-1].split('_')[0].capitalize()
         self.verbose = False
         header_index_1x = 0xC
@@ -1900,6 +1885,101 @@ class Movelist:
         self.misc_bytes = self.bytes[misc_block_start : self.all_moves[0].cancel_address]
         #print('{:x} : {:x} : {:x}'.format(short_block_start, misc_block_start, misc_block_start - short_block_start))
         #self.generate_modified_movelist_bytes()
+
+    def load_json(self):
+        custom_type_dir = './Data/Types/'
+        self.custom_types = None
+        for _type in os.listdir(custom_type_dir):
+            type_path = os.path.join(custom_type_dir, _type)
+            if os.path.isfile(type_path) and os.path.splitext(type_path)[1] == '.json':
+                with open(type_path, 'r') as io_custom_type:
+                    if self.custom_types == None:
+                        self.custom_types = json.load(io_custom_type)
+                    else:
+                        self.custom_types += json.load(io_custom_type)
+        
+        self.custom_base_path = f'./Data/Scripts/Custom'
+        self.custom_A5_script_path = f'./Data/Scripts/Custom/A5'
+        self.custom_25_script_path = f'./Data/Scripts/Custom/25'
+        self.common_base_path = './Data/Scripts/Common'
+        self.common_A5_script_path = f'{self.common_base_path}/A5'
+        self.common_25_script_path = f'{self.common_base_path}/25'
+        self.character_base_path = f'./Data/Scripts/{self.character_id}'
+        self.character_A5_script_path = f'./Data/Scripts/{self.character_id}/A5'
+        self.character_25_script_path = f'./Data/Scripts/{self.character_id}/25'
+
+        self.xA5_data = None
+        for file in os.listdir(self.common_A5_script_path):
+            file_path = os.path.join(self.common_A5_script_path,file)
+            if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                with open(file_path,'r') as xA5_script:
+                    if self.xA5_data == None:
+                        self.xA5_data = json.load(xA5_script)
+                    else:
+                        self.xA5_data += json.load(xA5_script)
+
+
+        
+        
+        
+        self.xA5_custom_data = None
+        if os.path.exists(self.custom_A5_script_path):
+            for file in os.listdir(self.custom_A5_script_path):
+                file_path = os.path.join(self.custom_A5_script_path,file)
+                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                    with open(file_path,'r') as xA5_custom_script:
+                        if self.xA5_custom_data == None:
+                            self.xA5_custom_data = json.load(xA5_custom_script)
+                        else:
+                            self.xA5_custom_data += json.load(xA5_custom_script)
+        
+        self.x25_data = None
+        for file in os.listdir(self.common_25_script_path):
+            file_path = os.path.join(self.common_25_script_path,file)
+            if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                with open(file_path,'r') as x25_script:
+                    if self.x25_data == None:
+                        self.x25_data = json.load(x25_script)
+                    else:
+                        self.x25_data += json.load(x25_script)
+
+        
+        self.x25_custom_data = None
+        if os.path.exists(self.custom_25_script_path):
+            for file in os.listdir(self.custom_25_script_path):
+                file_path = os.path.join(self.custom_25_script_path,file)
+                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                    with open(file_path,'r') as x25_custom_script:
+                        if self.x25_custom_data == None:
+                            self.x25_custom_data = json.load(x25_custom_script)
+                        else:
+                            self.x25_custom_data += json.load(x25_custom_script)
+        
+        self.xA5_char_data = None
+        self.custom = False
+        if os.path.exists(self.character_A5_script_path) and self.character_id != '000':
+            self.custom = True
+            for file in os.listdir(self.character_A5_script_path):
+                file_path = os.path.join(self.character_A5_script_path,file)
+                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                    with open(file_path,'r') as xA5_char_script:
+                        if self.xA5_char_data == None:
+                            self.xA5_char_data = json.load(xA5_char_script)
+                        else:
+                            self.xA5_char_data += json.load(xA5_char_script)
+    
+        self.x25_char_data = None
+        self.custom = False
+        if os.path.exists(self.character_25_script_path) and self.character_id != '000':
+            self.custom = True
+            for file in os.listdir(self.character_25_script_path):
+                file_path = os.path.join(self.character_25_script_path,file)
+                if os.path.isfile(file_path) and os.path.splitext(file_path)[1] == '.json':
+                    with open(file_path,'r') as x25_char_script:
+                        if self.x25_char_data == None:
+                            self.x25_char_data = json.load(x25_char_script)
+                        else:
+                            self.x25_char_data += json.load(x25_char_script)
 
     def parse_cancel_bytes_to_end(self, bytes):
         i = 0

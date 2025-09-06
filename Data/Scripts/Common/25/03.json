@@ -2,93 +2,39 @@
 	{
 		"state": "0x0002",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>USE TRANSITION ANIMATION<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "??",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "??"
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "transition_frames",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "transition_frames"
 			},
 			{
-				"index": 2,
-				"prefix": "",
-				"name": "??",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "??"
 			}
 		]
 	},
 	{
 		"state": "0x0004",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>APPLY MOVEMENT<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "angle",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "angle"
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "distance",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "distance"
 			}
 		]
 	},
 	{
 		"state": "0x000e",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>ANIMATION BUFFER<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "amount",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"suffix": " frames"
 				}
@@ -98,18 +44,10 @@
 	{
 		"state": "0x0015",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>ANIMATION SPEED OVERRIDE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "speed",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"encoded_percent": true,
 					"percent_base": 22080
@@ -120,18 +58,10 @@
 	{
 		"state": "0x0018",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>MOVE SPEED OVERRIDE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "speed",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"encoded_percent": true,
 					"percent_base": 22080
@@ -142,71 +72,37 @@
 	{
 		"state": "0x001a",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>THROW<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "hurt_script_id",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"decode": true
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "animation_index",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "animation_index"
 			}
 		]
 	},
 	{
 		"state": "0x0022",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET ELEVATION<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "height",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "height"
 			}
 		]
 	},
 	{
 		"state": "0x0025",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>THROW DAMAGE<b>:",
-		"last": "",
 		"no_arg_text": "[amount:remaining damage]",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "amount",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"suffix": "% of total damage"
 				}
@@ -216,179 +112,84 @@
 	{
 		"state": "0x0028",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET HAND POSE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "hand",
-				"cls": "Hand",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "Hand"
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "1",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
 
-				}
 			},
 			{
-				"index": 2,
-				"prefix": "",
-				"name": "pose_id",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "pose_id"
 			}
 		]
 	},
 	{
 		"state": "0x002f",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SELECT CAMERA<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "0",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"index": 0
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "1",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"index": 1
 			}
 		]
 	},
 	{
 		"state": "0x0033",
 		"type": "03",
-		"multiple_state": false,
-		"name": "<b>CANCEL SWITCH<b>:",
-		"last": "",
-		"no_arg_text": "",
-		"args": [
-
-		]
+		"name": "<b>CANCEL SWITCH<b>:"
 	},
 	{
 		"state": "0x004d",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>CAMERA SHAKE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "strength",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "strength"
 			}
 		]
 	},
 	{
 		"state": "0x03e8",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>ADD ATTACK STREAK<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "part",
-				"cls": "TracePart",
-				"type": "format_value",
-				"range": false,
+				"value_type": "TracePart",
 				"data": {
 					"negative": true
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
 				"name": "duration",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"suffix": " frames"
 				}
 			},
 			{
-				"index": 2,
-				"prefix": "",
-				"name": "length",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "length"
 			},
 			{
-				"index": 3,
-				"prefix": "",
 				"name": "kind",
-				"cls": "TraceKind",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "TraceKind"
 			}
 		]
 	},
 	{
 		"state": "0x03ec",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>REMOVE ATTACK STREAK<b>:",
-		"last": "",
 		"no_arg_text": "Remove all attack streaks",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "part",
-				"cls": "TracePart",
-				"type": "format_value",
-				"range": false,
+				"value_type": "TracePart",
 				"data": {
 					"negative": true
 				}
@@ -398,220 +199,105 @@
 	{
 		"state": "0x03eb",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET FACIAL EXPRESSION<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "expression",
-				"cls": "FacialExpression",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "FacialExpression"
 			}
 		]
 	},
 	{
 		"state": "0x03f9",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET HIT SPARK LOCATION<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "0",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"index": 0
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "1",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"index": 1
 			}
 		]
 	},
 	{
 		"state": "0x07d0",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>PLAY SOUND<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "id",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "id"
 			}
 		]
 	},
 	{
 		"state": "0x07d1",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>PLAY VOICE LINE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "category",
-				"cls": "VoiceCategory",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "VoiceCategory"
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "id",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "id"
 			}
 		]
 	},
 	{
 		"state": "0x07df",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>PLAY RANDOM VOICE LINE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "category",
-				"cls": "RandomVoiceCategory",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "RandomVoiceCategory"
 			}
 		]
 	},
 	{
 		"state": "0x0bbb",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET CHARACTER VISIBILITY<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "visible",
-				"cls": "BoolFlag",
-				"type": "format_value",
-				"range": false,
+				"value_type": "BoolFlag",
 				"data": {
 					"replace_char": ""
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
 				"name": "character",
-				"cls": "CharacterIndex",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "CharacterIndex"
 			}
 		]
 	},
 	{
 		"state": "0x13a1",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET CHARACTER VALUE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "target",
-				"cls": "CharacterValue",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "CharacterValue"
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "value",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "value"
 			}
 		]
 	},
 	{
 		"state": "0x13a6",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET WEAPON PART VISIBILITY<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "part",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "part"
 			},
 			{
-				"index": 1,
-				"prefix": "",
 				"name": "visible",
-				"cls": "BoolFlag",
-				"type": "format_value",
-				"range": false,
+				"value_type": "BoolFlag",
 				"data": {
 					"replace_char": ""
 				}
@@ -621,30 +307,17 @@
 	{
 		"state": "0x13a8",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET GAME SPEED (LESS THAN OR EQUAL TO 100%)<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "speed",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"encoded_percent": true,
 					"percent_base": 15360
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
 				"name": "duration",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"suffix": " frames"
 				}
@@ -654,114 +327,55 @@
 	{
 		"state": "0x13c0",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>HIT PROPERTIES<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "sound_effect",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "sound_effect"
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "strength",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "strength"
 			},
 			{
-				"index": 2,
-				"prefix": "",
-				"name": "attack_type",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "attack_type"
 			}
 		]
 	},
 	{
 		"state": "0x13d0",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET LETHAL HIT SITUATION<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "situation",
-				"cls": "LH_Situation",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "LH_Situation"
 			}
 		]
 	},
 	{
 		"state": "0x13d1",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET LETHAL HIT CONDITION<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "condition",
-				"cls": "LH_Condition",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "LH_Condition"
 			}
 		]
 	},
 	{
 		"state": "0x13d8",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>APPLY DAMAGE SCALING<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "lethal_hit_only",
-				"cls": "BoolFlag",
-				"type": "format_value",
-				"range": false,
+				"value_type": "BoolFlag",
 				"data": {
 					"replace_char": ""
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
 				"name": "scaling",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"suffix": "%",
 					"negative": true
@@ -772,159 +386,61 @@
 	{
 		"state": "0x13d9",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>HIT EFFECT PHYSICS OVERRIDE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "??",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"replace_char": ""
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "effect_index",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "effect_index"
 			},
 			{
-				"index": 2,
-				"prefix": "",
-				"name": "magnitude",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "magnitude"
 			},
 			{
-				"index": 3,
-				"prefix": "",
-				"name": "left/right",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "left/right"
 			},
 			{
-				"index": 4,
-				"prefix": "",
-				"name": "up/down",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "up/down"
 			},
 			{
-				"index": 5,
-				"prefix": "",
-				"name": "??",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "??"
 			},
 			{
-				"index": 6,
-				"prefix": "",
-				"name": "air_magnitude",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "air_magnitude"
 			},
 			{
-				"index": 7,
-				"prefix": "",
-				"name": "air_left/right",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "air_left/right"
 			},
 			{
-				"index": 8,
-				"prefix": "",
-				"name": "air_up/down",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "air_up/down"
 			}
 		]
 	},
 	{
 		"state": "0x13e0",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>CHANGE CHARACTER VALUE BY AMOUNT<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "target_value",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "target_value"
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "amount",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "amount"
 			}
 		]
 	},
 	{
 		"state": "0x13e1",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET LETHAL HIT STATE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "enabled",
-				"cls": "BoolFlag",
-				"type": "format_value",
-				"range": false,
+				"value_type": "BoolFlag",
 				"data": {
 					"replace_char": ""
 				}
@@ -934,138 +450,62 @@
 	{
 		"state": "0x13e2",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>SET CHARACTER VALUE<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "target_value",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"replace_char": ""
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "value",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "value"
 			}
 		]
 	},
 	{
 		"state": "0x2afb",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>APPLY SCREEN FILTER<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
-				"name": "in",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "in"
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "duration",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "duration"
 			},
 			{
-				"index": 2,
-				"prefix": "",
-				"name": "out",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "out"
 			},
 			{
-				"index": 3,
-				"prefix": "",
 				"name": "sat",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"encoded_percent": true
 				}
 			},
 			{
-				"index": 4,
-				"prefix": "",
-				"name": "lgt",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "lgt"
 			},
 			{
-				"index": 5,
-				"prefix": "",
 				"name": "reds",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"encoded_percent": true
 				}
 			},
 			{
-				"index": 6,
-				"prefix": "",
 				"name": "greens",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"encoded_percent": true
 				}
 			},
 			{
-				"index": 7,
-				"prefix": "",
 				"name": "??",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"encoded_percent": true
 				}
 			},
 			{
-				"index": 8,
-				"prefix": "",
 				"name": "blues",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"encoded_percent": true
 				}
@@ -1078,106 +518,44 @@
 			"0x2333"
 		],
 		"type": "03",
-		"multiple_state": true,
 		"name": "<b>MOVE CAMERA<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "type",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"replace_char": ""
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
-				"name": "??",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "??"
 			},
 			{
-				"index": 2,
-				"prefix": "",
 				"name": "target",
-				"cls": "ViewTarget",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "ViewTarget"
 			},
 			{
-				"index": 3,
-				"prefix": "",
-				"name": "??",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "??"
 			},
 			{
-				"index": 4,
-				"prefix": "",
-				"name": "??",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "??"
 			},
 			{
-				"index": 5,
-				"prefix": "",
-				"name": "zoom",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": "zoom"
 			},
 			{
-				"index": 6,
-				"prefix": "",
 				"name": "vertical_angle",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"negative": true
 				}
 			},
 			{
-				"index": 7,
-				"prefix": "",
 				"name": "left/right_span",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"negative": true
 				}
 			},
 			{
-				"index": 8,
-				"prefix": "",
 				"name": "roll",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"negative": true
 				}
@@ -1187,106 +565,47 @@
 	{
 		"state": "0x2718",
 		"type": "03",
-		"multiple_state": false,
 		"name": "<b>ADD VFX<b>:",
-		"last": "",
-		"no_arg_text": "",
 		"args": [
 			{
-				"index": 0,
-				"prefix": "",
 				"name": "id",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"replace_char": ""
 				}
 			},
 			{
-				"index": 1,
-				"prefix": "",
 				"name": "category",
-				"cls": "AssetType",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "AssetType"
 			},
 			{
-				"index": 2,
-				"prefix": "",
 				"name": "",
-				"cls": "ViewTarget",
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"value_type": "ViewTarget"
 			},
 			{
-				"index": 3,
-				"prefix": "",
-				"name": "",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": ""
 			},
 			{
-				"index": 4,
-				"prefix": "",
-				"name": "",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": ""
 			},
 			{
-				"index": 5,
-				"prefix": "",
-				"name": "",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
-				"data": {
-
-				}
+				"name": ""
 			},
 			{
-				"index": 6,
-				"prefix": "",
 				"name": "target",
-				"cls": "EffectTarget",
-				"type": "format_value",
-				"range": false,
+				"value_type": "EffectTarget",
 				"data": {
 					"negative": true
 				}
 			},
 			{
-				"index": 7,
-				"prefix": "",
 				"name": "effect_part",
-				"cls": "EffectPart",
-				"type": "format_value",
-				"range": false,
+				"value_type": "EffectPart",
 				"data": {
-					
+
 				}
 			},
 			{
-				"index": 8,
-				"prefix": "",
 				"name": "behavior",
-				"cls": null,
-				"type": "format_value",
-				"range": false,
 				"data": {
 					"negative": true
 				}
