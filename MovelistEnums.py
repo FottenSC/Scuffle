@@ -798,6 +798,7 @@ class CC(Enum): #Cancel codes for the cancel block, mostly we expect (CC XX XX C
     EXE_25 = 0x25 #all EXE blocks have the seecond argument as the number of instructions since the last non 8b/89 block (mostly true)
     EXE_19 = 0x19 #very common in neutral blocks
     EXE_1A = 0x1a
+    EXE_1C = 0x1c
     EXE_A5 = 0xA5
     EXE_12 = 0x12 # Increase variable value by 1.
     EXE_13 = 0x13 # Decrease variable value by 1.

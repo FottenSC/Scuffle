@@ -320,7 +320,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
                 
         return result if result != None else "<b>last return<b>"
     
-    elif type == 0x8a or type == 0x19 or type == 0x1a or type == 0x12 or type == 0x13: #variable / input param
+    elif type == 0x8a or type == 0x19 or type == 0x1a or type == 0x1c or type == 0x12 or type == 0x13: #variable / input param
         if value & 0xf0 == 0xf0:
             result = f'<b>input param {(value ^ 0xf0) + 1}<b>'
         elif value & 0x0100 == 0x0100:
@@ -1369,9 +1369,15 @@ class Cancel:
                     current_bytes = b''
                 if inst == CC.EXE_1A:
                     try:
-                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE?<b>: {format_value(self.bytes[index - 3:index])} ?? {"<b>last return value<b>" if self.bytes[index - 6] == 0xa5 or self.bytes[index - 6] == 0x25 else format_value(self.bytes[index - 6:index - 3],negative=True)}', index))
+                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE? (1a)<b>: {format_value(self.bytes[index - 3:index])} ?? {"<b>last return value<b>" if self.bytes[index - 6] == 0xa5 or self.bytes[index - 6] == 0x25 else format_value(self.bytes[index - 6:index - 3],negative=True)}', index))
                     except:
-                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE?<b>: {format_value(self.bytes[index - 3:index])}', index))
+                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE? (1a)<b>: {format_value(self.bytes[index - 3:index])}', index))
+                    current_bytes = b''
+                if inst == CC.EXE_1C:
+                    try:
+                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE? (1c)<b>: {format_value(self.bytes[index - 3:index])} ?? {"<b>last return value<b>" if self.bytes[index - 6] == 0xa5 or self.bytes[index - 6] == 0x25 else format_value(self.bytes[index - 6:index - 3],negative=True)}', index))
+                    except:
+                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE? (1c)<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
                 if inst == CC.EXE_12:
                     list_of_bytes.append((current_bytes, f'<b>ADD ONE TO VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
@@ -1481,6 +1487,8 @@ class Cancel:
         for x, y in goto_blocks:
             if y > len(self.bytes) - 1:
                 y = len(self.bytes) - 1
+            if y not in index_to_line_number.keys():
+                y = list(index_to_line_number.keys())[-1]
             goto_line_to_line.append((index_to_line_number[x], index_to_line_number[y]))
         #print(goto_line_to_line)
         self.goto_blocks = goto_blocks
@@ -1755,7 +1763,7 @@ class Movelist:
     STARTER_INT = 0x3131484b
 
     ONE_BYTE_INSTRUCTIONS = [CC.RETURN_8c, CC.RETURN_8d, CC.RETURN_8e, CC.RETURN_8f, CC.RETURN_90, CC.RETURN_91, CC.RETURN_94, CC.RETURN_95, CC.RETURN_98, CC.RETURN_9f, CC.RETURN_a0, CC.RETURN_a1, CC.RETURN_a2, CC.RETURN_a3, CC.RETURN_a4]
-    THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_1A, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29]
+    THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_1A, CC.EXE_1C, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29]
 
     def __init__(self, raw_bytes, name):
         self.character_id = '000'
