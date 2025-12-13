@@ -256,7 +256,7 @@
       "parent": "Script System Reference",
       "page_notes": [
         {
-          "content": "Type 25/03 commands are system-level commands, calling internal game functions to change game behavior. These commands can be set to execute exclusively on a specifed frame by prefixing a frame number before the state id and calling them with type 19 instead of 03. Ex: [state_id][args...][25][03][argN] --> [frame][state_id][args...][25][19][argN+1]"
+          "content": "Type 25/03 commands are system-level commands, calling internal game functions to change game behavior. These commands can be set to execute exclusively on a specifed frame by prefixing a frame number before the state id and calling them with type 19 instead of 03. Ex: [state_id][args...][25][03][arg_number+1] --> [frame][state_id][args...][25][19][arg_number+2]"
         }
       ]
     },
