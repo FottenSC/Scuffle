@@ -246,7 +246,7 @@
       "parent": "Script System Reference",
       "page_notes": [
         {
-          "content": "Overview of different script_type categories and their purposes. Add a section for character id directories ('Scripts/[character_id]/') and the 'Scripts/Custom' directory that is created when opening the Move Editor if it doesn't exist. 'Scripts/[character_id]/' and 'Scripts/Custom' directories mirror the 'Scripts/Common' directory's structure, allowing the end user to add script entries for a particualar character to 'Scripts/[character_id]/' or just add entries that won't be lost due to an offical update to the JSON in the Common directory. The 'Scripts/[character_id]/' is checked first, then the custom directory is checked when evaluating state ids and are prioritized over the common directory if found."
+          "content": "Overview of different script_type categories and their purposes. Add a section for character id directories ('Scripts/[character_id]/') and the 'Scripts/Custom' directory that is created when opening the Move Editor if it doesn't exist. 'Scripts/[character_id]/' and 'Scripts/Custom' directories mirror the 'Scripts/Common' directory's structure, allowing the end user to add script entries for a particualar character to 'Scripts/[character_id]/' or just add entries that won't be lost due to an offical update to the JSON in the Common directory. Directory priortity order is Character -> Custom -> Common"
         }
       ]
     },
