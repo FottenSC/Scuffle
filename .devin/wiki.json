@@ -138,7 +138,7 @@
       "parent": "Core Architecture",
       "page_notes": [
         {
-          "content": ""
+          "content": "Overview of how script JSON files define game commands, states, and conditions that SCUFFLE interprets. All commands use either three or one byte sets to distinguish how the data should be handled. In three byte sets, the first byte is used to determine how the value should be handled, with the other two being read as a 16-bit(short) int. 89 is used for constants, 8a for referencing a variable and 8b for an encoded/shortcut value. Each command ends with the type (A5, 25), subtype (01, 0d, 14, 19, 25, 26) and the arguments +1 for the state id (Ex: 8b 30 20 8b 00 c8 89 00 05 89 00 0a 25 0d 04).One byte math/compare operations: 8c - ADD, 8d - SUB, 8e - MULT, 8f - DIV, 90 - MOD, 91 - Flip Sign, 94 - bitwise AND, 95 - bitwise OR, 96 - NOT (Only returns 0 or 1), 98 - bit shift right >>, 9f - =, a0 - !=, a1 - <, a2 - <=, a3 - >, a4 - >=. Layout for math operations: [constant or variable][constant or variable][math operator byte]. math/compare operations don't have type bytes and are like 19 xx xx, which is used for assigning a variable (89 00 01 19 01 00). An example math/compare operation: 8a 01 00 89 00 02 8e 19 01 00. variables are grouped for different purposes: 19/8a 00 xx -> universal vars, 19/8a 01 xx -> seemingly local vars, 19/8a 00 f0-ff? -> input param to move script (f0 is input arg 1, f1 is for 2 etc..)."
         }
       ]
     },
