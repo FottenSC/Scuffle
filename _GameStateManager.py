@@ -28,6 +28,7 @@ class GameStateManager:
     def Update(self, do_print_debug_vars, show_all_hitboxes, verbose_log=False):
         
         successful_update = self.game_reader.UpdateCurrentSnapshot()
+        hitbox_id = None
         if successful_update:
             try:
                 primary_snapshots = self.game_reader.primary_snapshots
@@ -42,6 +43,7 @@ class GameStateManager:
                         self.p1_primary_move_id = primary_snapshots[-1].p1.movement_block.movelist_id
                         did_p1_primary_attack_change = primary_snapshots[-2].p1.movement_block.movelist_id != primary_snapshots[-3].p1.movement_block.movelist_id
                     if did_p1_primary_attack_change:
+                        hitbox_id = self.game_reader.p1_hitbox_index
                         if self.game_reader.p1_movelist != None:
                             old_id = MovelistParser.decode_move_id(primary_snapshots[-3].p1.movement_block.movelist_id,self.game_reader.p1_movelist)
                         else:
@@ -52,10 +54,18 @@ class GameStateManager:
 
                         if s != None:
                             for entry in s:
-                                print(entry)
+                                #print(entry)
+                                if self.game_reader.p1_hitbox_index != -1:
+                                    print(s[self.game_reader.p1_hitbox_index])
+                                
                                 if not show_all_hitboxes:
                                     break
-
+                    if did_p1_primary_attack_change == False:
+                        if hitbox_id != None and self.game_reader.p1_hitbox_index != hitbox_id:
+                            hitbox_id = self.game_reader.p1_hitbox_index
+                            if hitbox_id != -1:
+                                print(s[self.game_reader.p1_hitbox_index])
+                    
                     did_p2_primary_attack_change = primary_snapshots[-2].p2.movement_block.movelist_id != primary_snapshots[-3].p2.movement_block.movelist_id
                     if did_p2_primary_attack_change:
                         old_id = primary_snapshots[-3].p2.movement_block.movelist_id

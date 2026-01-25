@@ -1,0 +1,20 @@
+[
+    {
+        "name": "BreakFlag",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "Upper"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Middle"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Lower"
+            }
+        ]
+
+    }
+]

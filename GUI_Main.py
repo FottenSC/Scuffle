@@ -275,6 +275,8 @@ class GUI_Main(Tk):
                 if self.move_viewer.do_inject_movelist:
                     if self.move_viewer.do_fix_goto.get() == False:
                         self.launcher.game_reader.do_fix_goto = False
+                    if self.move_viewer.log_injected:
+                        print(f'{time.strftime("[%I:%M:%S %p]")} Injected movelist:{self.move_viewer.movelist_name_var.get()}')
                     else:
                         self.launcher.game_reader.do_fix_goto = True
                         
@@ -282,6 +284,7 @@ class GUI_Main(Tk):
                     self.launcher.game_reader.p1_movelist = self.move_viewer.movelist
                     self.move_viewer.set_character_id(self.launcher.game_reader.p1_movelist.character_id)
                     self.move_viewer.do_inject_movelist = False
+                    self.move_viewer.log_injected.set(False)
                     
             except:
                 self.move_viewer = None
@@ -314,6 +317,7 @@ class GUI_Main(Tk):
                             character_id = self.move_viewer.character_id_var.get()
                             self.move_viewer.set_movelist(self.launcher.game_reader.p1_movelist)
                             self.move_viewer.set_character_id(character_id)
+                            self.move_viewer.update_hitbox_command(self.launcher.game_reader.p1_hitbox_index)
                             self.launcher.game_reader.MarkMovelistAsOld()
                             if self.move_viewer.tool_encode_string != "":
                                 self.move_viewer.decode()
@@ -327,7 +331,7 @@ class GUI_Main(Tk):
             self.after(max(2, 8 - int(round(elapsed_time))), self.update_launcher)
         else:
             self.previous_working_pid = 0
-            self.after(1000, self.update_launcher)
+            self.after(500, self.update_launcher)
 
     def on_closing(self):
         sys.stdout = self.stdout

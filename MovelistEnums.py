@@ -291,7 +291,9 @@ class TracePart(Enum):
 
 class InputType(Enum):
     Press = 0x06
+    _Press = 0x93
     Hold = 0x05
+    Hold_ = 0x92
     _Hold = 0x20  
 
     Direction_PRESS = 0x13AF
@@ -328,7 +330,7 @@ class ReturnState(Enum):
     BT_GROUNDED_FACE_DOWN = 0xdd
 
 
-class SpecialState(Enum):
+class BattleState(Enum):
     TECH_CROUCH = 0x02
     GROUNDED = 0x03
     TECH_JUMP = 0x04
@@ -796,9 +798,12 @@ class CC(Enum): #Cancel codes for the cancel block, mostly we expect (CC XX XX C
     END = 0x02  # this byte ends the block
 
     EXE_25 = 0x25 #all EXE blocks have the seecond argument as the number of instructions since the last non 8b/89 block (mostly true)
-    EXE_19 = 0x19 #very common in neutral blocks
-    EXE_1A = 0x1a
-    EXE_1C = 0x1c
+    EXE_19 = 0x19 #assign value to variable
+    EXE_1A = 0x1a #variable math operation: ADD 
+    EXE_1B = 0x1b #variable math operation: SUBTRACT
+    EXE_1C = 0x1c #variable math operation: MULTIPLY
+    EXE_1D = 0x1d #variable math operation: DIVIDE
+    EXE_1E = 0x1e #variable math operation: MOD
     EXE_A5 = 0xA5
     EXE_12 = 0x12 # Increase variable value by 1.
     EXE_13 = 0x13 # Decrease variable value by 1.
@@ -845,25 +850,26 @@ class CC(Enum): #Cancel codes for the cancel block, mostly we expect (CC XX XX C
     RETURN_7a = 0x7a
     RETURN_7e = 0x7e
     RETURN_88 = 0x88
-    RETURN_8c = 0x8c
-    RETURN_8d = 0x8d
-    RETURN_8e = 0x8e
-    RETURN_8f = 0x8f
-    RETURN_90 = 0x90
-    RETURN_91 = 0x91
+    MATH_8c = 0x8c
+    MATH_8d = 0x8d
+    MATH_8e = 0x8e
+    MATH_8f = 0x8f
+    MATH_90 = 0x90
+    MATH_91 = 0x91
     RETURN_92 = 0x92
-    RETURN_94 = 0x94
-    RETURN_95 = 0x95
-    RETURN_96 = 0x96
-    RETURN_98 = 0x98
-    RETURN_99 = 0x99
+    BITWISE_94 = 0x94
+    MATH_95 = 0x95
+    COMPARE_96 = 0x96
+    MATH_97 = 0x97
+    MATH_98 = 0x98
+    EXE_99 = 0x99
     RETURN_9e = 0x9e
-    RETURN_9f = 0x9f
-    RETURN_a0 = 0xa0
-    RETURN_a1 = 0xa1
-    RETURN_a2 = 0xa2
-    RETURN_a3 = 0xa3
-    RETURN_a4 = 0xa4
+    COMPARE_9f = 0x9f
+    COMPARE_a0 = 0xa0
+    COMPARE_a1 = 0xa1
+    COMPARE_a2 = 0xa2
+    COMPARE_a3 = 0xa3
+    COMPARE_a4 = 0xa4
     RETURN_ab = 0xab
     RETURN_ac = 0xac
     RETURN_ad = 0xad

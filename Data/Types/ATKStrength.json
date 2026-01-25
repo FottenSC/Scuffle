@@ -1,0 +1,44 @@
+[
+    {
+        "name": "ATKStrength",
+        "values": [
+            {
+                "input_value": [1, 2, 3, 4, 5],
+                "output_value": "Weak Horizontal"
+            },
+            {
+                "input_value": [6, 7, 8, 9, 10],
+                "output_value": "Medium Horizontal"
+            },
+            {
+                "input_value": [11, 12, 13, 14, 15],
+                "output_value": "Strong Horizontal"
+            },
+            {
+                "input_value": [17, 18, 19, 20, 21],
+                "output_value": "Weak Vertical"
+            },
+            {
+                "input_value": [22, 23, 24, 25, 26],
+                "output_value": "Medium Vertical"
+            },
+            {
+                "input_value": [27, 28, 29, 30, 31],
+                "output_value": "Strong Vertical"
+            },
+            {
+                "input_value": [49, 50, 51, 52, 53],
+                "output_value": "Weak Kick/Throw"
+            },
+            {
+                "input_value": [54, 55, 56, 57, 58],
+                "output_value": "Medium Kick/Throw"
+            },
+            {
+                "input_value": [59, 60, 61, 62, 63],
+                "output_value": "Strong Kick/Throw"
+            }
+        ]
+
+    }
+]

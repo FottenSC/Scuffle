@@ -1,6 +1,6 @@
 [
     {
-        "name": "SpecialState",
+        "name": "BattleState",
         "values": [
             {
                 "input_value": 2,

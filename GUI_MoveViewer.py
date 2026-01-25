@@ -1,5 +1,6 @@
 import json
 import os
+import struct
 from tkinter import *
 from tkinter.ttk import *
 import tkinter.font as tkf
@@ -79,6 +80,7 @@ class GUI_MoveViewer:
 
         self.do_inject_movelist = False
         self.do_fix_goto = BooleanVar(value=True)
+        self.log_injected = BooleanVar(value=False)
         self.reload_on_save_var = BooleanVar(value=False)
 
         self.movelist_name_var = StringVar()
@@ -130,9 +132,9 @@ class GUI_MoveViewer:
         self.save_movelist_button.pack()
         master.bind('<Control-Shift-S>', lambda x: self.save_movelist_dialog())
 
-        self.save_movelist_button = Button(loader_frame_top, text="Inject Movelist", command=lambda: self.inject_movelist_dialog())
+        self.save_movelist_button = Button(loader_frame_top, text="Inject Movelist", command=lambda: self.inject_movelist_dialog(True))
         self.save_movelist_button.pack()
-        master.bind('<Control-i>', lambda x: self.inject_movelist_dialog())
+        master.bind('<Control-i>', lambda x: self.inject_movelist_dialog(True))
 
         self.character_id_menu_label = Label(loader_frame_char,text="Character ID", font=bold_label_font)
         self.character_id_menu_label.pack()
@@ -320,6 +322,8 @@ class GUI_MoveViewer:
         encode_to_decode.pack()
         self.tool_decode_string = StringVar()
         self.tool_encode_string= StringVar()
+        self.tool_decode_string.set('0')
+        self.tool_encode_string.set('0')
         self.tool_decode_string.trace('w', self.encode)
         self.tool_encode_string.trace('w', self.decode)
         self.tool_decode = Entry(encode_to_decode, textvariable=self.tool_decode_string, width=10)
@@ -334,8 +338,46 @@ class GUI_MoveViewer:
         tool_encode_label.grid(row=1, column=0)
         tool_decode_label.grid(row=1, column=1)
         
+        mm_to_m = Frame(loader_frame_tools)
+        mm_to_m.pack()
+        self.tool_meter_string = StringVar()
+        self.tool_mm_string= StringVar()
+        self.tool_meter_string.set('1.0')
+        self.tool_mm_string.set('0x03e8')
+        self.tool_mm_string.trace('w', self.mm_to_meter)
+        self.tool_meter_string.trace('w', self.meter_to_mm)
+        self.tool_meter = Entry(mm_to_m, textvariable=self.tool_meter_string, width=10)
+        self.tool_mm = Entry(mm_to_m, textvariable=self.tool_mm_string, width=10)
+        self.tool_mm.grid(row=0, column=0)
+        self.tool_meter.grid(row=0, column=1)
+        master.bind('<Alt-m>', lambda x: self.tool_mm.focus())
+        master.bind('<Alt-M>', lambda x: self.tool_meter.focus())
 
+        tool_mm_label = Label(mm_to_m, text='Millimeter')
+        tool_meter_label = Label(mm_to_m, text='Meter')
+        tool_mm_label.grid(row=1, column=0)
+        tool_meter_label.grid(row=1, column=1)
 
+        FP16_to_float = Frame(loader_frame_tools)
+        FP16_to_float.pack()
+        self.tool_float_string = StringVar()
+        self.tool_fp16_string= StringVar()
+        self.tool_float_string.set('1.0')
+        self.tool_fp16_string.set('0x3c00')
+        self.tool_fp16_string.trace('w', self.fp16_to_float)
+        self.tool_float_string.trace('w', self.float_to_fp16)
+        self.tool_float = Entry(FP16_to_float, textvariable=self.tool_float_string, width=10)
+        self.tool_fp16 = Entry(FP16_to_float, textvariable=self.tool_fp16_string, width=10)
+        self.tool_fp16.grid(row=0, column=0)
+        self.tool_float.grid(row=0, column=1)
+        master.bind('<Control-h>', lambda x: self.tool_fp16.focus())
+        master.bind('<Control-H>', lambda x: self.tool_float.focus())
+
+        tool_fp16_label = Label(FP16_to_float, text='FP16')
+        tool_float_label = Label(FP16_to_float, text='Float')
+        tool_fp16_label.grid(row=1, column=0)
+        tool_float_label.grid(row=1, column=1)
+        
 
     def hex_to_dec(self, *args):
         try:
@@ -369,7 +411,40 @@ class GUI_MoveViewer:
         except:
             pass
 
-        
+    def fp16_to_float(self, *args):
+        try:
+            if self.master.focus_get() != self.tool_float:
+                int_val = int(self.tool_fp16_string.get(), 16)
+                val_fp32 = struct.unpack('>e', struct.pack('>H', int_val))[0]
+                
+                self.tool_float_string.set(f"{val_fp32}")
+        except:
+            pass 
+    
+    def float_to_fp16(self, *args):
+        try:
+            if self.master.focus_get() != self.tool_fp16:
+                val_float = float(self.tool_float_string.get())
+                int_val = struct.unpack('>H', struct.pack('>e', val_float))[0]
+                self.tool_fp16_string.set(hex(int_val))
+        except:
+            pass
+
+    def mm_to_meter(self, *args):
+        try:
+            if self.master.focus_get() != self.tool_meter:
+                i = int(self.tool_mm_string.get(), 16)
+                self.tool_meter_string.set(i / 1000)
+        except:
+            pass
+
+    def meter_to_mm(self, *args):
+        try:
+            if self.master.focus_get() != self.tool_mm:
+                i = int(self.tool_meter_string.get(), 10)
+                self.tool_mm_string.set(hex(i * 1000))
+        except:
+            pass
 
     def load_movelist(self, path):
         try:
@@ -424,9 +499,10 @@ class GUI_MoveViewer:
         time.sleep(1)
 
         if move_successful and hitbox_successful and cancel_successful:
-            self.inject_movelist_dialog()
+            self.inject_movelist_dialog(False)
             time.sleep(3)
-
+            
+            print(f'{time.strftime("[%I:%M:%S %p]")} Saved changes to move {self.encoded_move_id_textvar.get()}')
             if self.do_fix_goto.get() == False:
                 self.do_fix_goto.set(True)
             
@@ -476,6 +552,12 @@ class GUI_MoveViewer:
     def prev_hitbox_command(self):
         self.hitbox_index -= 1
         if self.hitbox_index < 0:
+            self.hitbox_index = 0
+        self.load_hitbox()
+
+    def update_hitbox_command(self, index):
+        self.hitbox_index += index
+        if self.hitbox_index >= len(self.hitboxes_data):
             self.hitbox_index = 0
         self.load_hitbox()
 
@@ -670,6 +752,7 @@ class GUI_MoveViewer:
 
         filename = askopenfilename(initialdir = '{}/{}'.format(os.getcwd(), '/movelists'),filetypes=[('Header File', '*.khd *.sc6_movelist'),('All Files','*.*')])  # show an "Open" dialog box and return the path to the selected file
         self.load_movelist(filename)
+        print(f'{time.strftime("[%I:%M:%S %p]")} Loaded movelist:{filename}')
 
     def save_movelist_dialog(self):
         filename = asksaveasfilename(defaultextension=".khd")
@@ -678,8 +761,10 @@ class GUI_MoveViewer:
         else:
             with open(filename, 'wb') as fw:
                 fw.write(self.movelist.generate_modified_movelist_bytes())
+            print(f'{time.strftime("[%I:%M:%S %p]")} Saved movelist:{filename}')
 
-    def inject_movelist_dialog(self):
+    def inject_movelist_dialog(self,log=False):
+        self.log_injected.set(log)
         self.do_inject_movelist = True   
                 
 

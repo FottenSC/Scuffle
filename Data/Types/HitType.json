@@ -1,0 +1,28 @@
+[
+    {
+        "name": "HitType",
+        "values": [
+            {
+                "input_value": 1,
+                "output_value": "Swing Right"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Swing Left"
+            },
+            {
+                "input_value": 4,
+                "output_value": "Swing Down"
+            },
+            {
+                "input_value": 8,
+                "output_value": "Swing Up"
+            },
+            {
+                "input_value": 16,
+                "output_value": "Thrust"
+            }
+        ]
+
+    }
+]

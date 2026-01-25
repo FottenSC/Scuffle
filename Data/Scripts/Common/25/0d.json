@@ -56,7 +56,7 @@
 		"args": [
 			{
 				"name": "state",
-				"value_type": "SpecialState"
+				"value_type": "BattleState"
 			},
 			{
 				"name": "start",
@@ -141,30 +141,7 @@
 		"args": [
 			{
 				"name": "0",
-				"value_type": "SpecialState",
-				"data": {
-					"replace_char": ""
-				}
-			},
-			{
-				"name": "amount",
-				"data": {
-					"suffix": "%"
-				}
-			},
-			{
-				"name": "2"
-			}
-		]
-	},
-	{
-		"state": "0x3084",
-		"script_type": "0d",
-		"name": "SCALING (Throw)",
-		"args": [
-			{
-				"name": "0",
-				"value_type": "SpecialState",
+				"value_type": "BattleState",
 				"data": {
 					"replace_char": ""
 				}
@@ -184,6 +161,40 @@
 		"state": "0x3090",
 		"script_type": "0d",
 		"name": "USE METER (CE)"
+	},
+	{
+		"state": "0x3099",
+		"script_type": "0d",
+		"name": "SCALE WEAPON",
+		"args": [
+			{
+				"name": "weapon",
+				"value_type": "Weapon"
+				
+			},
+			{
+				"name": "axis",
+				"value_type": "ScaleAxis"
+			},
+			{
+				"name": "scale",
+				"data":{
+					"FP16": true
+				}
+			},
+			{
+				"name": "frame",
+				"data":{
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "duration",
+				"data":{
+					"suffix": " frames"
+				}
+			}
+		]
 	},
 	{
 		"state": "0x30a8",
@@ -389,6 +400,45 @@
 				"name": "end",
 				"data": {
 					"prefix": "frame "
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30fb",
+		"script_type": "0d",
+		"name": "ATTACK STREAK (REFRACTION)",
+		"args": [
+			{
+				"name": "part",
+				"value_type": "TracePart",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "start",
+				"data": {
+					"suffix": " frames"
+				}
+			},
+			{
+				"name": "duration",
+				"data": {
+					"suffix": " frames"
+				}
+			},
+			{
+				"name": "RE",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "??",
+				"data": {
+					"auto": true
 				}
 			}
 		]

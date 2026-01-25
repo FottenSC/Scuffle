@@ -1,0 +1,24 @@
+[
+    {
+        "name": "PlayerAlignment",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "Front"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Right"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Back"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Left"
+            }
+        ]
+
+    }
+]

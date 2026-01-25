@@ -1,0 +1,32 @@
+[
+    {
+        "name": "FrameShortcut",
+        "values": [
+            {
+                "input_value": 29696,
+                "output_value": "Entry Frame"
+            },
+            {
+                "input_value": 29952,
+                "output_value": "Exit Frame"
+            },
+            {
+                "input_value": 30208,
+                "output_value": "Exit Frame"
+            },
+            {
+                "input_value": 30720,
+                "output_value": "Current Frame"
+            },
+            {
+                "input_value": 31232,
+                "output_value": "Remaining Frames"
+            },
+            {
+                "input_value": 31744,
+                "output_value": "Current Frame + 1"
+            }
+        ]
+
+    }
+]

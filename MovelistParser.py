@@ -79,7 +79,7 @@ def string_to_class(string, custom_types=None):
         'InputType': InputType,
         "ComboConditions": ComboConditions,
         "ReturnState": ReturnState,
-        "SpecialState": SpecialState,
+        "SpecialState": BattleState,
         "AssetType": AssetType,
         "CharacterIndex": CharacterIndex,
         "Hand": Hand,
@@ -119,6 +119,9 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
             if "state" not in index_id:
                 index_id["state"] = "0x0000"
 
+            if "return_value" not in index_id:
+                index_id["return_value"] = False
+
             if "script_type" not in index_id:
                 index_id["script_type"] = "0x01"
 
@@ -140,6 +143,9 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
         for index_id in custom_data:
             if "state" not in index_id:
                 index_id["state"] = "0x0000"
+
+            if "return_value" not in index_id:
+                index_id["return_value"] = False
 
             if "script_type" not in index_id:
                 index_id["script_type"] = "0x01"
@@ -163,6 +169,9 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
         for index_id in data:
             if "state" not in index_id:
                 index_id["state"] = "0x0000"
+
+            if "return_value" not in index_id:
+                index_id["return_value"] = False
 
             if "script_type" not in index_id:
                 index_id["script_type"] = "0x01"
@@ -229,8 +238,10 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
     return found, state_info, argp
     
 
-def format_value(bytes, cls=None, auto = False, decode = False, movelist = None, negative = False, end = False, prefix = "", suffix = "", offset = 0, replace_char = " ", format = False, slice= False, slice_index = 0, encoded_percent = False, percent_base = 0x3c00):
+def format_value(bytes, cls=None, auto = False, decode = False, movelist = None, negative = False, end = False, prefix = "", suffix = "", offset = 0, replace_char = " ", format = False, slice= False, slice_index = 0, FP16 = False, percent = False, percent_base = 100, multiplier = 0, divisor = 0, divide_first = False):
     value = bs2i(bytes,1,big_endian=True) if negative else b2i(bytes,1,big_endian=True)
+    value_f = bs2i(bytes,1,big_endian=True)
+    value_f_b = bs1i(bytes,2)
     type = int(bytes[0])
     result = 0
 
@@ -267,10 +278,32 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         else:
             if value == 0 and auto:
                 result = f'<b>Auto<b>'
-            elif encoded_percent:
+            
+            elif percent:
                 result = f'<b>{math.floor(value / percent_base * 100)}%<b>'
+
+            elif FP16:
+                result = ((value_f & 0x7c00) << 13) + 0x38000000 | (value_f & 0x3ff) << 13 | value_f & 0x80000000
+                if multiplier:
+                    result = f"<b>{round(struct.unpack('f', struct.pack('I', result & 0xFFFFFFFF))[0] * multiplier,6)}{suffix}<b>"
+                if divisor:
+                    result = f"<b>{round(struct.unpack('f', struct.pack('I', result & 0xFFFFFFFF))[0] / divisor, 6)}{suffix}<b>"
+                
+                result = f"<b>{round(struct.unpack('f', struct.pack('I', result & 0xFFFFFFFF))[0],3)}{suffix}<b>"
             else:
+                if divide_first == 0:
+                    if multiplier:
+                        value = value * multiplier
+                    if divisor:
+                        value = value / divisor
+                if divide_first == 1:
+                    if divisor:
+                        value = value / divisor
+                    if multiplier:
+                        value = value * multiplier
+
                 result = f'{prefix}<b>{decode_move_id(value,movelist)}<b>{suffix}' if decode else f'{prefix}<b>{value + offset}<b>{suffix}'
+
                 
         return result if result != None else "<b>last return<b>"
     
@@ -302,25 +335,62 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
             else:
                 result = f'∞'
         elif value & 0x7600 == 0x7600:
-            result = f'<b>exit frame + {value ^ 0x7600}<b>' if (value ^ 0x7600) > 0 else '<b>exit frame<b>'
+            result_label = f'<b>exit frame - {abs(value_f_b)}<b>' if value_f_b <= -1 else f'<b>exit frame + {abs(value_f_b)}<b>' 
+            result = result_label if value_f_b != 0 else '<b>exit frame<b>'
         
+        elif value & 0x7500 == 0x7500:
+            result_label = f'<b>exit frame - {abs(value_f_b)}<b>' if value_f_b <= -1 else f'<b>exit frame + {abs(value_f_b)}<b>' 
+            result = result_label if value_f_b != 0 else '<b>exit frame<b>'
+        
+        elif value & 0x7c00 == 0x7c00:
+            result_label = f'<b>(current frame +1) - {abs(value_f_b)}<b>' if value_f_b <= -1 else f'<b>(current frame + 1) + {abs(value_f_b)}<b>' 
+            result = result_label if value_f_b != 0 else '<b>current frame + 1<b>'
         
         elif value & 0x7400 == 0x7400:
-            result = f'<b>entry frame + {value ^ 0x7400}<b>' if (value ^ 0x7400) > 0 else '<b>entry frame<b>'
+            result_label = f'<b>entry frame - {abs(value_f_b)}<b>' if value_f_b <= -1 else f'<b>entry frame + {abs(value_f_b)}<b>' 
+            result = result_label if value_f_b != 0 else '<b>entry frame<b>'
+        
+        elif value & 0x7a00 == 0x7a00:
+            result_label = f'<b>remaining frames - {abs(value_f_b)}<b>' if value_f_b <= -1 else f'<b>remaining frames + {abs(value_f_b)}<b>' 
+            result = result_label if value_f_b != 0 else '<b>remaining frames<b>'
         
         elif value & 0x7800 == 0x7800 and value != 0x7a00:
-            result = f'<b>current frame + {value ^ 0x7800}<b>' if (value ^ 0x7800) > 0 else '<b>current frame<b>'
+            result_label = f'<b>current frame - {abs(value_f_b)}<b>' if value_f_b <= -1 else f'<b>current frame + {abs(value_f_b)}<b>' 
+            result = result_label if value_f_b != 0 else '<b>current frame<b>'
         
             
         else:
             if value == 0 and auto:
                 result = f'<b>Auto<b>'
+            elif percent:
+                result = f'<b>{math.floor(value / percent_base * 100)}%<b>'
+
+            elif FP16:
+                result = ((value & 0x7c00) << 13) + 0x38000000 | (value & 0x3ff) << 13 | value & 0x80000000
+                if multiplier:
+                    result = f"<b>{round(struct.unpack('f', struct.pack('I', result & 0xFFFFFFFF))[0] * multiplier,6)}{suffix}<b>"
+                if divisor:
+                    result = f"<b>{round(struct.unpack('f', struct.pack('I', result & 0xFFFFFFFF))[0] / divisor, 6)}{suffix}<b>"
+
+                result = f"<b>{round(struct.unpack('f', struct.pack('I', result & 0xFFFFFFFF))[0],3)}{suffix}<b>"
+
             else:
+                if divide_first == 0:
+                    if multiplier:
+                        value = value * multiplier
+                    if divisor:
+                        value = value / divisor
+                if divide_first == 1:
+                    if divisor:
+                        value = value / divisor
+                    if multiplier:
+                        value = value * multiplier
+
                 result = f'{prefix}<b>{decode_move_id(value,movelist)}<b>{suffix}' if decode else f'{prefix}<b>{value + offset}<b>{suffix}'
                 
         return result if result != None else "<b>last return<b>"
     
-    elif type == 0x8a or type == 0x19 or type == 0x1a or type == 0x1c or type == 0x12 or type == 0x13: #variable / input param
+    elif type == 0x8a or type == 0x19 or type == 0x1a or type == 0x1b or type == 0x1c or type == 0x1d or type == 0x1e or type == 0x12 or type == 0x13 or type == 0x99: #variable / input param
         if value & 0xf0 == 0xf0:
             result = f'<b>input param {(value ^ 0xf0) + 1}<b>'
         elif value & 0x0100 == 0x0100:
@@ -330,7 +400,19 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         return result if result != None else "<b>last return<b>"
     
 
-
+def format_return_value(bytes, index, offset1 = 6, offset2 = 4):
+    variable_operators = [0x12, 0x13, 0x19, 0x1a, 0x1c, 0x8a, 0x99]
+    math_operators = [0x8c, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x94, 0x95, 0x97, 0x98]
+    compare_operators = [0x9f, 0xa0, 0xa1, 0xa2, 0xa3, 0xa4]
+    if bytes[index - offset1] == 0xa5 or bytes[index - offset2] == 0x25:
+        return"<b>last return value<b>"
+    elif bytes[index-offset2] in math_operators and bytes[index-offset1] not in variable_operators:
+        return"<b>math result<b>"
+    elif bytes[index-offset2] in compare_operators:
+        return"<b>compare result<b>"
+    
+    else:
+        return format_value(bytes[index - 6:index - 3], negative=True)
 
 
 
@@ -1140,6 +1222,7 @@ class Cancel:
 
             try:
                 inst = CC(int(self.bytes[index]))
+                next_inst = int(self.bytes[index + 1]) if index + 1 < len(self.bytes) else 0
             except:
                 list_of_bytes.append((current_bytes, 'ERROR PARSING', index))
                 break
@@ -1185,6 +1268,8 @@ class Cancel:
                             try:
                                 found, state_info, argp = find_script_info(self.movelist, state, self.movelist.xA5_char_data, self.movelist.xA5_custom_data, self.movelist.xA5_data, "01", second_arg, args_list)
                                 if found:
+                                    if state_info['return_value']:
+                                        label_prefix = '<b>GET:<b>'
                                     if len(argp) > 0:
                                         label = f'{label_prefix} {state_info["name"]} {"".join(argp)}'
                                     else:
@@ -1227,12 +1312,21 @@ class Cancel:
                                 label = f'{label_prefix} FRAME WINDOW '
                                 base_label = label
                                 last_bool = 'FRAME WINDOW CHECK'
+                                math_operators = [0x8c, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x94, 0x97, 0x98]
+                                math_result = False
+                                for op in math_operators:
+                                    for b in args_list[0]:
+                                        if b == op:
+                                            math_result = True
+                                            break
+                                    if math_result == True:
+                                        break
+
                                 
-                                
-                                label = f'{label_prefix} FRAME WINDOW [{format_value(self.bytes[state_index: state_index + 3], prefix="frame ") if format_value(self.bytes[state_index: state_index + 3]) != None else f"<b>math result<b>"} to {format_value(args_list[0],prefix="frame ") if args_list[0] != None else f"<b>{last_bool}<b>"}]'
+                                label = f'{label_prefix} FRAME WINDOW [{format_value(self.bytes[state_index: state_index + 3], prefix="frame ") if format_value(self.bytes[state_index: state_index + 3]) != None else f"<b>math result 1<b>"} to {format_value(args_list[0],prefix="frame ") if math_result == False else f"<b>math result 2<b>"}]'
                                     
                             else:
-                                label = f'{label_prefix} FRAME [frame:{format_value(self.bytes[state_index: state_index + 3], prefix="frame ") if format_value(self.bytes[state_index: state_index + 3]) != None else f"<b>math result<b>"}]'
+                                label = f'{label_prefix} FRAME [frame:{format_value(self.bytes[state_index: state_index + 3], prefix="frame ") if format_value(self.bytes[state_index: state_index + 3]) != None else f"<b>last return<b>"}]'
                                 last_bool = 'FRAME CHECK'
 
                                     
@@ -1248,6 +1342,7 @@ class Cancel:
                     try:
                         state_index = (index - 3) - (second_arg * 3)
                         state = b2i(self.bytes, state_index + 1, big_endian=True)
+                        state_f = b2i(self.bytes, state_index + 4, big_endian=True)
                         is_soul_charge = False
                         if state == 0x30CC: #soul charge, 3018 may be Tira/Gloomy only?
                             is_soul_charge = True
@@ -1256,11 +1351,14 @@ class Cancel:
                         
 
                         alias = decode_move_id(state, self.movelist)
+                        alias_f = decode_move_id(state_f, self.movelist)
 
                         state_args = Movelist.bytes_as_string(self.bytes[state_index + 3: index - 3])
                         i = 0
                         arg_bytes = self.bytes[state_index + 3: index - 3]
+                        arg_bytes_f = self.bytes[state_index + 6: index - 3]
                         args_list = [arg_bytes[i:i + 3] for i in range(0, len(arg_bytes), 3)]
+                        args_list_f = [arg_bytes_f[i:i + 3] for i in range(0, len(arg_bytes_f), 3)]
 
                         i = 0
                         params = [format_value(arg_bytes[i:i + 3]) for i in range(6, len(arg_bytes), 3)]
@@ -1270,7 +1368,9 @@ class Cancel:
                         else:
                             tag = '<b>'
                         state_id = state
+                        state_id_f = state_f
                         state = '[id:{}{}{}]'.format(tag, alias, tag)
+                        state_f = '[id:{}{}{}]'.format(tag, alias_f, tag)
                     except:
                         state = 'ERROR'
                         state_args = 'ERROR'
@@ -1292,7 +1392,7 @@ class Cancel:
                                 last_bool = state_info["last"] if ("last" in state_info and state_info["last"] != "") else state_info["name"]
 
                             if state_id == 0x13da:
-                                label = f'<b>ADD/REMOVE METER<b>: [target:{format_value(args_list[0],CharacterIndex)}][type:{format_value(args_list[1],MeterType)}][percentage_base:{format_value(args_list[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list[3], negative=True, encoded_percent=True, percent_base=240 if bs2i(args_list[2],1,big_endian=True) != 1 else 120)}]'
+                                label = f'<b>ADD/REMOVE METER<b>: [target:{format_value(args_list[0],CharacterIndex)}][type:{format_value(args_list[1],MeterType)}][percentage_base:{format_value(args_list[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list[3], negative=True, percent=True, percent_base=240 if bs2i(args_list[2],1,big_endian=True) != 1 else 120)}]'
 
                         except:
                             state = 'ERROR'
@@ -1316,12 +1416,15 @@ class Cancel:
                             list_of_bytes.append((current_bytes, f'<b>SWITCH MOVE<b>: MOVE[id:{format_value(self.bytes[state_index: state_index + 3],decode=True, movelist=self.movelist)}]', index))
 
                     elif first_arg == 0x09:
-                        list_of_bytes.append((current_bytes,f'<b>ENTER STATE<b>: [state:{format_value(self.bytes[state_index:state_index + 3],SpecialState)}]', index))
+                        list_of_bytes.append((current_bytes,f'<b>ENTER STATE<b>: [state:{format_value(self.bytes[state_index:state_index + 3],BattleState)}]', index))
                     
                     elif first_arg == 0x0a:
-                        list_of_bytes.append((current_bytes,f'<b>LEAVE STATE<b>: [state:{format_value(self.bytes[state_index:state_index + 3],SpecialState)}]', index))
+                        list_of_bytes.append((current_bytes,f'<b>LEAVE STATE<b>: [state:{format_value(self.bytes[state_index:state_index + 3],BattleState)}]', index))
 
-                    elif first_arg == 0x0d: # 0x3041 - CE VO | 0x3031 - Throw logic
+                    elif first_arg == 0x0c:
+                        list_of_bytes.append((current_bytes,f'<b>UPDATE FLOAT VALUE AT INDEX<b>: [index:{format_value(self.bytes[state_index:state_index + 3])}][new_value:{format_value(args_list[0],FP16=True)}]', index))
+
+                    elif first_arg == 0x0d or first_arg == 0x15: # 0x3041 - CE VO | 0x3031 - Throw logic
                         try:
                             label = ''
                             found, state_info, argp = find_script_info(self.movelist, state_id, self.movelist.x25_char_data, self.movelist.x25_custom_data, self.movelist.x25_data, "0d", second_arg, args_list)
@@ -1353,6 +1456,25 @@ class Cancel:
                         except:
                             state= 'ERROR'
                         list_of_bytes.append((current_bytes, f'<b>SET STATE<b>: [state:{format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}][value:{format_value(self.bytes[state_index + 3: state_index + 6], decode=False, movelist=self.movelist)}]' if label == "" else label, index))
+                    
+                    elif first_arg == 0x19:
+                        try:
+                            label = ''
+                            found, state_info, argp = find_script_info(self.movelist, state_id_f, self.movelist.x25_char_data, self.movelist.x25_custom_data, self.movelist.x25_data, "03", second_arg, args_list_f)
+                            if found:
+                                if len(argp) > 0:
+                                    label = f'{state_info["name"]}(frame: {format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}) {"".join(argp)}'
+                                else:
+                                    label = f'{state_info["name"]}(frame: {format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}){(" " + state_info["no_arg_text"]) if "no_arg_text" in state_info else ""}'
+
+                                last_bool = state_info["last"] if ("last" in state_info and state_info["last"] != "") else state_info["name"]
+
+                            if state_id_f == 0x13da:
+                                label = f'<b>ADD/REMOVE METER<b>: (frame: {format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}) [target:{format_value(args_list_f[0],CharacterIndex)}][type:{format_value(args_list_f[1],MeterType)}][percentage_base:{format_value(args_list_f[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list_f[3], negative=True, percent=True, percent_base=240 if bs2i(args_list_f[2],1,big_endian=True) != 1 else 120)}]'
+
+                        except:
+                            state = 'ERROR'
+                        list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: {state_f}(frame: {format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)})' if label == "" else label, index))
 
                     elif first_arg == 0x26:
                         list_of_bytes.append((current_bytes, f'<b>SET ACTIVE HITBOX<b>: {format_value(self.bytes[state_index: state_index + 3], prefix = "hitbox ", offset = 1)}', index))
@@ -1361,29 +1483,47 @@ class Cancel:
                     else:
                         list_of_bytes.append((current_bytes, '<b>SYSTEM SCRIPT<b>: [id:{}] ?? ({}) '.format(format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist), state_args), index))
                     current_bytes =  b''
-                if inst == CC.EXE_19:
+                if inst == CC.EXE_19 or inst == CC.EXE_99:
                     try:
-                        list_of_bytes.append((current_bytes, f'<b>SET VARIABLE<b>: {format_value(self.bytes[index - 3:index])} = {"<b>last return value<b>" if self.bytes[index - 6] == 0xa5 or self.bytes[index - 6] == 0x25 else format_value(self.bytes[index - 6:index - 3],negative=True)}', index))
+                        list_of_bytes.append((current_bytes, f'<b>SET VARIABLE<b>: {format_value(self.bytes[index - 3:index])} = {format_return_value(self.bytes,index)}', index))
                     except:
                         list_of_bytes.append((current_bytes, f'<b>SET VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
                 if inst == CC.EXE_1A:
                     try:
-                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE? (1a)<b>: {format_value(self.bytes[index - 3:index])} ?? {"<b>last return value<b>" if self.bytes[index - 6] == 0xa5 or self.bytes[index - 6] == 0x25 else format_value(self.bytes[index - 6:index - 3],negative=True)}', index))
+                        list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: ADD [{format_value(self.bytes[index - 3:index])} += {format_return_value(self.bytes,index)}]', index))
                     except:
-                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE? (1a)<b>: {format_value(self.bytes[index - 3:index])}', index))
+                        list_of_bytes.append((current_bytes, f'<b>VARAIBLE MATH<b>: {format_value(self.bytes[index - 3:index])}', index))
+                    current_bytes = b''
+                if inst == CC.EXE_1B:
+                    try:
+                        list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: SUBTRACT [{format_value(self.bytes[index - 3:index])} -= {format_return_value(self.bytes,index)}]', index))
+                    except:
+                        list_of_bytes.append((current_bytes, f'<b>VARAIBLE MATH<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
                 if inst == CC.EXE_1C:
                     try:
-                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE? (1c)<b>: {format_value(self.bytes[index - 3:index])} ?? {"<b>last return value<b>" if self.bytes[index - 6] == 0xa5 or self.bytes[index - 6] == 0x25 else format_value(self.bytes[index - 6:index - 3],negative=True)}', index))
+                        list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: MULTIPLY [{format_value(self.bytes[index - 3:index])} ⁎= {format_return_value(self.bytes,index)}]', index))
                     except:
-                        list_of_bytes.append((current_bytes, f'<b>MODIFY VARIABLE? (1c)<b>: {format_value(self.bytes[index - 3:index])}', index))
+                        list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: {format_value(self.bytes[index - 3:index])}', index))
+                    current_bytes = b''
+                if inst == CC.EXE_1D:
+                    try:
+                        list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: DIVIDE [{format_value(self.bytes[index - 3:index])} ÷= {format_return_value(self.bytes,index)}]', index))
+                    except:
+                        list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: {format_value(self.bytes[index - 3:index])}', index))
+                    current_bytes = b''
+                if inst == CC.EXE_1E:
+                    try:
+                        list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: MOD [{format_value(self.bytes[index - 3:index])} %= {format_return_value(self.bytes,index)}]', index))
+                    except:
+                        list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
                 if inst == CC.EXE_12:
-                    list_of_bytes.append((current_bytes, f'<b>ADD ONE TO VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
+                    list_of_bytes.append((current_bytes, f'<b>INCREMENT VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
                 if inst == CC.EXE_13:
-                    list_of_bytes.append((current_bytes, f'<b>SUBTRACT ONE FROM VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
+                    list_of_bytes.append((current_bytes, f'<b>DECREMENT VARIABLE<b>: {format_value(self.bytes[index - 3:index])}', index))
                     current_bytes = b''
                 if inst == CC.PEN_2A:
                     list_of_bytes.append((current_bytes, 'GOTO: {}'.format(format(args,'04x') if args not in end else 'END'), index))
@@ -1399,71 +1539,119 @@ class Cancel:
                     goto_blocks.append((index, args))
 
             elif inst in Movelist.ONE_BYTE_INSTRUCTIONS:
-                var = format_value(self.bytes[index - 6:index - 3])
+                if self.bytes[index - 3] == 165:
+                    var = format_value(self.bytes[index - ((3 * (self.bytes[index - 1])) + 6):index - ((3 * (self.bytes[index - 1])) + 3)])
+                else:
+                    var = format_value(self.bytes[index - 6:index - 3])
                 value = format_value(self.bytes[index - 3 : index],negative=True)
-                if inst == CC.RETURN_9f:
-                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>{last_bool}<b>"} == {value if value != None else f"<b>{last_bool}<b>"}',index))
+                
+                if inst == CC.RETURN_05:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>RETURN VALUE<b>:[{value if value != None else f"<b>last return value<b>"}]',index))
+                    last_bool = 'return result'
+                elif inst == CC.RETURN_08:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'EXIT',index))
+                    last_bool = 'return result'
+                elif inst == CC.COMPARE_9f:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>last return value<b>"} == {value if value != None else f"<b>last return value 2<b>"}',index))
                     last_bool = 'COMPARE'
 
-                elif inst == CC.RETURN_a0:
-                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>{last_bool}<b>"} != {value if value != None else f"<b>{last_bool}<b>"}',index))
+                elif inst == CC.COMPARE_a0:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>last return value<b>"} != {value if value != None else f"<b>last return value 2<b>"}',index))
                     last_bool = 'COMPARE'
-                elif inst == CC.RETURN_a1:
-                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>{last_bool}<b>"} <? {value if value != None else f"<b>{last_bool}<b>"}',index))
+                elif inst == CC.COMPARE_a1:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>last return value<b>"} <? {value if value != None else f"<b>last return value 2<b>"}',index))
                     last_bool = 'COMPARE'
-                elif inst == CC.RETURN_a2:
-                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>{last_bool}<b>"} <=? {value if value != None else f"<b>{last_bool}<b>"}',index))
+                elif inst == CC.COMPARE_a2:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>last return value<b>"} <=? {value if value != None else f"<b>last return value 2<b>"}',index))
                     last_bool = 'COMPARE'
-                elif inst == CC.RETURN_a3:
-                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>{last_bool}<b>"} >? {value if value != None else f"<b>{last_bool}<b>"}',index))
+                elif inst == CC.COMPARE_a3:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>last return value<b>"} >? {value if value != None else f"<b>last return value 2<b>"}',index))
                     last_bool = 'COMPARE'
-                elif inst == CC.RETURN_a4:
-                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>{last_bool}<b>"} >=? {value if value != None else f"<b>{last_bool}<b>"}',index))
+                elif inst == CC.COMPARE_a4:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: {var if var != None else f"<b>last return value<b>"} >=? {value if value != None else f"<b>last return value 2<b>"}',index))
                     last_bool = 'COMPARE'
                 
-                elif inst == CC.RETURN_8c:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: ADD [{var if var != None else f"<b>{last_bool}<b>"} + {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                elif inst == CC.MATH_8c:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: ADD [{var if var != None else f"<b>last return value<b>"} + {value if value != None else f"<b>last return value 2<b>"}]',index))
                     last_bool = 'math result'
                     
                 
-                elif inst == CC.RETURN_8d:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: SUBTRACT [{var if var != None else f"<b>{last_bool}<b>"} - {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                elif inst == CC.MATH_8d:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: SUBTRACT [{var if var != None else f"<b>last return value<b>"} - {value if value != None else f"<b>last return value 2<b>"}]',index))
                     last_bool = 'math result'
 
-                elif inst == CC.RETURN_8e:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: MULTIPLY [{var if var != None else f"<b>{last_bool}<b>"} * {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                elif inst == CC.MATH_8e:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: MULTIPLY [{var if var != None else f"<b>last return value<b>"} * {value if value != None else f"<b>last return value 2<b>"}]',index))
                     last_bool = 'math result'
 
-                elif inst == CC.RETURN_8f:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: DIVIDE [{var if var != None else f"<b>{last_bool}<b>"} ÷ {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                elif inst == CC.MATH_8f:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: DIVIDE [{var if var != None else f"<b>last return value<b>"} ÷ {value if value != None else f"<b>last return value 2<b>"}]',index))
                     last_bool = 'math result'
 
-                elif inst == CC.RETURN_90:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: MOD [{var if var != None else f"<b>{last_bool}<b>"} % {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                elif inst == CC.MATH_90:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: MOD [{var if var != None else f"<b>last return value<b>"} % {value if value != None else f"<b>last return value 2<b>"}]',index))
                     last_bool = 'math result'
 
-                elif inst == CC.RETURN_91:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: INVERT SIGN [{var if var != None else f"<b>{last_bool}<b>"} = {value if value != None else f"<b>{last_bool}<b>"} * -1]',index))
+                elif inst == CC.MATH_91:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: INVERT SIGN [{value if value != None else f"<b>last return value<b>"} * -1]',index))
                     last_bool = 'math result'
 
-                elif inst == CC.RETURN_94:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: BITWISE AND [{var if var != None else f"<b>{last_bool}<b>"} & {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                elif inst == CC.BITWISE_94:
+                    if next_inst == 150:
+                        current_bytes += b'\x96'
+                        index += 2
+                        list_of_bytes.append((current_bytes,f'<b>MATH<b>: BITWISE NOT AND [{var if var != None else f"<b>last return value<b>"} & {value if value != None else f"<b>last return value 2<b>"}]',index))
+                    else:
+                        index += 1
+                        list_of_bytes.append((current_bytes,f'<b>MATH<b>: BITWISE AND [{var if var != None else f"<b>last return value<b>"} & {value if value != None else f"<b>last return value 2<b>"}]',index))
+                        
                     last_bool = 'math result'
 
-                elif inst == CC.RETURN_95:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: BITWISE OR [{var if var != None else f"<b>{last_bool}<b>"} | {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                elif inst == CC.MATH_95:
+                    if next_inst == 150:
+                        current_bytes += b'\x96'
+                        index += 2
+                        list_of_bytes.append((current_bytes,f'<b>MATH<b>: BITWISE NOT OR [{var if var != None else f"<b>last return value<b>"} | {value if value != None else f"<b>last return value 2<b>"}]',index))
+                    else:
+                        index += 1
+                        list_of_bytes.append((current_bytes,f'<b>MATH<b>: BITWISE OR [{var if var != None else f"<b>last return value<b>"} | {value if value != None else f"<b>last return value 2<b>"}]',index))
+                    last_bool = 'math result'
+                
+                elif inst == CC.MATH_97:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: BIT SHIFT LEFT [{var if var != None else f"<b>last return value<b>"} << {value if value != None else f"<b>last return value 2<b>"}]',index))
                     last_bool = 'math result'
 
-                elif inst == CC.RETURN_98:
-                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: BIT SHIFT RIGHT [{var if var != None else f"<b>{last_bool}<b>"} >> {value if value != None else f"<b>{last_bool}<b>"}]',index))
+                elif inst == CC.MATH_98:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH<b>: BIT SHIFT RIGHT [{var if var != None else f"<b>last return value<b>"} >> {value if value != None else f"<b>last return value 2<b>"}]',index))
                     last_bool = 'math result'
+
+                elif inst == CC.COMPARE_96:
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>COMPARE<b>: [{value if value != None else f"<b>last return value<b>"} == 0]',index))
+                    last_bool = 'COMPARE'
 
                 else:
-                    list_of_bytes.append((current_bytes,f'<b>MATH/COMPARE<b>: {var if var != None else f"<b>{last_bool}<b>"} ?? {value if value != None else f"<b>{last_bool}<b>"}',index))
+                    index += 1
+                    list_of_bytes.append((current_bytes,f'<b>MATH/COMPARE<b>: {var if var != None else f"<b>last return value<b>"} ?? {value if value != None else f"<b>last return value 2<b>"}',index))
                     last_bool = 'MATH/COMPARE'
 
                 current_bytes = b''
-                index += 1
                   
                 
             else:
@@ -1762,8 +1950,8 @@ class Movelist:
     #STARTER_STRING = 'KH11'
     STARTER_INT = 0x3131484b
 
-    ONE_BYTE_INSTRUCTIONS = [CC.RETURN_8c, CC.RETURN_8d, CC.RETURN_8e, CC.RETURN_8f, CC.RETURN_90, CC.RETURN_91, CC.RETURN_94, CC.RETURN_95, CC.RETURN_98, CC.RETURN_9f, CC.RETURN_a0, CC.RETURN_a1, CC.RETURN_a2, CC.RETURN_a3, CC.RETURN_a4]
-    THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_1A, CC.EXE_1C, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29]
+    ONE_BYTE_INSTRUCTIONS = [CC.RETURN_05, CC.RETURN_08, CC.MATH_8c, CC.MATH_8d, CC.MATH_8e, CC.MATH_8f, CC.MATH_90, CC.MATH_91, CC.BITWISE_94, CC.MATH_95, CC.COMPARE_96, CC.MATH_97, CC.MATH_98, CC.COMPARE_9f, CC.COMPARE_a0, CC.COMPARE_a1, CC.COMPARE_a2, CC.COMPARE_a3, CC.COMPARE_a4]
+    THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_1A, CC.EXE_1B, CC.EXE_1C, CC.EXE_1D, CC.EXE_1E, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29, CC.EXE_99]
 
     def __init__(self, raw_bytes, name):
         self.character_id = '000'

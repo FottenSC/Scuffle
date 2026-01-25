@@ -1,0 +1,44 @@
+[
+    {
+        "name": "Weapon",
+        "values": [
+            {
+                "input_value": 1,
+                "output_value": "Weapon 1"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Weapon 2"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Weapon 3"
+            },
+            {
+                "input_value": 4,
+                "output_value": "Weapon 4"
+            },
+            {
+                "input_value": 5,
+                "output_value": "Weapon 5"
+            },
+            {
+                "input_value": 6,
+                "output_value": "Weapon 6"
+            },
+            {
+                "input_value": 7,
+                "output_value": "Weapon 7"
+            },
+            {
+                "input_value": 8,
+                "output_value": "Weapon 8"
+            },
+            {
+                "input_value": 9,
+                "output_value": "Weapon 9"
+            }
+        ]
+
+    }
+]

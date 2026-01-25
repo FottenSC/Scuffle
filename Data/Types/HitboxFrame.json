@@ -1,0 +1,16 @@
+[
+    {
+        "name": "HitboxFrame",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "Active start frame"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Active end frame"
+            }
+        ]
+
+    }
+]

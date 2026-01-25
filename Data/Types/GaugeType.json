@@ -1,0 +1,24 @@
+[
+    {
+        "name": "GaugeType",
+        "values": [
+            {
+                "input_value": [0,1],
+                "output_value": "Current HP"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Soul Gauge"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Soul Charge Time"
+            },
+            {
+                "input_value": 4,
+                "output_value": "Guard Gauge"
+            }
+        ]
+
+    }
+]

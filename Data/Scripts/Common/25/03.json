@@ -5,7 +5,10 @@
 		"name": "<b>USE TRANSITION ANIMATION<b>:",
 		"args": [
 			{
-				"name": "??"
+				"name": "blend_factor",
+				"data":{
+					"FP16": true
+				}
 			},
 			{
 				"name": "transition_frames"
@@ -18,13 +21,108 @@
 	{
 		"state": "0x0004",
 		"script_type": "03",
-		"name": "<b>APPLY MOVEMENT<b>:",
+		"name": "<b>APPLY HORIZONTAL MOVEMENT<b>:",
 		"args": [
 			{
-				"name": "angle"
+				"name": "angle",
+				"data":{
+					"suffix": " degrees",
+					"negative": true
+
+				}
 			},
 			{
-				"name": "distance"
+				"name": "distance",
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters",
+					"negative": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x0005",
+		"script_type": "03",
+		"name": "<b>APPLY VERTICAL MOVEMENT<b>:",
+		"args": [
+			{
+				"name": "distance",
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters",
+					"negative": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x0006",
+		"script_type": "03",
+		"name": "<b>STOP MOVEMENT<b>:",
+		"no_arg_text": "HORIZONTAL AND VERTICAL"
+	},
+	{
+		"state": "0x0007",
+		"script_type": "03",
+		"name": "<b>STOP MOVEMENT<b>:",
+		"no_arg_text": "HORIZONTAL"
+	},
+	{
+		"state": "0x0008",
+		"script_type": "03",
+		"name": "<b>STOP MOVEMENT<b>:",
+		"no_arg_text": "VERTICAL"
+	},
+	{
+		"state": "0x0009",
+		"script_type": "03",
+		"name": "<b>APPLY HORIZONTAL MOVEMENT (ADDITIVE)<b>:",
+		"args": [
+			{
+				"name": "angle",
+				"data":{
+					"suffix": " degrees",
+					"negative": true
+
+				}
+			},
+			{
+				"name": "distance",
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters",
+					"negative": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x000a",
+		"script_type": "03",
+		"name": "<b>APPLY VERTICAL MOVEMENT (ADDITIVE)<b>:",
+		"args": [
+			{
+				"name": "distance",
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters",
+					"negative": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x000d",
+		"script_type": "03",
+		"name": "<b>SET FACING ANGLE<b>:",
+		"args": [
+			{
+				"name": "angle",
+				"data": {
+					"suffix": " degrees",
+					"negative": true
+				}
 			}
 		]
 	},
@@ -49,8 +147,9 @@
 			{
 				"name": "speed",
 				"data": {
-					"encoded_percent": true,
-					"percent_base": 22080
+					"FP16": true,
+					"suffix": "%"
+
 				}
 			}
 		]
@@ -63,8 +162,8 @@
 			{
 				"name": "speed",
 				"data": {
-					"encoded_percent": true,
-					"percent_base": 22080
+					"FP16": true,
+					"suffix": "%"
 				}
 			}
 		]
@@ -91,7 +190,11 @@
 		"name": "<b>SET ELEVATION<b>:",
 		"args": [
 			{
-				"name": "height"
+				"name": "height",
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters"
+				}
 			}
 		]
 	},
@@ -150,7 +253,34 @@
 		"name": "<b>CAMERA SHAKE<b>:",
 		"args": [
 			{
-				"name": "strength"
+				"name": "preset_id"
+			},
+			{
+				"name": "??"
+			},
+			{
+				"name": "quake_rate"
+			},
+			{
+				"name": "intensity",
+				"data":{
+					"divisor": 1000
+				}
+			},
+			{
+				"name": "height_multipler",
+				"data":{
+					"multiplier": 0.01
+				}
+			},
+			{
+				"name": "shake_duration"
+			},
+			{
+				"name": "shake_rate"
+			},
+			{
+				"name": "duration"
 			}
 		]
 	},
@@ -208,6 +338,34 @@
 		]
 	},
 	{
+		"state": "0x03f1",
+		"script_type": "03",
+		"name": "<b>DARKEN SCREEN<b>:",
+		"args": [
+			{
+				"name": "fade_in"
+			},
+			{
+				"name": "duration"
+			},
+			{
+				"name": "fade_out"
+			},
+			{
+				"name": "target_darkness_multiplier",
+				"data": {
+					"FP16": true
+				}
+			},
+			{
+				"name": "starting_darkness_multiplier",
+				"data": {
+					"FP16": true
+				}
+			}	
+		]
+	},
+	{
 		"state": "0x03f9",
 		"script_type": "03",
 		"name": "<b>SET HIT SPARK LOCATION<b>:",
@@ -256,6 +414,52 @@
 		]
 	},
 	{
+		"state": "0x0bb8",
+		"script_type": "03",
+		"name": "<b>CHANGE FRAME DURATION<b>:",
+		"args": [
+			{
+				"name": "animation_type",
+				"value_type": "AnimationType"
+				
+			},
+			{
+				"name": "duration",
+				"data":{
+					"suffix": " frames"
+				}
+			}
+		]
+	},
+	{
+		"state": "0x0bba",
+		"script_type": "03",
+		"name": "<b>SET WEAPON SCALE<b>:",
+		"args": [
+			{
+				"name": "weapon",
+				"value_type": "Weapon"
+				
+			},
+			{
+				"name": "axis",
+				"value_type": "ScaleAxis"
+			},
+			{
+				"name": "scale",
+				"data":{
+					"FP16": true
+				}
+			},
+			{
+				"name": "duration",
+				"data":{
+					"suffix": " frames"
+				}
+			}
+		]
+	},
+	{
 		"state": "0x0bbb",
 		"script_type": "03",
 		"name": "<b>SET CHARACTER VISIBILITY<b>:",
@@ -288,6 +492,23 @@
 		]
 	},
 	{
+		"state": ["0x13a2","0x13e3"],
+		"script_type": "03",
+		"name": "<b>CHANGE CHARACTER VALUE BY AMOUNT<b>:",
+		"args": [
+			{
+				"name": "target",
+				"value_type": "CharacterValue"
+			},
+			{
+				"name": "amount",
+				"data":{
+					"negative": true
+				}
+			}
+		]
+	},
+	{
 		"state": "0x13a6",
 		"script_type": "03",
 		"name": "<b>SET WEAPON PART VISIBILITY<b>:",
@@ -307,19 +528,63 @@
 	{
 		"state": "0x13a8",
 		"script_type": "03",
-		"name": "<b>SET GAME SPEED (LESS THAN OR EQUAL TO 100%)<b>:",
+		"name": "<b>SET GAME SPEED MULTIPLIER<b>:",
 		"args": [
 			{
 				"name": "speed",
 				"data": {
-					"encoded_percent": true,
-					"percent_base": 15360
+					"FP16": true
 				}
 			},
 			{
 				"name": "duration",
 				"data": {
 					"suffix": " frames"
+				}
+			}
+		]
+	},
+	{
+		"state": "0x13ad",
+		"script_type": "03",
+		"name": "<b>SET ATTACK TYPE AND STRENGTH<b>:",
+		"args": [
+			{
+				"name": "value",
+				"value_type": "ATKStrength"
+			}
+		]
+	},
+	{
+		"state": "0x13ae",
+		"script_type": "03",
+		"name": "<b>SET PLAYER EQUIPMENT BREAK STATE<b>:",
+		"args": [
+			{
+				"name": "break_level",
+				"value_type": "BreakFlag"
+			},
+			{
+				"name": "broken",
+				"value_type": "BoolFlag"
+			}
+		]
+	},
+	{
+		"state": "0x13b4",
+		"script_type": "03",
+		"name": "<b>JUMP TO OPPONENT WITH OFFSET DISTANCE > 1.0<b>:",
+		"args": [
+			{
+				"name": "side",
+				"value_type": "PlayerAlignment"
+			},
+			{
+				"name": "distance",
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters",
+					"negative": true
 				}
 			}
 		]
@@ -337,6 +602,44 @@
 			},
 			{
 				"name": "attack_type"
+			}
+		]
+	},
+	{
+		"state": "0x13cd",
+		"script_type": "03",
+		"name": "<b>SET PLAYER SPEED MULTIPLIER<b>:",
+		"args": [
+			{
+				"name": "speed",
+				"data": {
+					"FP16": true
+				}
+			},
+			{
+				"name": "duration",
+				"data": {
+					"suffix": " frames"
+				}
+			}
+		]
+	},
+	{
+		"state": "0x13ce",
+		"script_type": "03",
+		"name": "<b>SET OPPONENT SPEED MULTIPLIER<b>:",
+		"args": [
+			{
+				"name": "speed",
+				"data": {
+					"FP16": true
+				}
+			},
+			{
+				"name": "duration",
+				"data": {
+					"suffix": " frames"
+				}
 			}
 		]
 	},
@@ -359,6 +662,21 @@
 			{
 				"name": "condition",
 				"value_type": "LH_Condition"
+			}
+		]
+	},
+	{
+		"state": "0x13d3",
+		"script_type": "03",
+		"name": "<b>JUMP TO OPPONENT WITH OFFSET DISTANCE > 0 (FRONT)<b>:",
+		"args": [
+			{
+				"name": "distance",
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters",
+					"negative": true
+				}
 			}
 		]
 	},
@@ -469,18 +787,18 @@
 		"name": "<b>APPLY SCREEN FILTER<b>:",
 		"args": [
 			{
-				"name": "in"
+				"name": "fade_in"
 			},
 			{
 				"name": "duration"
 			},
 			{
-				"name": "out"
+				"name": "fade_out"
 			},
 			{
 				"name": "sat",
 				"data": {
-					"encoded_percent": true
+					"FP16": true
 				}
 			},
 			{
@@ -489,25 +807,25 @@
 			{
 				"name": "reds",
 				"data": {
-					"encoded_percent": true
+					"FP16": true
 				}
 			},
 			{
 				"name": "greens",
 				"data": {
-					"encoded_percent": true
+					"FP16": true
 				}
 			},
 			{
 				"name": "??",
 				"data": {
-					"encoded_percent": true
+					"FP16": true
 				}
 			},
 			{
 				"name": "blues",
 				"data": {
-					"encoded_percent": true
+					"FP16": true
 				}
 			}
 		]
@@ -578,17 +896,31 @@
 				"value_type": "AssetType"
 			},
 			{
-				"name": "",
-				"value_type": "ViewTarget"
+				"name": "angle"
 			},
 			{
-				"name": ""
+				"name": "X",
+				"data":{
+					"FP16": true,
+					"negative": true
+				
+				}
+
 			},
 			{
-				"name": ""
+				"name": "Y",
+				"data":{
+					"FP16": true,
+					"negative": true
+				}
 			},
 			{
-				"name": ""
+				"name": "Z",
+				"data":{
+					"FP16": true,
+					"negative": true
+
+				}
 			},
 			{
 				"name": "target",

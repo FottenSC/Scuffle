@@ -1,0 +1,24 @@
+[
+    {
+        "name": "ScaleAxis",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "X"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Y"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Z"
+            },
+            {
+                "input_value": 3,
+                "output_value": "XYZ"
+            }
+        ]
+
+    }
+]

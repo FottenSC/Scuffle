@@ -22,6 +22,12 @@ Ctrl + D - focus Decoded entry box
 Ctrl + Shift + E - focus HEX entry box
 Ctrl + Shift + D - focus DEC entry box
 
+Ctrl + H - focus FP16 entry box
+Ctrl + Shift + H - focus Float entry box
+
+Alt + M - focus Millimeter entry box
+Alt + Shift + M - focus Meter entry box
+
 Ctrl + [ - decrease move id
 Ctrl + ] - increase move id
 Ctrl + Shift + [ - decrease hitbox id

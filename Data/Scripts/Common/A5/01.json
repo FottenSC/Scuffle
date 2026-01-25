@@ -5,7 +5,7 @@
 			"0x0006"
 		],
 		"script_type": "01",
-		"name": "BUTTON INPUT",
+		"name": "PLAYER BUTTON INPUT",
 		"last": "BUTTON INPUT CHECK",
 		"args": [
 			{
@@ -71,12 +71,24 @@
 	{
 		"state": "0x000b",
 		"script_type": "01",
-		"name": "SPECIAL STATE",
-		"last": "SPECIAL STATE CHECK",
+		"name": "PLAYER BATTLE STATE",
+		"last": "BATTLE STATE CHECK",
 		"args": [
 			{
 				"name": "state",
-				"value_type": "SpecialState"
+				"value_type": "BattleState"
+			}
+		]
+	},
+	{
+		"state": "0x000c",
+		"script_type": "01",
+		"name": "PLAYER BATTLE STATE INACTIVE",
+		"last": "INACTIVE BATTLE STATE CHECK",
+		"args": [
+			{
+				"name": "state",
+				"value_type": "BattleState"
 			}
 		]
 	},
@@ -112,17 +124,36 @@
 		]
 	},
 	{
+		"state": "0x0013",
+		"script_type": "01",
+		"name": "PLAYER ANGLE IN RANGE",
+		"last": "PLAYER ANGLE CHECK",
+		"args": [
+			{
+				"index": [0,1],
+				"name": "range",
+				"range": true,
+				"data":{
+					"suffix": " degrees",
+					"negative": true
+				}
+			}
+		]
+	},
+	{
 		"state": "0x0014",
 		"script_type": "01",
 		"name": "OPPONENT DISTANCE",
 		"last": "OPPONENT DISTANCE CHECK",
 		"args": [
 			{
-
-			},
-			{
-				"data": {
-					"decode": true
+				"index": [0,1],
+				"name": "range",
+				"range": true,
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters",
+					"negative": true
 				}
 			}
 		]
@@ -132,6 +163,345 @@
 		"script_type": "01",
 		"name": "ROUND OVER",
 		"last": "ROUND OVER CHECK"
+	},
+	{
+		"state": "0x001c",
+		"script_type": "01",
+		"name": "OPPONENT BATTLE STATE",
+		"last": "BATTLE STATE CHECK",
+		"args": [
+			{
+				"name": "state",
+				"value_type": "BattleState"
+			}
+		]
+	},
+	{
+		"state": "0x001d",
+		"script_type": "01",
+		"name": "OPPONENT BATTLE STATE INACTIVE",
+		"last": "INACTIVE BATTLE STATE CHECK",
+		"args": [
+			{
+				"name": "state",
+				"value_type": "BattleState"
+			}
+		]
+	},
+	{
+		"state": "0x0022",
+		"script_type": "01",
+		"name": "CHARACTER STATE VALUE (PLAYER)",
+		"last": "CHARACTER STATE VALUE CHECK",
+		"args": [
+			{
+				"name": "state",
+				"value_type": "CharacterState"
+			},
+			{
+				"name": "value"
+			}
+		]
+	},
+	{
+		"state": "0x0023",
+		"script_type": "01",
+		"name": "CHARACTER STATE VALUE (OPPONENT)",
+		"last": "CHARACTER STATE VALUE CHECK",
+		"args": [
+			{
+				"name": "state",
+				"value_type": "CharacterState"
+			},
+			{
+				"name": "value"
+			}
+		]
+	},
+	{
+		"state": "0x002a",
+		"script_type": "01",
+		"name": "PLAYER ALIGNMENT WITH OPPONENT SIDE",
+		"last": "PLAYER ALIGNMENT CHECK",
+		"args": [
+			{
+				"name": "side",
+				"value_type": "PlayerAlignment"
+			}
+		]
+	},
+	{
+		"state": "0x0030",
+		"script_type": "01",
+		"name": "ATTACK HIT TYPE (OPPONENT)",
+		"last": "HIT TYPE CHECK",
+		"args": [
+			{
+				"name": "hit_type",
+				"value_type": "HitType"
+			}
+		]
+	},
+	{
+		"state": "0x0031",
+		"script_type": "01",
+		"name": "ATTACK HIT TYPE (PLAYER)",
+		"last": "HIT TYPE CHECK",
+		"args": [
+			{
+				"name": "hit_type",
+				"value_type": "HitType"
+			}
+		]
+	},
+	{
+		"state": "0x0032",
+		"script_type": "01",
+		"return_value": true,
+		"name": "ATTACK HIT LEVEL &'d WITH VALUE (PLAYER)",
+		"last": "HIT LEVEL CHECK",
+		"args": [
+			{
+				"name": "value"
+			}
+		]
+	},
+	{
+		"state": "0x0033",
+		"script_type": "01",
+		"return_value": true,
+		"name": "ATTACK HIT LEVEL &'d WITH VALUE (OPPONENT)",
+		"last": "HIT LEVEL CHECK",
+		"args": [
+			{
+				"name": "value"
+			}
+		]
+	},
+	{
+		"state": "0x0035",
+		"script_type": "01",
+		"name": "COUNTER HIT",
+		"last": "COUNTER HIT CHECK"
+	},
+	{
+		"state": "0x003c",
+		"script_type": "01",
+		"name": "OPPONENT CHARACTER",
+		"last": "OPPONENT CHARACTER CHECK",
+		"args": [
+			{
+				"name": "character",
+				"value_type": "CharacterID"
+			}
+		]
+	},
+	{
+		"state": "0x0040",
+		"script_type": "01",
+		"name": "PLAYER HP > 0%",
+		"last": "PLAYER HP CHECK"
+	},
+	{
+		"state": "0x0041",
+		"script_type": "01",
+		"name": "SWITCHING TO DIFFERENT MOVE",
+		"last": "SWITCH CHECK"
+	},
+	{
+		"state": "0x0054",
+		"script_type": "01",
+		"name": "EXITING MOVE",
+		"last": "EXITING MOVE CHECK"
+	},
+	{
+		"state": "0x0056",
+		"script_type": "01",
+		"name": "CURRENT ELEVATION <= VALUE",
+		"last": " ELEVATION CHECK",
+		"args":[
+			{
+				"name": "value",
+				"data":{
+					"divisor": 1000,
+					"suffix":" meters",
+					"negative": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x0059",
+		"script_type": "01",
+		"name": "PLAYER GENDER",
+		"last": "PLAYER GENDER CHECK",
+		"args": [
+			{
+				"name": "gender",
+				"value_type": "CharacterGender"
+			}
+		]
+	},
+	{
+		"state": "0x005a",
+		"script_type": "01",
+		"name": "OPPONENT GENDER",
+		"last": "OPPONENT GENDER CHECK",
+		"args": [
+			{
+				"name": "gender",
+				"value_type": "CharacterGender"
+			}
+		]
+	},
+	{
+		"state": "0x005d",
+		"script_type": "01",
+		"name": "OPPONENT ANGLE IN RANGE",
+		"last": "OPPONENT ANGLE CHECK",
+		"args": [
+			{
+				"index": [0,1],
+				"name": "range",
+				"range": true,
+				"data":{
+					"suffix": " degrees",
+					"negative": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x0061",
+		"script_type": "01",
+		"name": "OPPONENT BATTLE STATE",
+		"last": "OPPONENT BATTLE STATE CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "state",
+				"value_type": "OpponentState"
+			}
+		]
+	},
+	{
+		"state": "0x0062",
+		"script_type": "01",
+		"name": "OPPONENT BATTLE STATE INACTIVE",
+		"last": "OPPONENT BATTLE STATE INACTIVE CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "state",
+				"value_type": "OpponentState"
+			}
+		]
+	},
+	{
+		"state": "0x0066",
+		"script_type": "01",
+		"name": "OPPONENT BATTLE STATE",
+		"last": "OPPONENT BATTLE STATE CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "state",
+				"value_type": "OpponentState"
+			}
+		]
+	},
+	{
+		"state": "0x0067",
+		"script_type": "01",
+		"name": "OPPONENT BATTLE STATE ACTIVE",
+		"last": "OPPONENT BATTLE STATE ACTIVE CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "state",
+				"value_type": "OpponentState"
+			}
+		]
+	},
+	{
+		"state": "0x006b",
+		"script_type": "01",
+		"name": "PLAYER STYLE",
+		"last": "PLAYER STYLE CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "style",
+				"value_type": "CharacterID"
+			}
+		]
+	},
+	{
+		"state": ["0x006f","0x0072"],
+		"script_type": "01",
+		"name": "OPPONENT HP < PLAYER HP",
+		"last": "OPPONENT HP CHECK"
+	},
+	{
+		"state": ["0x0070","0x0071"],
+		"script_type": "01",
+		"name": "PLAYER HP < OPPONENT HP",
+		"last": "PLAYER HP CHECK"
+	},
+	{
+		"state": "0x0075",
+		"script_type": "01",
+		"name": "PLAYER WEAPON VARIATION",
+		"last": "PLAYER WEAPON VARIATION CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "variation"
+			}
+		]
+	},
+	{
+		"state": "0x0076",
+		"script_type": "01",
+		"name": "OPPONENT WEAPON VARIATION",
+		"last": "OPPONENT WEAPON VARIATION CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "variation"
+			}
+		]
+	},
+	{
+		"state": "0x007b",
+		"script_type": "01",
+		"name": "PLAYER HP PERCENT",
+		"last": "PLAYER HP PERCENT CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "value",
+				"data": {
+					"prefix": "below ",
+					"suffix": "%"
+				}
+			}
+		]
+	},
+	{
+		"state": "0x007f",
+		"script_type": "01",
+		"name": "RNG PROBABILITY",
+		"last": "PROBABILITY CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "percentage",
+				"data": {
+					"suffix": "%"
+				}
+			}
+		]
 	},
 	{
 		"state": "0x008a",
@@ -163,134 +533,68 @@
 		]
 	},
 	{
-		"state": "0x0022",
+		"state": [
+			"0x0090"
+		],
 		"script_type": "01",
-		"name": "CHARACTER STATE VALUE",
-		"last": "CHARACTER STATE VALUE CHECK",
-		"args": [
-			{
-				"name": "state",
-				"value_type": "CharacterState"
-			},
-			{
-				"name": "value"
-			}
-		]
-	},
-	{
-		"state": "0x0035",
-		"script_type": "01",
-		"name": "COUNTER HIT",
-		"last": "COUNTER HIT CHECK"
-	},
-	{
-		"state": "0x003c",
-		"script_type": "01",
-		"name": "OPPONENT CHARACTER",
-		"last": "OPPONENT CHARACTER CHECK",
-		"args": [
-			{
-				"name": "character",
-				"value_type": "CharacterID"
-			}
-		]
-	},
-	{
-		"state": "0x0054",
-		"script_type": "01",
-		"name": "EXITING MOVE",
-		"last": "EXITING MOVE CHECK"
-	},
-	{
-		"state": "0x005a",
-		"script_type": "01",
-		"name": "OPPONENT GENDER",
-		"last": "OPPONENT GENDER CHECK",
-		"args": [
-			{
-				"name": "gender",
-				"value_type": "CharacterGender"
-			}
-		]
-	},
-	{
-		"state": "0x0061",
-		"script_type": "01",
-		"name": "OPPONENT STATE",
-		"last": "OPPONENT STATE CHECK",
+		"multiple_state": true,
+		"name": "CURRENT DIRECTION INPUT (OPPONENT)",
+		"last": "DIRECTION INPUT CHECK",
 		"args": [
 			{
 				"index": 0,
-				"name": "state",
-				"value_type": "OpponentState"
-			}
-		]
-	},
-	{
-		"state": "0x0066",
-		"script_type": "01",
-		"name": "OPPONENT STATE",
-		"last": "OPPONENT STATE CHECK",
-		"args": [
-			{
-				"index": 0,
-				"name": "state",
-				"value_type": "OpponentState"
-			}
-		]
-	},
-	{
-		"state": "0x006b",
-		"script_type": "01",
-		"name": "PLAYER STYLE",
-		"last": "PLAYER STYLE CHECK",
-		"args": [
-			{
-				"index": 0,
-				"name": "style",
-				"value_type": "CharacterID"
-			}
-		]
-	},
-	{
-		"state": "0x0075",
-		"script_type": "01",
-		"name": "WEAPON VARIATION",
-		"last": "WEAPON VARIATION CHECK",
-		"args": [
-			{
-				"index": 0,
-				"name": "variation"
-			}
-		]
-	},
-	{
-		"state": "0x007b",
-		"script_type": "01",
-		"name": "PLAYER HP PERCENT",
-		"last": "PLAYER HP PERCENT CHECK",
-		"args": [
-			{
-				"index": 0,
-				"name": "value",
+				"name": "",
+				"value_type": "PaddedButton",
 				"data": {
-					"prefix": "below ",
-					"suffix": "%"
+					"slice": true
 				}
 			}
 		]
 	},
 	{
-		"state": "0x007f",
+		"state": [
+			"0x0091"
+		],
 		"script_type": "01",
-		"name": "CHANCE OF RETURNING TRUE",
-		"last": "RETURN TRUE % CHECK",
+		"multiple_state": true,
+		"name": "PREVIOUS DIRECTION INPUT (OPPONENT)",
+		"last": "DIRECTION INPUT CHECK",
 		"args": [
 			{
 				"index": 0,
-				"name": "percentage",
+				"name": "",
+				"value_type": "PaddedButton",
 				"data": {
-					"suffix": "%"
+					"slice": true
+				}
+			}
+		]
+	},
+	{
+		"state": [
+			"0x0092",
+			"0x0093"
+		],
+		"script_type": "01",
+		"name": "OPPONENT BUTTON INPUT",
+		"last": "BUTTON INPUT CHECK",
+		"args": [
+			{
+				"index": -1,
+				"name": "",
+				"value_type": "InputType",
+				"format_method": "name_from_enum",
+				"data": {
+					"replace_char": " ",
+					"slice": true
+				}
+			},
+			{
+				"index": 0,
+				"name": "",
+				"value_type": "PaddedButton",
+				"data": {
+					"replace_char": "+"
 				}
 			}
 		]
@@ -302,12 +606,13 @@
 		"last": "PLAYER DISTANCE CHECK",
 		"args": [
 			{
-				"index": 0,
-				"name": "0"
-			},
-			{
-				"index": 1,
-				"name": "1"
+				"index": [0, 1],
+				"name": "range",
+				"data":{
+					"divisor": 1000,
+					"suffix": " meters",
+					"negative": true
+				}
 			}
 		]
 	},
@@ -336,14 +641,112 @@
 		]
 	},
 	{
+		"state": "0x138b",
+		"script_type": "01",
+		"name": "HITBOX ATTACK STRENGTH (PLAYER)",
+		"last": "HITBOX ATTACK STRENGTH",
+		"return_value": true
+	},
+	{
+		"state": "0x138c",
+		"script_type": "01",
+		"name": "HITBOX ATTACK STRENGTH (OPPONENT)",
+		"last": "HITBOX ATTACK STRENGTH",
+		"return_value": true
+	},
+	{
+		"state": "0x1399",
+		"script_type": "01",
+		"name": "HITBOX ACTIVE FRAME",
+		"last": "HITBOX ACTIVE FRAME",
+		"no_arg_text": "[target_value:<b>Active start frame<b>]",
+		"return_value": true,
+		"args": [
+			{
+				"index": 0,
+				"name": "target_value",
+				"value_type": "HitboxFrame"
+			}
+		]
+	},
+	{
+		"state": "0x139a",
+		"script_type": "01",
+		"name": "CURRENT ANIMATION FRAME",
+		"last": "CURRENT ANIMATION FRAME",
+		"return_value": true
+	},
+	{
+		"state": "0x139b",
+		"script_type": "01",
+		"name": "DECODED FRAME SHORTCUT",
+		"last": "DECODED FRAME SHORTCUT",
+		"return_value": true,
+		"args": [
+			{
+				"index": 0,
+				"name": "shortcut_value",
+				"value_type": "FrameShortcut"
+			}
+		]
+	},
+	{
+		"state": "0x139e",
+		"script_type": "01",
+		"name": "PLAYER EQUIPMENT BREAK",
+		"last": "PLAYER EQUIPMENT BREAK CHECK",
+		"no_arg_text": "[break_level:<b>Upper<b> and <b>Middle<b>]",
+		"args": [
+			{
+				"index": 0,
+				"name": "break_level",
+				"value_type": "BreakFlag"
+			}
+		]
+	},
+	{
+		"state": "0x139f",
+		"script_type": "01",
+		"name": "OPPONENT EQUIPMENT BREAK",
+		"last": "OPPONENT EQUIPMENT BREAK CHECK",
+		"no_arg_text": "[break_level:<b>Upper<b> and <b>Middle<b>]",
+		"args": [
+			{
+				"index": 0,
+				"name": "break_level",
+				"value_type": "BreakFlag"
+			}
+		]
+	},
+	{
+		"state": "0x13a6",
+		"script_type": "01",
+		"name": "HITBOX DAMAGE",
+		"last": "HITBOX DAMAGE",
+		"return_value": true
+	},
+	{
+		"state": "0x13ac",
+		"script_type": "01",
+		"name": "CURRENT MOVE INDEX (OPPONENT)",
+		"last": "CURRENT MOVE INDEX",
+		"return_value": true,
+		"args": [
+			{
+				"index": 0,
+				"name": "type",
+				"value_type": "AnimationType2"
+			}
+		]
+	},
+	{
 		"state": [
 			"0x13ae",
-			"0x13af",
 			"0x0024"
 		],
 		"script_type": "01",
 		"multiple_state": true,
-		"name": "DIRECTION INPUT",
+		"name": "CURRENT DIRECTION INPUT (PLAYER)",
 		"last": "DIRECTION INPUT CHECK",
 		"args": [
 			{
@@ -355,6 +758,60 @@
 				}
 			}
 		]
+	},
+	{
+		"state": [
+			"0x13af",
+			"0x0025"
+		],
+		"script_type": "01",
+		"multiple_state": true,
+		"name": "PREVIOUS DIRECTION INPUT (PLAYER)",
+		"last": "DIRECTION INPUT CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "",
+				"value_type": "PaddedButton",
+				"data": {
+					"slice": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x13b0",
+		"script_type": "01",
+		"name": "GUARD DAMAGE OVERRIDE",
+		"last": "GUARD DAMAGE OVERRIDE",
+		"return_value": true
+	},
+	{
+		"state": "0x13b3",
+		"script_type": "01",
+		"name": "CURRENT MOVE INDEX (PLAYER)",
+		"last": "CURRENT MOVE INDEX",
+		"return_value": true,
+		"args": [
+			{
+				"index": 0,
+				"name": "type",
+				"value_type": "AnimationType2"
+			}
+		]
+	},
+	{
+		"state": "0x13b4",
+		"script_type": "01",
+		"name": "HITBOX INDEX",
+		"last": "HITBOX INDEX",
+		"return_value": true
+	},
+	{
+		"state": "0x13b9",
+		"script_type": "01",
+		"name": "PLAYER HP <= 30%",
+		"last": "PLAYER HP CHECK"
 	},
 	{
 		"state": "0x13bd",
@@ -373,10 +830,29 @@
 		]
 	},
 	{
+		"state": "0x13be",
+		"script_type": "01",
+		"name": "OPPONENT HP <= 30%",
+		"last": "OPPONENT HP CHECK"
+	},
+	{
 		"state": "0x13c5",
 		"script_type": "01",
 		"name": "PLAYER CHARACTER (MIMIC)",
 		"last": "PLAYER CHARACTER CHECK",
+		"args": [
+			{
+				"index": 0,
+				"name": "character",
+				"value_type": "CharacterID"
+			}
+		]
+	},
+	{
+		"state": "0x13c6",
+		"script_type": "01",
+		"name": "OPPONENT CHARACTER (MIMIC)",
+		"last": "OPPONENT CHARACTER CHECK",
 		"args": [
 			{
 				"index": 0,
@@ -403,6 +879,63 @@
 				"name": "value",
 				"data": {
 					"negative": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x13cf",
+		"script_type": "01",
+		"name": "PLAYER GAUGE VALUE",
+		"last": "PLAYER GAUGE VALUE CHECK",
+		"args": [
+			{
+				"name": "target_value",
+				"value_type": "GaugeType"
+			},
+			{
+				"name": "percent",
+				"value_type": "BoolFlag"
+			},
+			{
+				"name": "compare_method",
+				"value_type": "CompareType"
+			},
+			{
+				"name": "value"			
+			}
+		]
+	},
+	{
+		"state": "0x13d2",
+		"script_type": "01",
+		"name": "REGULAR CHARACTER",
+		"last": "REGULAR CHARACTER CHECK",
+		"args": [
+			{
+				"name": "target",
+				"value_type": "CharacterIndex"
+			}
+		]
+	},
+	{
+		"state": "0x13d3",
+		"script_type": "01",
+		"name": "CHARACTER HEIGHT",
+		"last": "CHARACTER HEIGHT CHECK",
+		"args": [
+			{
+				"name": "target",
+				"value_type": "CharacterIndex"
+			},
+			{
+				"name": ""
+			},
+			{
+				"name": "height_range",
+				"index":[2,3],
+				"data":{
+					"suffix": " cm"
 				}
 			}
 		]

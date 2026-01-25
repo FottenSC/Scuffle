@@ -1,0 +1,16 @@
+[
+    {
+        "name": "AnimationType2",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "General/Idle"
+            },
+            {
+                "input_value": 1,
+                "output_value": "Attack"
+            }
+        ]
+
+    }
+]

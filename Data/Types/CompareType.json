@@ -1,0 +1,32 @@
+[
+    {
+        "name": "CompareType",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "<"
+            },
+            {
+                "input_value": 1,
+                "output_value": "<="
+            },
+            {
+                "input_value": 2,
+                "output_value": "=="
+            },
+            {
+                "input_value": 3,
+                "output_value": "NAN/!="
+            },
+            {
+                "input_value": 4,
+                "output_value": ">"
+            },
+            {
+                "input_value": 5,
+                "output_value": ">="
+            }
+        ]
+
+    }
+]
