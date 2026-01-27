@@ -239,6 +239,90 @@
 		]
 	},
 	{
+		"state": "0x30aa",
+		"script_type": "0d",
+		"name": "ATTACK STREAK (BREAK ATTACK)",
+		"args": [
+			{
+				"name": "first_part",
+				"value_type": "TracePart",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "second_part",
+				"value_type": "TracePart",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "start",
+				"data": {
+					"auto": true,
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "end",
+				"data": {
+					"auto": true,
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "flare",
+				"data": {
+					"auto": true,
+					"prefix": "frame "
+				}
+			}
+		]
+	},
+	{
+		"state": "0x30ab",
+		"script_type": "0d",
+		"name": "ATTACK STREAK (UNBLOCKABLE)",
+		"args": [
+			{
+				"name": "trail_part",
+				"value_type": "TracePart",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "flare_part",
+				"value_type": "EffectPart",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "trail_start",
+				"data": {
+					"auto": true,
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "darken_start",
+				"data": {
+					"auto": true,
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "flare_start",
+				"data": {
+					"auto": true,
+					"prefix": "frame "
+				}
+			}
+		]
+	},
+	{
 		"state": "0x30ad",
 		"script_type": "0d",
 		"name": "EARTHQUAKE",
@@ -419,7 +503,7 @@
 			{
 				"name": "start",
 				"data": {
-					"suffix": " frames"
+					"prefix": "frame "
 				}
 			},
 			{

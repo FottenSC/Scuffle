@@ -71,7 +71,7 @@ class GUI_MoveViewer:
 
         #self.master.geometry(str(1850) + 'x' + str(990))
         master.title("SCUFFLE Move Editor")
-        master.iconbitmap('Data/icon.ico')
+        master.iconbitmap(default='Data/icon.ico')
         s = Style()
         font_config = ConfigReader.ConfigReader('font_config')
         self.defaultFont = tkf.nametofont("TkDefaultFont")

@@ -24,8 +24,8 @@ class GUI_Main(Tk):
         self.overlay = None
 
         Tk.__init__(self)
+        self.iconbitmap(default='Data/icon.ico')
         self.wm_title("SCUFFLE")
-        self.iconbitmap('Data/icon.ico')
 
         self.color_scheme_config = ConfigReader.ConfigReader("color_scheme")
         self.color_scheme_config.add_comment("colors with names -> http://www.science.smith.edu/dftwiki/images/3/3d/TkInterColorCharts.png")
@@ -331,7 +331,7 @@ class GUI_Main(Tk):
             self.after(max(2, 8 - int(round(elapsed_time))), self.update_launcher)
         else:
             self.previous_working_pid = 0
-            self.after(500, self.update_launcher)
+            self.after(1000, self.update_launcher)
 
     def on_closing(self):
         sys.stdout = self.stdout

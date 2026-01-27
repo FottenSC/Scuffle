@@ -1,0 +1,16 @@
+[
+    {
+        "name": "BreakEffect",
+        "values": [
+            {
+                "input_value": 100,
+                "output_value": "Small Ground Break"
+            },
+            {
+                "input_value": 200,
+                "output_value": "Large Ground Break"
+            }
+        ]
+
+    }
+]

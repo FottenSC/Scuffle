@@ -782,6 +782,66 @@
 		]
 	},
 	{
+		"state": "0x1786",
+		"script_type": "03",
+		"name": "SPAWN GROUND EFFECT (WITH SOUND)",
+		"args": [
+			{
+				"name": "effect_part",
+				"value_type": "EffectPart",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "particle_radius",
+				"data":{
+					"multiplier": 0.01
+				}
+			},
+			{
+				"name": "break_effect",
+				"value_type": "BreakEffect"
+			},
+			{
+				"name": "??"
+			},
+			{
+				"name": "??"
+			}
+		]
+	},
+	{
+		"state": "0x1789",
+		"script_type": "03",
+		"name": "SPAWN GROUND EFFECT",
+		"args": [
+			{
+				"name": "effect_part",
+				"value_type": "EffectPart",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "particle_radius",
+				"data":{
+					"multiplier": 0.01
+				}
+			},
+			{
+				"name": "break_effect",
+				"value_type": "BreakEffect"
+			},
+			{
+				"name": "??"
+			},
+			{
+				"name": "??"
+			}
+		]
+	},
+	{
 		"state": "0x2afb",
 		"script_type": "03",
 		"name": "<b>APPLY SCREEN FILTER<b>:",
@@ -941,6 +1001,25 @@
 				"data": {
 					"negative": true
 				}
+			}
+		]
+	},
+	{
+		"state": "0x271d",
+		"script_type": "03",
+		"name": "<b>REMOVE VFX<b>:",
+		"args": [
+			{
+				"name": "id",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "??"
+			},
+			{
+				"name": "??"
 			}
 		]
 	}

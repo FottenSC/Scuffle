@@ -1463,18 +1463,18 @@ class Cancel:
                             found, state_info, argp = find_script_info(self.movelist, state_id_f, self.movelist.x25_char_data, self.movelist.x25_custom_data, self.movelist.x25_data, "03", second_arg, args_list_f)
                             if found:
                                 if len(argp) > 0:
-                                    label = f'{state_info["name"]}(frame: {format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}) {"".join(argp)}'
+                                    label = f'{state_info["name"]}(frame:{format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}) {"".join(argp)}'
                                 else:
-                                    label = f'{state_info["name"]}(frame: {format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}){(" " + state_info["no_arg_text"]) if "no_arg_text" in state_info else ""}'
+                                    label = f'{state_info["name"]}(frame:{format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}){(" " + state_info["no_arg_text"]) if "no_arg_text" in state_info else ""}'
 
                                 last_bool = state_info["last"] if ("last" in state_info and state_info["last"] != "") else state_info["name"]
 
                             if state_id_f == 0x13da:
-                                label = f'<b>ADD/REMOVE METER<b>: (frame: {format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}) [target:{format_value(args_list_f[0],CharacterIndex)}][type:{format_value(args_list_f[1],MeterType)}][percentage_base:{format_value(args_list_f[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list_f[3], negative=True, percent=True, percent_base=240 if bs2i(args_list_f[2],1,big_endian=True) != 1 else 120)}]'
+                                label = f'<b>ADD/REMOVE METER<b>: (frame:{format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)}) [target:{format_value(args_list_f[0],CharacterIndex)}][type:{format_value(args_list_f[1],MeterType)}][percentage_base:{format_value(args_list_f[2],MeterCalcBase,replace_char="")}][amount:{format_value(args_list_f[3], negative=True, percent=True, percent_base=240 if bs2i(args_list_f[2],1,big_endian=True) != 1 else 120)}]'
 
                         except:
                             state = 'ERROR'
-                        list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: {state_f}(frame: {format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)})' if label == "" else label, index))
+                        list_of_bytes.append((current_bytes, f'<b>SYSTEM SCRIPT<b>: {state_f}(frame:{format_value(self.bytes[state_index: state_index + 3], decode=False, movelist=self.movelist)})' if label == "" else label, index))
 
                     elif first_arg == 0x26:
                         list_of_bytes.append((current_bytes, f'<b>SET ACTIVE HITBOX<b>: {format_value(self.bytes[state_index: state_index + 3], prefix = "hitbox ", offset = 1)}', index))

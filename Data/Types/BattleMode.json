@@ -1,0 +1,44 @@
+[
+    {
+        "name": "BattleMode",
+        "values": [
+            {
+                "input_value": 1,
+                "output_value": "Round Start"
+            },
+            {
+                "input_value": 2,
+                "output_value": "In Battle"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Round Over"
+            },
+            {
+                "input_value": 5,
+                "output_value": "Win"
+            },
+            {
+                "input_value": 6,
+                "output_value": "Stage Intro"
+            },
+            {
+                "input_value": 7,
+                "output_value": "Character Intro"
+            },
+            {
+                "input_value": 8,
+                "output_value": "Stage Transition"
+            },
+            {
+                "input_value": 9,
+                "output_value": "Motion Change"
+            },
+            {
+                "input_value": 10,
+                "output_value": "End"
+            }
+        ]
+
+    }
+]

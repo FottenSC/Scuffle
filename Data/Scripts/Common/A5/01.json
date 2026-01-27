@@ -159,6 +159,18 @@
 		]
 	},
 	{
+		"state": "0x0015",
+		"script_type": "01",
+		"name": "BATTLE MODE STATE",
+		"last": "BATTLE MODE STATE CHECK",
+		"args":[
+			{
+				"name": "mode",
+				"value_type": "BattleMode"
+			}
+		]	
+	},
+	{
 		"state": "0x0016",
 		"script_type": "01",
 		"name": "ROUND OVER",
@@ -388,7 +400,7 @@
 		"state": "0x0062",
 		"script_type": "01",
 		"name": "OPPONENT BATTLE STATE INACTIVE",
-		"last": "OPPONENT BATTLE STATE INACTIVE CHECK",
+		"last": "INACTIVE OPPONENT BATTLE STATE CHECK",
 		"args": [
 			{
 				"index": 0,
@@ -414,7 +426,7 @@
 		"state": "0x0067",
 		"script_type": "01",
 		"name": "OPPONENT BATTLE STATE ACTIVE",
-		"last": "OPPONENT BATTLE STATE ACTIVE CHECK",
+		"last": "ACTIVE OPPONENT BATTLE STATE CHECK",
 		"args": [
 			{
 				"index": 0,
@@ -945,5 +957,11 @@
 		"script_type": "01",
 		"name": "TRAINING MODE",
 		"last": "TRAINING MODE CHECK"
+	},
+	{
+		"state": "0x13dc",
+		"script_type": "01",
+		"name": "ONLINE BATTLE?",
+		"last": "ONLINE BATTLE CHECK"
 	}
 ]
