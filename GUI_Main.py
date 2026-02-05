@@ -275,10 +275,10 @@ class GUI_Main(Tk):
                 if self.move_viewer.do_inject_movelist:
                     if self.move_viewer.do_fix_goto.get() == False:
                         self.launcher.game_reader.do_fix_goto = False
-                    if self.move_viewer.log_injected:
-                        print(f'{time.strftime("[%I:%M:%S %p]")} Injected movelist:{self.move_viewer.movelist_name_var.get()}')
                     else:
                         self.launcher.game_reader.do_fix_goto = True
+                    if self.move_viewer.log_injected:
+                        print(f'{time.strftime("[%I:%M:%S %p]")} Injected movelist:{self.move_viewer.movelist_name_var.get()}')
                         
                     self.launcher.game_reader.do_write_movelist = True
                     self.launcher.game_reader.p1_movelist = self.move_viewer.movelist

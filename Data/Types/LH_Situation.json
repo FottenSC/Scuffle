@@ -40,13 +40,14 @@
                 "output_value": "Downed"
             },
             {
-                "input_value": 10,
+                "input_value": 32,
                 "output_value": "Guard Impacted"
             },
             {
-                "input_value": 11,
+                "input_value": 35,
                 "output_value": "Character Value"
             }
+
         ]
 
     }

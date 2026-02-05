@@ -211,7 +211,7 @@ class GUI_MoveViewer:
 
         s.configure('Save.TButton', font=font_config.get_property("Side Panel","save_changes_font", "Consolas 14 bold"))
         s.configure('Bold.TButton', font=bold_label_font)
-        save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=(False,)).start())
+        save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=(self.do_fix_goto.get(),)).start())
         save_move.grid(row=4)   
         master.bind('<Control-s>', lambda x: Thread(target=self.save_move_bytes_command, args=(self.do_fix_goto.get(),)).start())
         

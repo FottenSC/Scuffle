@@ -2,7 +2,7 @@ import requests
 from multiprocessing import queues #pyinstaller workaround  https://stackoverflow.com/questions/40768570/importerror-no-module-named-queue-while-running-my-app-freezed-with-cx-freeze
 import json
 
-CURRENT_VERSION = 'scuffle_VV_2.01'
+CURRENT_VERSION = 'scuffle_VV_2.02'
 
 def check_version(force_print=False):
 

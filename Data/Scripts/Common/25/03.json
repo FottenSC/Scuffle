@@ -719,10 +719,16 @@
 				"name": "magnitude"
 			},
 			{
-				"name": "left/right"
+				"name": "left/right",
+				"data":{
+					"negative": true
+				}
 			},
 			{
-				"name": "up/down"
+				"name": "up/down",
+				"data":{
+					"negative": true
+				}
 			},
 			{
 				"name": "??"
@@ -731,10 +737,16 @@
 				"name": "air_magnitude"
 			},
 			{
-				"name": "air_left/right"
+				"name": "air_left/right",
+				"data":{
+					"negative": true
+				}
 			},
 			{
-				"name": "air_up/down"
+				"name": "air_up/down",
+				"data":{
+					"negative": true
+				}
 			}
 		]
 	},
@@ -918,7 +930,10 @@
 				"name": "??"
 			},
 			{
-				"name": "zoom"
+				"name": "zoom",
+				"data":{
+					"divisor": 1000
+				}
 			},
 			{
 				"name": "vertical_angle",
