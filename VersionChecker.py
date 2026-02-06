@@ -2,7 +2,7 @@ import requests
 from multiprocessing import queues #pyinstaller workaround  https://stackoverflow.com/questions/40768570/importerror-no-module-named-queue-while-running-my-app-freezed-with-cx-freeze
 import json
 
-CURRENT_VERSION = 'scuffle_VV_2.02'
+CURRENT_VERSION = 'scuffle_VV_2.1'
 
 def check_version(force_print=False):
 
@@ -12,22 +12,33 @@ def check_version(force_print=False):
         print("DEVELOPER NOTE: Remember to update VersionChecker.CURRENT_VERSION before publishing a release.")
     else:
         try:
-            r = requests.get('https://api.github.com/repos/aHorseface/Scuffle/releases/latest')
+            r = requests.get('https://api.github.com/repositories/437065963/releases')
 
             #https://api.github.com
             #GET /repos/:owner/:repo/releases/latest
             if r.ok:
+                available_updates = 0
                 repoItem = json.loads(r.text or r.content)
-                repoTag = repoItem['tag_name']
-                print("")
-                if (repoTag != CURRENT_VERSION):
+                for release in repoItem:
+                    if release['tag_name'] != CURRENT_VERSION:
+                        available_updates += 1
+                    else:
+                        break
+                
+                if (available_updates > 0):
                     print("---------------------------------------------------------" * 2)
                     print("** A new version of SCUFFLE is available. **")
-                    new_version_available = True
-                #if (repoTag != CURRENT_VERSION or force_print):
+                    print("")
+                    #if (repoTag != CURRENT_VERSION or force_print):
                     #print(repoItem['html_url'])
                     print("Release Notes:")
-                    print(repoItem['body'])
+                    new_version_available = True
+                    while available_updates > 0:
+                        index = available_updates - 1
+                        repoTag = str(repoItem[index]['tag_name'])
+                        print(f"{repoTag.split('scuffle_VV_')[1]}:")
+                        print(repoItem[index]['body'])
+                        available_updates -= 1
                     print("---------------------------------------------------------" * 2)
                 else:
                     print("SCUFFLE is up to date.")
