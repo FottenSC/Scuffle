@@ -21,6 +21,8 @@ def check_version(force_print=False):
                 repoItem = json.loads(r.text or r.content)
                 for release in repoItem:
                     if release['tag_name'] != CURRENT_VERSION:
+                        if CURRENT_VERSION.split('scuffle_VV_')[1] > str(release['tag_name']).split('scuffle_VV_')[1]:
+                            break
                         available_updates += 1
                     else:
                         break
