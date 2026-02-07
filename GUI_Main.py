@@ -25,7 +25,7 @@ class GUI_Main(Tk):
 
         Tk.__init__(self)
         self.iconbitmap(default='Data/icon.ico')
-        self.wm_title("SCUFFLE")
+        self.wm_title(f"SCUFFLE - v{VersionChecker.CURRENT_VERSION.split('scuffle_VV_')[1]}")
 
         self.color_scheme_config = ConfigReader.ConfigReader("color_scheme")
         self.color_scheme_config.add_comment("colors with names -> http://www.science.smith.edu/dftwiki/images/3/3d/TkInterColorCharts.png")
@@ -54,7 +54,7 @@ class GUI_Main(Tk):
         #Disables version checker
         updates = VersionChecker.check_version()
         if updates:
-            self.wm_title("SCUFFLE (Updates Available)")
+            self.wm_title(f"SCUFFLE - v{VersionChecker.CURRENT_VERSION.split('scuffle_VV_')[1]} (Updates Available)")
 
         print("SCUFFLE Starting...")
         self.launcher = GameStateManager()
@@ -265,7 +265,7 @@ class GUI_Main(Tk):
                         end = self.launcher.game_reader.p1_movelist.block_Q_length
                         # if self.verbose_logging.get() == True:
                         #     end = MovelistParser.decode_move_id(0x3300, self.launcher.game_reader.p1_movelist)
-                        if (self.launcher.p1_primary_move_id > 0x0100 and self.launcher.p1_primary_move_id < end) or (self.launcher.p1_primary_move_id >= MovelistParser.decode_move_id(0x3000, self.launcher.game_reader.p1_movelist) and self.launcher.p1_primary_move_id <= MovelistParser.decode_move_id(0x3000 + self.launcher.game_reader.p1_movelist.block_T_length, self.launcher.game_reader.p1_movelist)):
+                        if (self.launcher.p1_primary_move_id > 0x0100 and self.launcher.p1_primary_move_id < end) or (self.launcher.p1_primary_move_id >= MovelistParser.decode_move_id(0x3000, self.launcher.game_reader.p1_movelist) and self.launcher.p1_primary_move_id <= MovelistParser.decode_move_id(0x3000 + self.launcher.game_reader.p1_movelist.block_T_length, self.launcher.game_reader.p1_movelist)) or self.launcher.p1_primary_move_id in range(219,223):
                             self.move_viewer.load_moveid(str(self.launcher.p1_primary_move_id),track_history=False)
                 
                 except:

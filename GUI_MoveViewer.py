@@ -11,6 +11,7 @@ import ConfigReader
 import time
 from threading import Thread
 import GUI_Main
+import VersionChecker
 
 class GUI_MoveViewer:
 
@@ -57,11 +58,9 @@ class GUI_MoveViewer:
                     file.write(empty_json)
                 with open(f'{dir}/25/14.json', 'w') as file:
                     file.write(empty_json)
-        
-        
-        
 
-
+        
+            
         self.master = master
         self.verbose = verbose
         self.backward_history = []
@@ -70,7 +69,7 @@ class GUI_MoveViewer:
         self.forward_enabled = StringVar(value=DISABLED)
 
         #self.master.geometry(str(1850) + 'x' + str(990))
-        master.title("SCUFFLE Move Editor")
+        master.title(f"SCUFFLE Move Editor - v{VersionChecker.CURRENT_VERSION.split('scuffle_VV_')[1]}")
         master.iconbitmap(default='Data/icon.ico')
         s = Style()
         font_config = ConfigReader.ConfigReader('font_config')
@@ -301,17 +300,17 @@ class GUI_MoveViewer:
         hex_to_dec.pack()
         self.tool_hex_string = StringVar()
         self.tool_dec_string = StringVar()
-        self.tool_hex_string.set('0xff')
+        self.tool_hex_string.set('0x00ff')
         self.tool_dec_string.set('255')
         self.tool_hex_string.trace('w', self.hex_to_dec)
         self.tool_dec_string.trace('w', self.dec_to_hex)
 
-        tool_hex = Entry(hex_to_dec, textvariable=self.tool_hex_string, width=10)
-        tool_dec = Entry(hex_to_dec, textvariable=self.tool_dec_string, width=10)
-        tool_hex.grid(row=0, column=0)
-        tool_dec.grid(row=0, column=1)
-        master.bind('<Control-E>', lambda x: tool_hex.focus())
-        master.bind('<Control-D>', lambda x: tool_dec.focus())
+        self.tool_hex = Entry(hex_to_dec, textvariable=self.tool_hex_string, width=10)
+        self.tool_dec = Entry(hex_to_dec, textvariable=self.tool_dec_string, width=10)
+        self.tool_hex.grid(row=0, column=0)
+        self.tool_dec.grid(row=0, column=1)
+        master.bind('<Control-E>', lambda x: self.tool_hex.focus())
+        master.bind('<Control-D>', lambda x: self.tool_dec.focus())
 
         tool_hex_label = Label(hex_to_dec, text='HEX')
         tool_dec_label = Label(hex_to_dec, text='DEC')
@@ -377,19 +376,51 @@ class GUI_MoveViewer:
         tool_float_label = Label(FP16_to_float, text='Float')
         tool_fp16_label.grid(row=1, column=0)
         tool_float_label.grid(row=1, column=1)
+
+        hexf_to_float = Frame(loader_frame_tools)
+        hexf_to_float.pack()
+        self.tool_hexf_string = StringVar()
+        self.tool_float2_string = StringVar()
+        self.tool_hexf_string.set('0x3f800000')
+        self.tool_float2_string.set('1.0')
+        self.tool_hexf_string.trace('w', self.hex_to_float)
+        self.tool_float2_string.trace('w', self.float_to_hex)
+
+        self.tool_hexf = Entry(hexf_to_float, textvariable=self.tool_hexf_string, width=10)
+        self.tool_float2 = Entry(hexf_to_float, textvariable=self.tool_float2_string, width=10)
+        self.tool_hexf.grid(row=0, column=0)
+        self.tool_float2.grid(row=0, column=1)
+        master.bind('<Alt-h>', lambda x: self.tool_hexf.focus())
+        master.bind('<Alt-H>', lambda x: self.tool_float2.focus())
+
+        tool_hexf_label = Label(hexf_to_float, text='HEX')
+        tool_float2_label = Label(hexf_to_float, text='Float')
+        tool_hexf_label.grid(row=1, column=0)
+        tool_float2_label.grid(row=1, column=1)
         
 
     def hex_to_dec(self, *args):
+        
         try:
-            i = int(self.tool_hex_string.get(), 16)
-            self.tool_dec_string.set(i)
+            if self.master.focus_get() != self.tool_dec:
+                fmt_map = {
+                    1: 'b',  # signed char
+                    2: 'h',  # signed short
+                    4: 'i',  # signed int
+                }
+                i = bytes.fromhex(self.tool_hex_string.get().strip().lower().replace('0x', ''))
+                # i = int(self.tool_hex_string.get(), 16)
+                i = struct.unpack(f'>{fmt_map[len(i)]}', i)[0]
+                self.tool_dec_string.set(i)
         except:
             pass
 
     def dec_to_hex(self, *args):
         try:
-            i = int(self.tool_dec_string.get(), 10)
-            self.tool_hex_string.set(hex(i))
+            if self.master.focus_get() != self.tool_hex:
+                i = int(self.tool_dec_string.get(), 10)
+                i = struct.pack('>h',i)
+                self.tool_hex_string.set(f'0x{i.hex()}')
         except:
             pass
 
@@ -443,6 +474,25 @@ class GUI_MoveViewer:
             if self.master.focus_get() != self.tool_mm:
                 i = int(self.tool_meter_string.get(), 10)
                 self.tool_mm_string.set(hex(i * 1000))
+        except:
+            pass
+
+    def hex_to_float(self, *args):
+        try:
+            if self.master.focus_get() != self.tool_float2:
+                int_val = int(self.tool_hexf_string.get(), 16)
+                val_fp32 = struct.unpack('<f', struct.pack('<i', int_val))[0]
+                
+                self.tool_float2_string.set(f"{val_fp32}")
+        except:
+            pass 
+    
+    def float_to_hex(self, *args):
+        try:
+            if self.master.focus_get() != self.tool_hexf:
+                val_float2 = float(self.tool_float2_string.get())
+                int_val = struct.pack('>f', val_float2)
+                self.tool_hexf_string.set(f'0x{int_val.hex()}')
         except:
             pass
 
