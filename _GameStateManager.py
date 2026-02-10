@@ -54,17 +54,18 @@ class GameStateManager:
 
                         if s != None:
                             for entry in s:
-                                #print(entry)
                                 if self.game_reader.p1_hitbox_index != -1:
                                     print(s[self.game_reader.p1_hitbox_index])
-                                
-                                if not show_all_hitboxes:
                                     break
-                    if did_p1_primary_attack_change == False:
-                        if hitbox_id != None and self.game_reader.p1_hitbox_index != hitbox_id:
-                            hitbox_id = self.game_reader.p1_hitbox_index
-                            if hitbox_id != -1:
-                                print(s[self.game_reader.p1_hitbox_index])
+                                if did_p1_primary_attack_change == False:
+                                    if hitbox_id != None and self.game_reader.p1_hitbox_index != hitbox_id:
+                                        hitbox_id = self.game_reader.p1_hitbox_index
+                                        if hitbox_id != -1:
+                                            print(s[self.game_reader.p1_hitbox_index])
+                                            break                            
+                                
+                                if show_all_hitboxes:
+                                    print(entry)
                     
                     did_p2_primary_attack_change = primary_snapshots[-2].p2.movement_block.movelist_id != primary_snapshots[-3].p2.movement_block.movelist_id
                     if did_p2_primary_attack_change:

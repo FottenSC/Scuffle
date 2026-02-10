@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 import struct
 from tkinter import *
 from tkinter.ttk import *
@@ -58,7 +59,9 @@ class GUI_MoveViewer:
                     file.write(empty_json)
                 with open(f'{dir}/25/14.json', 'w') as file:
                     file.write(empty_json)
-
+        
+        if not os.path.exists(f'./Backups'):
+            os.mkdir('./Backups')
         
             
         self.master = master
@@ -73,6 +76,7 @@ class GUI_MoveViewer:
         master.iconbitmap(default='Data/icon.ico')
         s = Style()
         font_config = ConfigReader.ConfigReader('font_config')
+        self.overlay_config = ConfigReader.ConfigReader('frame_data_overlay')
         self.defaultFont = tkf.nametofont("TkDefaultFont")
         self.defaultFont.configure(family=font_config.get_property("General","default_font_family","Consolas"),size=font_config.get_property("General","default_font_size", 8),weight=font_config.get_property("General","default_font_weight","normal"))
         bold_label_font = font_config.get_property("Side Panel","bold_font", "Consolas 8 bold")
@@ -84,6 +88,8 @@ class GUI_MoveViewer:
 
         self.movelist_name_var = StringVar()
         self.movelist_name_var.set('???')
+
+        self.auto_backup_save_var = BooleanVar(value=True)
 
         self.character_id_var = StringVar()
         self.character_id_var.set('000')
@@ -215,12 +221,16 @@ class GUI_MoveViewer:
         master.bind('<Control-s>', lambda x: Thread(target=self.save_move_bytes_command, args=(self.do_fix_goto.get(),)).start())
         
 
-        update_pointers = Checkbutton(move_id_entry_container, variable=self.do_fix_goto, onvalue=True, offvalue=False,text="Update Goto pointers")
-        save_move_reload = Checkbutton(move_id_entry_container, variable=self.reload_on_save_var, onvalue=True, offvalue=False, text="Reload after save   ") 
-        update_pointers.grid(row=6)
-        save_move_reload.grid(row=7)
+        update_pointers = Checkbutton(move_id_entry_container, variable=self.do_fix_goto, onvalue=True, offvalue=False,text="Update Goto pointers    ")
+        save_move_reload = Checkbutton(move_id_entry_container, variable=self.reload_on_save_var, onvalue=True, offvalue=False, text="Reload after save       ")
+        auto_backup = Checkbutton(move_id_entry_container, variable=self.auto_backup_save_var, onvalue=True, offvalue=False, text=f"Backup changes [max:{self.overlay_config.get_property('DisplaySettings','max_backup_count',20)}] ")
+
+        update_pointers.grid(row=6,padx=5)
+        save_move_reload.grid(row=7,padx=5)
+        auto_backup.grid(row=8,padx=5)
         master.bind('<Control-r>', lambda x: self.reload_on_save_var.set(not self.reload_on_save_var.get()))
         master.bind('<Control-p>', lambda x: self.do_fix_goto.set(not self.do_fix_goto.get()))
+        master.bind('<Control-b>', lambda x: self.auto_backup_save_var.set(not self.auto_backup_save_var.get()))
         
         move_frame.rowconfigure(0,weight=2)
         hitbox_frame.rowconfigure(0,weight=2)
@@ -553,6 +563,28 @@ class GUI_MoveViewer:
             time.sleep(3)
             
             print(f'{time.strftime("[%I:%M:%S %p]")} Saved changes to move {self.encoded_move_id_textvar.get()}')
+
+            if self.auto_backup_save_var.get() == True:
+                count=0
+                max_count = int(self.overlay_config.get_property('DisplaySettings','max_backup_count',20))
+                for file in Path('./Backups').iterdir():
+                    count += 1
+
+                if count == max_count:
+                    i = 0
+                    while i < max_count - 1:
+                        os.remove(f'./backups/KHD_backup_{i}.khd')
+                        i += 1
+                    count = 1
+                
+                if count > 0:
+                    os.rename('./Backups/KHD_backup_latest.khd', f'./Backups/KHD_backup_{count-1}.khd')
+                
+                with open('./Backups/KHD_backup_latest.khd', 'wb') as fw:
+                    fw.write(self.movelist.generate_modified_movelist_bytes())
+                    print(f'{time.strftime("[%I:%M:%S %p]")} Saved backups: {count+1} Max Count: {max_count}')
+
+
             if self.do_fix_goto.get() == False:
                 self.do_fix_goto.set(True)
             
@@ -602,12 +634,6 @@ class GUI_MoveViewer:
     def prev_hitbox_command(self):
         self.hitbox_index -= 1
         if self.hitbox_index < 0:
-            self.hitbox_index = 0
-        self.load_hitbox()
-
-    def update_hitbox_command(self, index):
-        self.hitbox_index += index
-        if self.hitbox_index >= len(self.hitboxes_data):
             self.hitbox_index = 0
         self.load_hitbox()
 

@@ -317,7 +317,6 @@ class GUI_Main(Tk):
                             character_id = self.move_viewer.character_id_var.get()
                             self.move_viewer.set_movelist(self.launcher.game_reader.p1_movelist)
                             self.move_viewer.set_character_id(character_id)
-                            self.move_viewer.update_hitbox_command(self.launcher.game_reader.p1_hitbox_index)
                             self.launcher.game_reader.MarkMovelistAsOld()
                             if self.move_viewer.tool_encode_string != "":
                                 self.move_viewer.decode()
