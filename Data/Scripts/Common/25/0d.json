@@ -323,6 +323,23 @@
 		]
 	},
 	{
+		"state": "0x30ac",
+		"script_type": "0d",
+		"name": "EARTHQUAKE",
+		"args": [
+			{
+				"name": "start",
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "bone",
+				"value_type": "EffectPart"
+			}
+		]
+	},
+	{
 		"state": "0x30ad",
 		"script_type": "0d",
 		"name": "EARTHQUAKE",
@@ -388,6 +405,25 @@
 				"data": {
 					"decode": true
 				}
+			},
+			{
+				"name": "entry_frame",
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "switch",
+				"data": {
+					"prefix": "on frame "
+				}
+			},
+			{
+				"name": "show_flare",
+				"value_type": "BoolFlag"
+			},
+			{
+				"name": "parameter"
 			}
 		]
 	},

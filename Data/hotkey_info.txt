@@ -19,14 +19,18 @@ Ctrl + M - focus move id entry box
 Ctrl + E - focus Encoded entry box
 Ctrl + D - focus Decoded entry box
 
-Ctrl + Shift + E - focus HEX entry box
-Ctrl + Shift + D - focus DEC entry box
+Alt + M - focus Millimeter entry box
+Ctrl + Shift + M - focus Meter entry box
 
 Ctrl + H - focus FP16 entry box
 Ctrl + Shift + H - focus Float entry box
 
-Alt + M - focus Millimeter entry box
-Alt + Shift + M - focus Meter entry box
+Alt + H - focus float HEX entry box
+Alt + Shift + H - focus float entry box
+
+Ctrl + F - focus find entry box
+F3 - find next match
+Shift + F3 - find previous match
 
 Ctrl + [ - decrease move id
 Ctrl + ] - increase move id
@@ -36,7 +40,6 @@ Ctrl + Shift + ] - increase hitbox id
 Alt + [ - move backward in manually loaded move id history list
 Alt + ] - move forward in manually loaded move id history list
 Alt + X - Clear manually loaded move id history list
-
 
 Ctrl + , - copy move to clipboard
 Ctrl + . - copy hitbox to clipboard

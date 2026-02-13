@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import re
 import struct
 from tkinter import *
 from tkinter.ttk import *
@@ -234,8 +235,8 @@ class GUI_MoveViewer:
         
         move_frame.rowconfigure(0,weight=2)
         hitbox_frame.rowconfigure(0,weight=2)
-        cancel_frame.rowconfigure(0,weight=2)
-        cancel_frame.columnconfigure(0, weight=1)
+        cancel_frame.rowconfigure(1,weight=2)
+        cancel_frame.columnconfigure(1, weight=1)
         #cancel_frame.columnconfigure(1, weight=2)
 
         self.move_pair= ScrolledTextPair(move_frame, (12, 64), 28, True)
@@ -279,8 +280,19 @@ class GUI_MoveViewer:
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
 
+        self.find_label = Label(cancel_frame,text='Find:')
+        self.find_label.grid(row=0, column=1,sticky=E,pady=4)
+        self.find_var = StringVar()
+        self.find_entry = Entry(cancel_frame,width=60,textvariable=self.find_var)
+        self.find_entry.grid(row=0, column=2,sticky=E,pady=4)
+        self.prev_button = Button(cancel_frame, text="Find Prev.", width=10, command=lambda: self.find("prev")).grid(row=0, column=3,sticky=W)
+        self.next_button = Button(cancel_frame, text="Find Next", width=10, command=lambda: self.find("next")).grid(row=0, column=4,sticky=W)
+        master.bind('<Control-f>', lambda x: self.find_entry.focus())
+        master.bind('<Return>', lambda x: self.find("next"))
+        master.bind('<F3>', lambda x: self.find("next"))
+        master.bind('<Shift-F3>', lambda x: self.find("prev"))
         self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 103), 40, add_canvas=True)
-        self.cancel_pair.grid(sticky=N+W+E+S, row = 0, column = 0)
+        self.cancel_pair.grid(sticky=N+W+E+S, row = 1, column = 0, columnspan=5)
 
         self.cancel_raw = self.cancel_pair.left
 
@@ -597,7 +609,52 @@ class GUI_MoveViewer:
                 self.cancel_pair.highlight_orange()
                 
                 
-                
+    def find(self, direction="next"):
+        raw_pattern = self.find_var.get()
+        if not raw_pattern:
+            return
+
+        regex_pattern = re.escape(raw_pattern)
+        regex_pattern = regex_pattern.replace(r"\?\?", r"..")
+        count_var = IntVar()
+        is_backwards = (direction == "prev")
+        
+        if is_backwards:
+            start_pos = self.cancel_pair.left.index("sel.first" if self.cancel_pair.left.tag_ranges("sel") else "insert")
+            stop_pos = "1.0"
+        else:
+            start_pos = self.cancel_pair.left.index("sel.last" if self.cancel_pair.left.tag_ranges("sel") else "insert")
+            stop_pos = "end"
+
+        pos = self.cancel_pair.left.search(
+            regex_pattern, 
+            start_pos, 
+            stopindex=stop_pos, 
+            backwards=is_backwards, 
+            regexp=True,
+            count=count_var, 
+            nocase=True
+        )
+
+        # Wrap around logic
+        if not pos:
+            wrap_start = "end" if is_backwards else "1.0"
+            wrap_stop = "1.0" if is_backwards else "end"
+            pos = self.cancel_pair.left.search(
+                regex_pattern, wrap_start, stopindex=wrap_stop, 
+                backwards=is_backwards, regexp=True, count=count_var, nocase=True
+            )
+
+        if pos:
+            self._apply_selection(pos, count_var.get())
+
+    def _apply_selection(self, start_index, length):
+        end_index = f"{start_index}+{length}c"
+        self.cancel_pair.left.tag_remove("sel", "1.0", "end")
+        self.cancel_pair.left.tag_add("sel", start_index, end_index)
+        self.cancel_pair.left.mark_set("insert", end_index)
+        self.cancel_pair.left.see(start_index)
+        self.cancel_pair.left.focus_set()          
                 
             
         
@@ -708,9 +765,11 @@ class GUI_MoveViewer:
         try:
             if move_id[0:2] == "0x":
                 id = int(move_id[2:],16)
+                encoded_id = id 
                 id = MovelistParser.decode_move_id(id,self.movelist)
             else:
                 id = int(move_id)
+                encoded_id = MovelistParser.encode_move_id(id,self.movelist)
         except:
             print('unrecognized move_id: {}'.format(move_id))
             return
@@ -754,7 +813,8 @@ class GUI_MoveViewer:
                 self.hitboxes_data.append((raw, intr, move.attack_indexes[i]))
             self.load_hitbox()
 
-            cancel_guide, goto_line_to_line = move.cancel.get_gui_guide()
+            input_params = MovelistParser.find_script_info(self.movelist, encoded_id, self.movelist.x25_char_data, self.movelist.x25_custom_data, self.movelist.x25_data, "0d")
+            cancel_guide, goto_line_to_line = move.cancel.get_gui_guide(input_params)
             #for bytes in cancel_guide:
 
             raw = ''
