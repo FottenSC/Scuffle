@@ -1213,7 +1213,13 @@ class Cancel:
 
                 if vs_t:
                     if vs_t > 1:
-                        gi_effective_against += ('tg')
+                        if vs_t == 16:
+                            gi_effective_against += ('G')
+                        elif vs_t == 32 or vs_t == 33:
+                            gi_effective_against += ('T')
+                        else:
+                            gi_effective_against += ('tg')
+
                     else:
                         gi_effective_against += ('TG')
 
