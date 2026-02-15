@@ -214,7 +214,7 @@ class TextRedirector(object):
 class GUI_FrameDataOverlay(GUI_Overlay.Overlay):
     def __init__(self, master, launcher, log=True):
 
-        GUI_Overlay.Overlay.__init__(self, master, (1000, 86), "SCUFFLE: Frame Data Overlay", log)
+        GUI_Overlay.Overlay.__init__(self, master, (1260, 86), "SCUFFLE: Frame Data Overlay", log)
 
 
         self.launcher = launcher

@@ -22,6 +22,8 @@ import sys
 class GUI_Main(Tk):
     def __init__(self):
         self.overlay = None
+        self.hitbox = None
+        self.stop_print = False
 
         Tk.__init__(self)
         self.iconbitmap(default='Data/icon.ico')
@@ -41,6 +43,7 @@ class GUI_Main(Tk):
         self.stderr = sys.stderr
         sys.stderr = TextRedirector(self.text, sys.stderr, self.write_to_error, "stderr")
         self.text.tag_configure("stderr", foreground="#b22222")
+        self.text
 
 
 
@@ -255,7 +258,7 @@ class GUI_Main(Tk):
 
     def update_launcher(self):
         time1 = time.time()
-        successful_update = self.launcher.Update(self.do_print_debug_values.get(), self.do_show_all_hitbox_data.get(), self.verbose_logging.get())
+        successful_update, self.hitbox, self.stop_print = self.launcher.Update(self.do_print_debug_values.get(),self.hitbox, self.stop_print, self.do_show_all_hitbox_data.get(), self.verbose_logging.get())
 
         if self.move_viewer != None:
             if self.launcher.p1_primary_move_id != self.old_move_id and self.launcher.p1_primary_move_id != 0x59: #0x59 is the hex for 'coming to a stop' move_id

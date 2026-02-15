@@ -288,7 +288,7 @@ class GUI_MoveViewer:
         self.prev_button = Button(cancel_frame, text="Find Prev.", width=10, command=lambda: self.find("prev")).grid(row=0, column=3,sticky=W)
         self.next_button = Button(cancel_frame, text="Find Next", width=10, command=lambda: self.find("next")).grid(row=0, column=4,sticky=W)
         master.bind('<Control-f>', lambda x: self.find_entry.focus())
-        master.bind('<Return>', lambda x: self.find("next"))
+        self.find_entry.bind('<Return>', lambda x: self.find("next"))
         master.bind('<F3>', lambda x: self.find("next"))
         master.bind('<Shift-F3>', lambda x: self.find("prev"))
         self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 103), 40, add_canvas=True)
@@ -615,7 +615,7 @@ class GUI_MoveViewer:
             return
 
         regex_pattern = re.escape(raw_pattern)
-        regex_pattern = regex_pattern.replace(r"\?\?", r"..")
+        regex_pattern = regex_pattern.replace(r"\?", r".")
         count_var = IntVar()
         is_backwards = (direction == "prev")
         

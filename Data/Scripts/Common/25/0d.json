@@ -119,7 +119,7 @@
 				}
 			},
 			{
-				"name": "??",
+				"name": "thrust/throw",
 				"value_type": "BoolFlag",
 				"data": {
 					"replace_char": ""
@@ -127,6 +127,136 @@
 			},
 			{
 				"name": "RI_effect",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			}
+		]
+	},
+	{
+		"state": "0x3065",
+		"script_type": "0d",
+		"name": "GUARD IMPACT CONDITION",
+		"args": [
+			{
+				"name": "start",
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "end",
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "attack_level",
+				"value_type": "AttackLevel"
+			},
+			{
+				"name": "horizontal",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "vertical",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "kick",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "thrust",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "throw",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "RI",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			}
+		]
+	},
+	{
+		"state": "0x3066",
+		"script_type": "0d",
+		"name": "GUARD IMPACT CONDITION",
+		"args": [
+			{
+				"name": "start",
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "end",
+				"data": {
+					"prefix": "frame "
+				}
+			},
+			{
+				"name": "attack_level",
+				"value_type": "AttackLevel"
+			},
+			{
+				"name": "horizontal",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "vertical",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "kick",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "thrust",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "throw",
+				"value_type": "BoolFlag",
+				"data": {
+					"replace_char": ""
+				}
+			},
+			{
+				"name": "RI",
 				"value_type": "BoolFlag",
 				"data": {
 					"replace_char": ""

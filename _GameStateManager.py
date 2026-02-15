@@ -2,8 +2,10 @@ import math
 import AddressMap
 import SoulCaliburGameState
 import time
+import tkinter as tk
 import GameplayEnums
 import MovelistParser
+import GUI_FrameDataOverlay as fdo
 from typing import List
 from threading import Thread
 from ByteTools import *
@@ -25,10 +27,10 @@ class GameStateManager:
         self.time_spent_in_primary_move_id_count = [[], []]
         self.time_spent_in_secondary_move_id_count = [[], []]
 
-    def Update(self, do_print_debug_vars, show_all_hitboxes, verbose_log=False):
-        
+    def Update(self, do_print_debug_vars, hitbox, _stop_print, show_all_hitboxes, verbose_log=False):
         successful_update = self.game_reader.UpdateCurrentSnapshot()
-        hitbox_id = None
+        hitbox_id = hitbox
+        stop_print = _stop_print
         if successful_update:
             try:
                 primary_snapshots = self.game_reader.primary_snapshots
@@ -43,6 +45,7 @@ class GameStateManager:
                         self.p1_primary_move_id = primary_snapshots[-1].p1.movement_block.movelist_id
                         did_p1_primary_attack_change = primary_snapshots[-2].p1.movement_block.movelist_id != primary_snapshots[-3].p1.movement_block.movelist_id
                     if did_p1_primary_attack_change:
+                        stop_print = False
                         hitbox_id = self.game_reader.p1_hitbox_index
                         if self.game_reader.p1_movelist != None:
                             old_id = MovelistParser.decode_move_id(primary_snapshots[-3].p1.movement_block.movelist_id,self.game_reader.p1_movelist)
@@ -53,19 +56,36 @@ class GameStateManager:
                         s = self.create_frame_entry('p1', primary_snapshots[-1].p1, self.primary_move_ids_record[0], self.primary_bhc_stuns_record[0], self.primary_entry_times[0], self.game_reader.p1_movelist,verbose=verbose_log) if self.game_reader.p1_movelist != None else None
 
                         if s != None:
-                            for entry in s:
-                                if self.game_reader.p1_hitbox_index != -1:
-                                    print(s[self.game_reader.p1_hitbox_index])
-                                    break
-                                if did_p1_primary_attack_change == False:
-                                    if hitbox_id != None and self.game_reader.p1_hitbox_index != hitbox_id:
-                                        hitbox_id = self.game_reader.p1_hitbox_index
-                                        if hitbox_id != -1:
-                                            print(s[self.game_reader.p1_hitbox_index])
-                                            break                            
+                            # if show_all_hitboxes:
+                            #     for i, entry in enumerate(s):
+                            #         if i != self.game_reader.p1_hitbox_index:
+                            #             print(entry)
+                            #     stop_print = True
                                 
-                                if show_all_hitboxes:
-                                    print(entry)
+                            if self.game_reader.p1_hitbox_index != -1 and stop_print == False:
+                                print(s[self.game_reader.p1_hitbox_index])
+                                if self.game_reader.p1_hitbox_index > 0:
+                                    stop_print = True
+                        else: 
+                            stop_print = True
+
+                                
+                    
+                    elif did_p1_primary_attack_change == False and self.p1_primary_move_id != 65535 and self.p1_primary_move_id != 56391 and stop_print == False:
+                        s = self.create_frame_entry('p1', primary_snapshots[-1].p1, self.primary_move_ids_record[0], self.primary_bhc_stuns_record[0], self.primary_entry_times[0], self.game_reader.p1_movelist,verbose=verbose_log) if self.game_reader.p1_movelist != None else None
+                        if s != None:
+                            if show_all_hitboxes and stop_print == False:    
+                                for i, entry in enumerate(s):
+                                    if i != self.game_reader.p1_hitbox_index:
+                                        print(entry)
+                                stop_print = True
+
+                            elif hitbox_id != None and self.game_reader.p1_hitbox_index != hitbox_id:
+                                hitbox_id = self.game_reader.p1_hitbox_index
+                                if hitbox_id != -1 and hitbox_id > 0 and stop_print == False:
+                                    print(s[self.game_reader.p1_hitbox_index])
+                                    #stop_print = True
+
                     
                     did_p2_primary_attack_change = primary_snapshots[-2].p2.movement_block.movelist_id != primary_snapshots[-3].p2.movement_block.movelist_id
                     if did_p2_primary_attack_change:
@@ -117,9 +137,13 @@ class GameStateManager:
 
                 if do_print_debug_vars:
                     print(self.game_reader.primary_snapshots[-1])
+
+                return (True, hitbox_id, stop_print)
             except Exception as e:
                 print(e)
                 raise e
+        else:
+            return (False, hitbox_id, stop_print)
 
     def count_time_in_move_id(self, count_list, move_id, snapshots, is_p1 = True):
         found_move_id = False
@@ -460,5 +484,5 @@ class FrameBackCounter:
 if __name__ == "__main__":
     launcher = GameStateManager()
     while(True):
-        launcher.Update(False, False, False)
+        launcher.Update(False, None, False, False, False)
         time.sleep(.05)

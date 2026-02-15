@@ -115,8 +115,6 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
     state_info = None
     argp = []
     param_out = []
-    in_state = state
-    in_state = str(f"0x{state:04x}")
     if movelist.character_id != '000' and movelist.custom == True:
         for index_id in char_data:
             if "state" not in index_id:
@@ -1167,9 +1165,11 @@ class Cancel:
                     notes.append('TC[{}-{}]'.format(start, stop))
                 elif type == 4:
                     notes.append('TJ[{}-{}]'.format(start, stop))
-                elif type == 0x28:  # airborne???
-                    pass
-                elif type == 0x62:  # even more airborne???
+                elif type == 0x1f:
+                    notes.append('W![{}-{}]'.format(start, stop))
+                elif type == 0x28: 
+                    notes.append('RING OUT[{}-{}]'.format(start, stop))
+                elif type == 0x62:  
                     pass
 
         splits = self.bytes.split(b'\x8b\x30\x64')#GI frames
@@ -1180,9 +1180,9 @@ class Cancel:
                 stop = b2i(split, 7, big_endian=True)
                 type_b = b2i(split, 10, big_endian=True) # for GI 325/323 seem to both be mid/high, 322 seems to be lows #for armor, this seems to be damage absorbable before break
                 vs_h = b2i(split, 13, big_endian=True) == 0x01 #horizontals
-                vs_v = b2i(split, 16, big_endian=True) == 0x01 #verticals
+                vs_v = b2i(split, 16, big_endian=True) >= 0x01 #verticals
                 vs_k = b2i(split, 19, big_endian=True) == 0x01 #most kicks are horizontals so only really useful for horizontal impacts?
-                vs_unk = b2i(split, 22, big_endian=True) == 0x01 #???
+                vs_t = b2i(split, 22, big_endian=True) >= 0x01 #???
 
                 if start in infinite_set:
                     start = 0
@@ -1195,20 +1195,126 @@ class Cancel:
 
                 gi_effective_against = ''
                 if vs_h:
-                    gi_effective_against += ('H')
+                    if vs_h > 1:
+                        gi_effective_against += ('h')
+                    else:
+                        gi_effective_against += ('H')
                 if vs_v:
-                    gi_effective_against += ('V')
-                if vs_k and vs_h: #seems like most kicks are horizontals???
-                    gi_effective_against += ('K')
+                    if vs_v > 1:
+                        gi_effective_against += ('v')
+                    else:
+                        gi_effective_against += ('V')
 
-                if type_a == 0x14a:
-                    red_or_green = 'REV{}{}{}'.format('{', type_b, '}')
+                if vs_k: #seems like most kicks are horizontals???
+                    if vs_k > 1:
+                        gi_effective_against += ('k')
+                    else:
+                        gi_effective_against += ('K')
+
+                if vs_t:
+                    if vs_t > 1:
+                        gi_effective_against += ('tg')
+                    else:
+                        gi_effective_against += ('TG')
+
+                hit_level = ''
+                if type_b == 0x140:
+                    hit_level = "High"
+                if type_b == 0x141:
+                    hit_level = "Mid"
+                if type_b == 0x142:
+                    hit_level = "Low"
+                if type_b == 0x143:
+                    hit_level = "High+Mid"
+                if type_b == 0x144:
+                    hit_level = "Mid+Low"
+                if type_b == 0x145:
+                    hit_level = "All"
+
+                if type_a == 0x148:
+                    red_or_green = 'ARMOR:{}{}{}{}'.format(hit_level,'{', gi_effective_against, '}')
+                elif type_a == 0x14a:
+                    red_or_green = 'REV{}{} dmg{}'.format('{', type_b, '}')
+                elif type_a == 0x14c or type_a == 0x14f:
+                    red_or_green = 'RI:{}{}{}{}'.format(hit_level,'{', gi_effective_against, '}')
                 else:
-                    if type_b == 0x142:
-                        gi_effective_against = gi_effective_against.swapcase()
-                    red_or_green = 'GI{}{}{}'.format('{', gi_effective_against, '}')
+                    red_or_green = 'GI:{}{}{}{}'.format(hit_level,'{', gi_effective_against, '}')
 
                 notes.append('{}[{}-{}]'.format(red_or_green, start, stop))
+        
+        byte_sets = [b'\x8b\x30\x65', b'\x8b\x30\x66']
+        for set in byte_sets:
+            splits = self.bytes.split(set)#GI frames
+            if len(splits) > 1:
+                for split in splits[1:]:
+                    start = b2i(split, 1, big_endian=True) #mostly 0x149, 0x14a for armored/invincible?
+                    stop = b2i(split, 4, big_endian=True)
+                    type_b = b2i(split, 7, big_endian=True)
+                    vs_h = b2i(split, 10, big_endian=True) # for GI 325/323 seem to both be mid/high, 322 seems to be lows #for armor, this seems to be damage absorbable before break
+                    vs_v = b2i(split, 13, big_endian=True) == 0x01 #horizontals
+                    vs_k = b2i(split, 16, big_endian=True) >= 0x01 #verticals
+                    vs_t = b2i(split, 19, big_endian=True) == 0x01 #most kicks are horizontals so only really useful for horizontal impacts?
+                    vs_g = b2i(split, 22, big_endian=True) >= 0x01 #???
+                    ri = b2i(split, 25, big_endian=True) == 0x01 #???
+
+                    if start in infinite_set:
+                        start = 0
+                    else:
+                        start += 2
+                    if stop in infinite_set:
+                        stop = ''
+                    else:
+                        stop += 3
+
+                    gi_effective_against = ''
+                    if vs_h:
+                        if vs_h > 1:
+                            gi_effective_against += ('h')
+                        else:
+                            gi_effective_against += ('H')
+                    if vs_v:
+                        if vs_v > 1:
+                            gi_effective_against += ('v')
+                        else:
+                            gi_effective_against += ('V')
+
+                    if vs_k: #seems like most kicks are horizontals???
+                        if vs_k > 1:
+                            gi_effective_against += ('k')
+                        else:
+                            gi_effective_against += ('K')
+
+                    if vs_t:
+                        if vs_t > 1:
+                            gi_effective_against += ('t')
+                        else:
+                            gi_effective_against += ('T')
+                    if vs_g:
+                        if vs_g > 1:
+                            gi_effective_against += ('g')
+                        else:
+                            gi_effective_against += ('G')
+
+                    hit_level = ''
+                    if type_b == 0x140:
+                        hit_level = "High"
+                    if type_b == 0x141:
+                        hit_level = "Mid"
+                    if type_b == 0x142:
+                        hit_level = "Low"
+                    if type_b == 0x143:
+                        hit_level = "High+Mid"
+                    if type_b == 0x144:
+                        hit_level = "Mid+Low"
+                    if type_b == 0x145:
+                        hit_level = "All"
+
+                    if ri:
+                        red_or_green = 'RI:{}{}{}{}'.format(hit_level,'{', gi_effective_against, '}')
+                    else:
+                        red_or_green = 'GI:{}{}{}{}'.format(hit_level,'{', gi_effective_against, '}')
+
+                    notes.append('{}[{}-{}]'.format(red_or_green, start, stop))
         return notes
 
 
@@ -1961,13 +2067,15 @@ class Movelist:
     ONE_BYTE_INSTRUCTIONS = [CC.RETURN_05, CC.RETURN_08, CC.MATH_8c, CC.MATH_8d, CC.MATH_8e, CC.MATH_8f, CC.MATH_90, CC.MATH_91, CC.BITWISE_94, CC.MATH_95, CC.COMPARE_96, CC.MATH_97, CC.MATH_98, CC.COMPARE_9f, CC.COMPARE_a0, CC.COMPARE_a1, CC.COMPARE_a2, CC.COMPARE_a3, CC.COMPARE_a4]
     THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_1A, CC.EXE_1B, CC.EXE_1C, CC.EXE_1D, CC.EXE_1E, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29, CC.EXE_99]
 
-    def __init__(self, raw_bytes, name):
+    def __init__(self, raw_bytes, name: str):
         self.character_id = '000'
         self.bytes = raw_bytes
 
         self.custom_types = self.xA5_data = self.xA5_char_data = self.xA5_custom_data = self.x25_data = self.x25_char_data = self.x25_custom_data = None
         self.load_json()
-        self.name = name.split('/')[-1].split('_')[0].capitalize()
+        if '_movelist' in name:
+            name.replace('_movelist','_Movelist')
+        self.name = name.split('/')[-1].split('_Movelist')[0].capitalize()
         self.verbose = False
         header_index_1x = 0xC
         header_index_1y = 0xE
