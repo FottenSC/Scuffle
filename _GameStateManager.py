@@ -71,7 +71,7 @@ class GameStateManager:
 
                                 
                     
-                    elif did_p1_primary_attack_change == False and self.p1_primary_move_id != 65535 and self.p1_primary_move_id != 56391 and stop_print == False and hitbox_id != 65535:
+                    elif did_p1_primary_attack_change == False and self.p1_primary_move_id != 65535 and self.p1_primary_move_id != 56391 and stop_print == False:
                         s = self.create_frame_entry('p1', primary_snapshots[-1].p1, self.primary_move_ids_record[0], self.primary_bhc_stuns_record[0], self.primary_entry_times[0], self.game_reader.p1_movelist,verbose=verbose_log) if self.game_reader.p1_movelist != None else None
                         if s != None:
                             if show_all_hitboxes and stop_print == False:    
@@ -275,7 +275,7 @@ class GameStateManager:
                             #leave += older_link.leave_on
                             #enter += older_link.enter_in
                             older_diff = older_link.leave_on - older_link.enter_in
-                            #print('2:{} 1:{} s:{} b:{}'.format(diff, older_diff, old_startup, old_block_stun))
+                            print('2:{} 1:{} s:{} b:{}'.format(diff, older_diff, old_startup, old_block_stun))
                             diff += (older_diff)
 
 
@@ -286,7 +286,7 @@ class GameStateManager:
             except Exception as e:
                 pass
                 #print(e)
-                #print("Couldn't find route from {} to {}".format(move_ids[-2], move_ids[-1]))
+                print("Couldn't find route from {} to {}".format(move_ids[-2], move_ids[-1]))
 
 
 
