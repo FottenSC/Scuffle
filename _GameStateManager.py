@@ -275,7 +275,7 @@ class GameStateManager:
                             #leave += older_link.leave_on
                             #enter += older_link.enter_in
                             older_diff = older_link.leave_on - older_link.enter_in
-                            print('2:{} 1:{} s:{} b:{}'.format(diff, older_diff, old_startup, old_block_stun))
+                            #print('2:{} 1:{} s:{} b:{}'.format(diff, older_diff, old_startup, old_block_stun))
                             diff += (older_diff)
 
 
@@ -286,7 +286,7 @@ class GameStateManager:
             except Exception as e:
                 pass
                 #print(e)
-                print("Couldn't find route from {} to {}".format(move_ids[-2], move_ids[-1]))
+                #print("Couldn't find route from {} to {}".format(move_ids[-2], move_ids[-1]))
 
 
 
