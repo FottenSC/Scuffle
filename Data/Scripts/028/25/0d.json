@@ -1,0 +1,41 @@
+[
+    {
+		"state": "0x3250",
+		"script_type": "0d",
+		"name": "ACTIVATE REGALIA",
+        "args":[
+            {
+                "name": "regalia",
+                "value_type": "RegaliaType"
+            }
+        ]
+	},
+    {
+		"state": "0x3251",
+		"script_type": "0d",
+		"name": "APPLY REGALIA VFX",
+        "args":[
+            {
+                "name": "frame",
+                "data":{
+                    "prefix": "frame "
+                }
+            },
+            {
+                "name": "regalia",
+                "value_type": "RegaliaType"
+            }
+        ]
+	},
+    {
+		"state": "0x3252",
+		"script_type": "0d",
+		"name": "USE REGALIA ATTACK",
+        "args":[
+            {
+                "name": "regalia",
+                "value_type": "RegaliaType"
+            }
+        ]
+	}
+]

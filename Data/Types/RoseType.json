@@ -1,0 +1,16 @@
+[
+    {
+        "name": "RoseType",
+        "values": [
+            {
+                "input_value": 1,
+                "output_value": "White"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Red"
+            }
+        ]
+
+    }
+]

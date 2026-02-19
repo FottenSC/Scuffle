@@ -1,0 +1,17 @@
+[
+    {
+		"state": "0x3260",
+		"script_type": "0d",
+		"name": "ROSE COUNT",
+		"last": "ROSE COUNT",
+        "args":[
+            {
+                "name": "rose",
+                "value_type": "RoseType"
+            },
+            {
+                "name": "count"
+            }
+        ]
+	}
+]

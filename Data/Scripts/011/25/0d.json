@@ -1,0 +1,13 @@
+[
+    {
+		"state": "0x325b",
+		"script_type": "0d",
+		"name": "TERROR CHARGE",
+        "args":[
+            {
+                "name": "active",
+                "value_type": "BoolFlag"
+            }
+        ]
+	}
+]

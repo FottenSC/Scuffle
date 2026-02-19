@@ -1,0 +1,16 @@
+[
+    {
+        "name": "RegaliaType",
+        "values": [
+            {
+                "input_value": 1,
+                "output_value": "Spear"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Sword"
+            }
+        ]
+
+    }
+]

@@ -333,10 +333,7 @@
 		"args": [
 			{
 				"name": "part",
-				"value_type": "TracePart",
-				"data": {
-					"replace_char": ""
-				}
+				"value_type": "TracePart"
 			},
 			{
 				"name": "play_voice",
@@ -375,17 +372,11 @@
 		"args": [
 			{
 				"name": "first_part",
-				"value_type": "TracePart",
-				"data": {
-					"replace_char": ""
-				}
+				"value_type": "TracePart"
 			},
 			{
 				"name": "second_part",
-				"value_type": "TracePart",
-				"data": {
-					"replace_char": ""
-				}
+				"value_type": "TracePart"
 			},
 			{
 				"name": "start",
@@ -417,17 +408,11 @@
 		"args": [
 			{
 				"name": "trail_part",
-				"value_type": "TracePart",
-				"data": {
-					"replace_char": ""
-				}
+				"value_type": "TracePart"
 			},
 			{
 				"name": "flare_part",
-				"value_type": "EffectPart",
-				"data": {
-					"replace_char": ""
-				}
+				"value_type": "EffectPart"
 			},
 			{
 				"name": "trail_start",
@@ -661,10 +646,7 @@
 		"args": [
 			{
 				"name": "part",
-				"value_type": "TracePart",
-				"data": {
-					"replace_char": ""
-				}
+				"value_type": "TracePart"
 			},
 			{
 				"name": "start",

@@ -1,0 +1,21 @@
+[
+    {
+		"state": "0x325c",
+		"script_type": "0d",
+		"name": "ROSE TRAIL",
+		"last": "ROSE TRAIL",
+        "args":[
+            {
+                "name": "rose",
+                "value_type": "RoseType"
+            },
+            {
+                "name": "start",
+                "data":{
+                    "prefix": "frame "
+                }
+                
+            }
+        ]
+	}
+]
