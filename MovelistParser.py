@@ -309,6 +309,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         return result if result != None else "<b>last return<b>"
     
     elif type == 0x8b: #encoded / shortcut
+        sockets = [x for x in range(-32745, -32736)]
         if cls != None:
             found = False
             for t in custom_types:
@@ -361,7 +362,12 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         
             
         else:
-            if value == 0 and auto:
+            if value in sockets:
+                for i, socket in enumerate(sockets):
+                    if value == socket:
+                        result = f"<b>Weapon Socket {i+1}<b>"
+                        break
+            elif value == 0 and auto:
                 result = f'<b>Auto<b>'
             elif percent:
                 result = f'<b>{math.floor(value / percent_base * 100)}%<b>'
@@ -391,7 +397,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
                 
         return result if result != None else "<b>last return<b>"
     
-    elif type == 0x8a or type == 0x19 or type == 0x1a or type == 0x1b or type == 0x1c or type == 0x1d or type == 0x1e or type == 0x12 or type == 0x13 or type == 0x99: #variable / input param
+    elif type == 0x8a or type == 0x19 or type == 0x1a or type == 0x1b or type == 0x1c or type == 0x1d or type == 0x1e or type == 0x12 or type == 0x13 or type == 0x92 or type == 0x93 or type == 0x99: #variable / input param
         if value & 0xf0 == 0xf0:
             index = value ^ 0xf0
             if params != [] and index < len(params):
@@ -406,7 +412,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
     
 
 def format_return_value(bytes, index, offset1 = 6, offset2 = 4, movelist = None, params = []):
-    variable_operators = [0x12, 0x13, 0x19, 0x1a, 0x1c, 0x8a, 0x99]
+    variable_operators = [0x12, 0x13, 0x19, 0x1a, 0x1c, 0x8a, 0x92, 0x93, 0x99]
     math_operators = [0x8c, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x94, 0x95, 0x97, 0x98]
     compare_operators = [0x9f, 0xa0, 0xa1, 0xa2, 0xa3, 0xa4]
     if bytes[index - offset1] == 0xa5 or bytes[index - offset2] == 0x25:
@@ -1639,10 +1645,10 @@ class Cancel:
                     except:
                         list_of_bytes.append((current_bytes, f'<b>VARIABLE MATH ASSIGNMENT<b>: {format_value(self.bytes[index - 3:index],movelist=self.movelist,params=input_params)}', index))
                     current_bytes = b''
-                if inst == CC.EXE_12:
+                if inst == CC.EXE_12 or inst == CC.EXE_92:
                     list_of_bytes.append((current_bytes, f'<b>INCREMENT VARIABLE<b>: {format_value(self.bytes[index - 3:index],movelist=self.movelist,params=input_params)}', index))
                     current_bytes = b''
-                if inst == CC.EXE_13:
+                if inst == CC.EXE_13 or inst == CC.EXE_93:
                     list_of_bytes.append((current_bytes, f'<b>DECREMENT VARIABLE<b>: {format_value(self.bytes[index - 3:index],movelist=self.movelist,params=input_params)}', index))
                     current_bytes = b''
                 if inst == CC.PEN_2A:
@@ -2071,7 +2077,7 @@ class Movelist:
     STARTER_INT = 0x3131484b
 
     ONE_BYTE_INSTRUCTIONS = [CC.RETURN_05, CC.RETURN_08, CC.MATH_8c, CC.MATH_8d, CC.MATH_8e, CC.MATH_8f, CC.MATH_90, CC.MATH_91, CC.BITWISE_94, CC.MATH_95, CC.COMPARE_96, CC.MATH_97, CC.MATH_98, CC.COMPARE_9f, CC.COMPARE_a0, CC.COMPARE_a1, CC.COMPARE_a2, CC.COMPARE_a3, CC.COMPARE_a4]
-    THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_1A, CC.EXE_1B, CC.EXE_1C, CC.EXE_1D, CC.EXE_1E, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29, CC.EXE_99]
+    THREE_BYTE_INSTRUCTIONS = [CC.START, CC.ARG_8A, CC.ARG_8B, CC.ARG_89, CC.EXE_19, CC.EXE_1A, CC.EXE_1B, CC.EXE_1C, CC.EXE_1D, CC.EXE_1E, CC.EXE_25, CC.EXE_A5, CC.EXE_12, CC.EXE_13, CC.PEN_2A, CC.PEN_28, CC.PEN_29, CC.EXE_92, CC.EXE_93, CC.EXE_99]
 
     def __init__(self, raw_bytes, name: str):
         self.character_id = '000'

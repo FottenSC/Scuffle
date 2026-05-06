@@ -1,6 +1,7 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+Backups/
 build/
 dist/
 dist/SCUFFLE/

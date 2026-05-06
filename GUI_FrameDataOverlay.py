@@ -279,7 +279,7 @@ class GUI_FrameDataOverlay(GUI_Overlay.Overlay):
     def create_frame_advantage_label(self, col):
         frame_advantage_var = StringVar()
         frame_advantage_var.set('?')
-        frame_advantage_label = Label(self.toplevel, textvariable=frame_advantage_var, font=("Consolas", 44), width=4, anchor='c',
+        frame_advantage_label = Label(self.toplevel, textvariable=frame_advantage_var, font=("Courier New", 44), width=4, anchor='c',
                                         borderwidth=4, relief='ridge')
         frame_advantage_label.grid(row=0, column=col)
         return frame_advantage_var, frame_advantage_label
@@ -293,7 +293,7 @@ class GUI_FrameDataOverlay(GUI_Overlay.Overlay):
         return attack_type_var
 
     def create_textbox(self, col):
-        textbox = Text(self.toplevel, font=("Consolas", 14), wrap=NONE, highlightthickness=0, pady=0, relief='flat')
+        textbox = Text(self.toplevel, font=("Courier New", 14), wrap=NONE, highlightthickness=0, pady=0, relief='flat')
         textbox.grid(row=0, column=col, rowspan=2, sticky=N + S + W + E)
         textbox.configure(background=self.background_color)
         textbox.configure(foreground=CurrentColorScheme.dict[ColorSchemeEnum.system_text])

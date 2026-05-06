@@ -80,10 +80,13 @@ class GameStateManager:
                                         print(entry)
                                 stop_print = True
 
-                            elif hitbox_id != None and self.game_reader.p1_hitbox_index != hitbox_id:
+                            elif hitbox_id != None and self.game_reader.p1_hitbox_index != hitbox_id and self.game_reader.p1_hitbox_index != None:
                                 hitbox_id = self.game_reader.p1_hitbox_index
                                 if hitbox_id != -1 and hitbox_id > 0 and stop_print == False:
-                                    print(s[self.game_reader.p1_hitbox_index])
+                                    try:
+                                        print(s[self.game_reader.p1_hitbox_index])
+                                    except:
+                                        print(f'Hitbox index out of bounds: {self.game_reader.p1_hitbox_index}')
                                     #stop_print = True
 
                     

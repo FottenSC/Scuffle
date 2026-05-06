@@ -1,5 +1,6 @@
 ```NEW KEYBOARD SHORTCUTS
-Ctrl + L - reload current move
+F5 - reload current move
+Ctrl + F5 - Load move id from move id textbox
 Ctrl + Shift + L - load movelist from file
 
 Ctrl + S - save changes to memory
@@ -10,9 +11,9 @@ Ctrl + I - inject movelist
 Ctrl + R - toggle auto-reload
 Ctrl + P - toggle goto pointer updating when saving
 
-Ctrl + 1 - switch to move tab
-Ctrl + 2 - switch to hitbox tab
-Ctrl + 3 - switch to scripting tab
+Ctrl + 1 - switch to move tab, focus hex textbox
+Ctrl + 2 - switch to hitbox tab, focus hex textbox
+Ctrl + 3 - switch to scripting tab, focus hex textbox
 
 Ctrl + M - focus move id entry box
 
@@ -31,6 +32,9 @@ Alt + Shift + H - focus float entry box
 Ctrl + F - focus find entry box
 F3 - find next match
 Shift + F3 - find previous match
+
+Ctrl + = - increase font size in scripting tab
+Ctrl + Shift + = - decrease font size in scripting tab
 
 Ctrl + [ - decrease move id
 Ctrl + ] - increase move id

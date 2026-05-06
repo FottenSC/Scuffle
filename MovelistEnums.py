@@ -856,7 +856,8 @@ class CC(Enum): #Cancel codes for the cancel block, mostly we expect (CC XX XX C
     MATH_8f = 0x8f
     MATH_90 = 0x90
     MATH_91 = 0x91
-    RETURN_92 = 0x92
+    EXE_92 = 0x92
+    EXE_93 = 0x93
     BITWISE_94 = 0x94
     MATH_95 = 0x95
     COMPARE_96 = 0x96

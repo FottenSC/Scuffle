@@ -63,8 +63,8 @@ class GUI_MoveIdMeter:
         master.attributes("-topmost", True)
         master.iconbitmap('Data/icon.ico')
 
-        guide_font = ("Consolas", 8)
-        label_font = ("Consolas", 8)
+        guide_font = ("Courier New", 8)
+        label_font = ("Courier New", 8)
 
         self.style = Style()
         self.style.configure('MoveIdOmeter.TFrame', background='black')

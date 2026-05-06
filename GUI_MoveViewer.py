@@ -162,14 +162,7 @@ class GUI_MoveViewer:
         self.display_frame.add(move_frame, text='Move')
         self.display_frame.add(hitbox_frame, text='Hitbox')
         self.display_frame.add(cancel_frame, text = 'Scripting')
-        master.bind('<Control-Key-1>', lambda x: self.display_frame.select(0))
-        master.bind('<Control-Key-2>', lambda x: self.display_frame.select(1))
-        master.bind('<Control-Key-3>', lambda x: self.display_frame.select(2))
-        master.bind('<Control-KP_1>', lambda x: self.display_frame.select(0))
-        master.bind('<Control-KP_2>', lambda x: self.display_frame.select(1))
-        master.bind('<Control-KP_3>', lambda x: self.display_frame.select(2))
     
-
         move_id_entry_container = Frame(loader_frame_bot)
         move_id_entry_container.grid(row=0, column=0)
 
@@ -190,6 +183,7 @@ class GUI_MoveViewer:
 
         self.move_id_entry = Entry(move_id_label_container)
         self.move_id_entry.bind('<Return>', lambda x: self.load_moveid(self.move_id_entry.get(),clear_history=True))
+        master.bind('<Control-F5>', lambda x: self.load_moveid(self.move_id_entry.get(),clear_history=True))
         master.bind('<Control-m>', lambda x: self.move_id_entry.focus())
         
         move_id_load_button_container = Frame(move_id_entry_container)
@@ -202,7 +196,7 @@ class GUI_MoveViewer:
         self.load_button.grid(row=0,column=1)
         self.next_load_button.grid(row=0,column=2)
         self.clear_history_button.grid(row=0,column=3)
-        master.bind('<Control-l>', lambda x: self.load_moveid(self.move_id_textvar.get()))
+        master.bind('<F5>', lambda x: self.load_moveid(self.move_id_textvar.get()))
         master.bind('<Alt-[>', lambda x: self.load_moveid_from_history(x, 0))
         master.bind('<Alt-]>', lambda x: self.load_moveid_from_history(x, 1))
         master.bind('<Alt-x>', lambda x: self.clear_all_history())
@@ -217,8 +211,9 @@ class GUI_MoveViewer:
 
         s.configure('Save.TButton', font=font_config.get_property("Side Panel","save_changes_font", "Consolas 14 bold"))
         s.configure('Bold.TButton', font=bold_label_font)
-        save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=(self.do_fix_goto.get(),)).start())
-        save_move.grid(row=4)   
+        self.save_move = Button(move_id_entry_container, text="Save Changes", style='Save.TButton', command=lambda: Thread(target=self.save_move_bytes_command, args=(self.do_fix_goto.get(),)).start())
+        self.save_move.grid(row=4)
+        self.save_move['state'] = DISABLED
         master.bind('<Control-s>', lambda x: Thread(target=self.save_move_bytes_command, args=(self.do_fix_goto.get(),)).start())
         
 
@@ -280,25 +275,42 @@ class GUI_MoveViewer:
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
 
+        self.font_group = Frame(cancel_frame)
+        self.font_group.grid(row=0,column=0)
+        self.font_label = Label(self.font_group,text='Font Scale:')
+        self.font_label.grid(row=0, column=1,sticky=E,pady=4)
+        Button(self.font_group, text="-", width=4, command=lambda: self.cancel_pair.change_font_size(-2)).grid(row=0, column=2,sticky=E)
+        Button(self.font_group, text="+", width=4, command=lambda: self.cancel_pair.change_font_size(2)).grid(row=0, column=3,sticky=E)
+        master.bind('<Control-+>',lambda x: self.cancel_pair.change_font_size(-2))
+        master.bind('<Control-=>',lambda x: self.cancel_pair.change_font_size(2))
+
+
+
         self.find_label = Label(cancel_frame,text='Find:')
-        self.find_label.grid(row=0, column=1,sticky=E,pady=4)
+        self.find_label.grid(row=0, column=4,sticky=E,pady=4)
         self.find_var = StringVar()
         self.find_entry = Entry(cancel_frame,width=60,textvariable=self.find_var)
-        self.find_entry.grid(row=0, column=2,sticky=E,pady=4)
-        self.prev_button = Button(cancel_frame, text="Find Prev.", width=10, command=lambda: self.find("prev")).grid(row=0, column=3,sticky=W)
-        self.next_button = Button(cancel_frame, text="Find Next", width=10, command=lambda: self.find("next")).grid(row=0, column=4,sticky=W)
+        self.find_entry.grid(row=0, column=5,sticky=E,pady=4)
+        self.prev_button = Button(cancel_frame, text="Find Prev.", width=10, command=lambda: self.find("prev")).grid(row=0, column=6,sticky=W)
+        self.next_button = Button(cancel_frame, text="Find Next", width=10, command=lambda: self.find("next")).grid(row=0, column=7,sticky=W)
         master.bind('<Control-f>', lambda x: self.find_entry.focus())
         self.find_entry.bind('<Return>', lambda x: self.find("next"))
         master.bind('<F3>', lambda x: self.find("next"))
         master.bind('<Shift-F3>', lambda x: self.find("prev"))
         self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 103), 40, add_canvas=True)
-        self.cancel_pair.grid(sticky=N+W+E+S, row = 1, column = 0, columnspan=5)
+        self.cancel_pair.grid(sticky=N+W+E+S, row = 1, column = 0, columnspan=8)
 
         self.cancel_raw = self.cancel_pair.left
 
         self.cancel_intr = self.cancel_pair.right
-        self.cancel_intr.tag_configure("bold", font=font_config.get_property("Tabs","bold_guide_font", "Consolas 9 bold"))
-        self.cancel_intr.tag_configure("soulcharge", font=font_config.get_property("Tabs","soul_charge_font", "Consolas 9 bold"), foreground='#2C75FF')
+        
+        master.bind('<Control-Key-1>', lambda x: self.change_tab(0))
+        master.bind('<Control-Key-2>', lambda x: self.change_tab(1))
+        master.bind('<Control-Key-3>', lambda x: self.change_tab(2))
+
+        master.bind('<Control-KP_1>', lambda x: self.change_tab(0))    
+        master.bind('<Control-KP_2>', lambda x: self.change_tab(1))
+        master.bind('<Control-KP_3>', lambda x: self.change_tab(2))
 
         clipboard_label = Label(loader_frame_clip, text="Cheat Engine", font = bold_label_font)
         clipboard_label.grid(sticky=N+W+E, row=0, column=0)
@@ -499,8 +511,8 @@ class GUI_MoveViewer:
     def meter_to_mm(self, *args):
         try:
             if self.master.focus_get() != self.tool_mm:
-                i = int(self.tool_meter_string.get(), 10)
-                self.tool_mm_string.set(hex(i * 1000))
+                i = float(self.tool_meter_string.get())
+                self.tool_mm_string.set(f'0x{int(i * 1000):04x}')
         except:
             pass
 
@@ -540,9 +552,19 @@ class GUI_MoveViewer:
         except:
             pass
 
+    def change_tab(self, index):
+        self.display_frame.select(index)
+        if index == 0:
+            self.move_raw.focus()
+        elif index == 1:
+            self.hitbox_raw.focus()
+        elif index == 2:
+            self.cancel_raw.focus()
+
 
     def save_move_bytes_command(self,update_goto=True):
-
+        if self.move_id_textvar.get() != "-":
+            self.save_move['state'] = DISABLED
         move = self.movelist.all_moves[int(self.move_id_textvar.get())]
         move_successful = self.text_entry_to_bytes(self.move_raw, move, MovelistParser.Move.LENGTH)
 
@@ -584,6 +606,7 @@ class GUI_MoveViewer:
             if self.auto_backup_save_var.get() == True:
                 count=0
                 max_count = int(self.overlay_config.get_property('DisplaySettings','max_backup_count',20))
+                os.makedirs('./Backups', exist_ok=True)
                 for file in Path('./Backups').iterdir():
                     count += 1
 
@@ -612,6 +635,8 @@ class GUI_MoveViewer:
                 self.move_pair.highlight_orange()
                 self.hitbox_pair.highlight_orange()
                 self.cancel_pair.highlight_orange()
+
+            self.save_move['state'] = NORMAL
                 
                 
     def find(self, direction="next"):
@@ -775,6 +800,7 @@ class GUI_MoveViewer:
             else:
                 id = int(move_id)
                 encoded_id = MovelistParser.encode_move_id(id,self.movelist)
+            self.save_move['state'] = NORMAL
         except:
             print('unrecognized move_id: {}'.format(move_id))
             return
@@ -894,6 +920,8 @@ class GUI_MoveViewer:
         filename = askopenfilename(initialdir = '{}/{}'.format(os.getcwd(), '/movelists'),filetypes=[('Header File', '*.khd *.sc6_movelist'),('All Files','*.*')])  # show an "Open" dialog box and return the path to the selected file
         self.load_movelist(filename)
         print(f'{time.strftime("[%I:%M:%S %p]")} Loaded movelist:{filename}')
+        if self.move_id_textvar.get() != "-":
+            self.save_move['state'] = NORMAL
 
     def save_movelist_dialog(self):
         filename = asksaveasfilename(defaultextension=".khd")
@@ -941,8 +969,14 @@ class ScrolledTextPair(Frame):
 
         # Creating the widgets
         self.font_config = ConfigReader.ConfigReader('font_config')
-        self.left = Text(self, width = width_lr[0], wrap='none', height=h,  undo=True, autoseparators=True, maxundo=-1)
-        self.right = Text(self, width = width_lr[1], wrap='none', height=h,  undo=True, autoseparators=True, maxundo=-1)
+        self.custom_font = tkf.Font(family=self.font_config.get_property('Tabs','guide_font','Consolas'),size=self.font_config.get_property('Tabs','guide_font_size',10))
+        self.cancel_bold = tkf.Font(family=self.font_config.get_property("Tabs","bold_guide_font", "Consolas"), size=self.font_config.get_property('Tabs','guide_font_size',10), weight='bold')
+
+        self.left = Text(self, width = width_lr[0], wrap='none', height=h,  undo=True, autoseparators=True, maxundo=-1, font= self.custom_font)
+        self.right = Text(self, width = width_lr[1], wrap='none', height=h,  undo=True, autoseparators=True, maxundo=-1, font=self.custom_font)
+
+        self.right.tag_configure("bold", font=self.cancel_bold)
+        self.right.tag_configure("soulcharge", font=self.cancel_bold, foreground='#2C75FF')
         self.font_height = tkf.Font(font=self.left['font']).metrics('linespace')
         self.scrollbar = Scrollbar(self)
         if not hide_scrollbar:
@@ -1002,6 +1036,15 @@ class ScrolledTextPair(Frame):
         self.right.yview(*args)
         if self.canvas != None:
             self.canvas.yview(*args)
+    
+    def change_font_size(self, delta):
+        # Get the current size and update it
+        current_size = self.custom_font.actual("size")
+        new_size = current_size + delta
+    
+        # Update the font object; the Text widget updates automatically
+        self.custom_font.configure(size=new_size)
+        self.cancel_bold.configure(size=new_size)
 
 
     def on_textscroll(self, *args):
