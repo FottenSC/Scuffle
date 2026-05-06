@@ -63,7 +63,10 @@ class GameStateManager:
                             #     stop_print = True
                                 
                             if self.game_reader.p1_hitbox_index != -1 and stop_print == False:
-                                print(s[self.game_reader.p1_hitbox_index])
+                                try:
+                                    print(s[self.game_reader.p1_hitbox_index])
+                                except:
+                                    print(f'Hitbox index out of bounds: {self.game_reader.p1_hitbox_index}')
                                 if self.game_reader.p1_hitbox_index > 0:
                                     stop_print = True
                         else: 
