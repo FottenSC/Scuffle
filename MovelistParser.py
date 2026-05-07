@@ -941,7 +941,7 @@ class Cancel:
                     else:
                         updated_bytes += new_bytes[z:z+1]
                         
-                        goto = b2i(new_bytes, z + 1, big_endian=True)
+                        goto = bs2i(new_bytes, z + 1, big_endian=True)
                         if first_index >= len(old_bytes) - 1:
                             new_diff = 0
                     
