@@ -944,7 +944,9 @@ class Cancel:
                         goto = bs2i(new_bytes, z + 1, big_endian=True)
                         if first_index >= len(old_bytes) - 1:
                             new_diff = 0
-                    
+
+                        
+                        
                         if goto > first_index:
                             if z + 1 >= first_index and z + 1 <= first_index + diff:
                                 if goto > len(new_bytes) - 1:
@@ -957,12 +959,11 @@ class Cancel:
 
                             else:
                                 new_diff = diff
-                            if goto <= 0:
-                               goto = 0
-                               new_diff = 0
-                            goto += new_diff if goto + new_diff <= len(new_bytes) - 1 else 0
-                        
-                        updated_bytes += goto.to_bytes(2, byteorder='big')
+                        if goto <= 0:
+                            goto = 0
+                            new_diff = 0
+                        goto += new_diff if goto + new_diff <= len(new_bytes) - 1 else 0
+                        updated_bytes += goto.to_bytes(2, byteorder='big', signed=True)
                         z += 3
             return updated_bytes
 
