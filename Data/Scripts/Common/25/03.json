@@ -903,21 +903,16 @@
 		]
 	},
 	{
-		"state": [
-			"0x2332",
-			"0x2333"
-		],
+		"state": "0x2332",
 		"script_type": "03",
 		"name": "<b>MOVE CAMERA<b>:",
 		"args": [
 			{
-				"name": "type",
-				"data": {
-					"replace_char": ""
-				}
+				"name": "type"
 			},
 			{
-				"name": "??"
+				"name": "EndCam",
+				"value_type": "BoolFlag"
 			},
 			{
 				"name": "target",
@@ -927,7 +922,8 @@
 				"name": "??"
 			},
 			{
-				"name": "??"
+				"name": "Bone Target",
+				"value_type": "EffectPart"
 			},
 			{
 				"name": "zoom",
@@ -949,6 +945,54 @@
 			},
 			{
 				"name": "roll",
+				"data": {
+					"negative": true
+				}
+			}
+		]
+	},
+	{
+		"state": "0x2333",
+		"script_type": "03",
+		"name": "<b>START CAMERA<b>:",
+		"args": [
+			{
+				"name": "type"
+			},
+			{
+				"name": "duration"
+			},
+			{
+				"name": "recovery"
+			}
+		]
+	},
+	{
+		"state": "0x2337",
+		"script_type": "03",
+		"name": "<b>MOVE CAMERA B<b>:",
+		"args": [
+			{
+				"name": "type"
+			},
+			{
+				"name": "EndCam",
+				"value_type": "BoolFlag"
+			},
+			{
+				"name": "+Right/-Left",
+				"data": {
+					"negative": true
+				}
+			},
+			{
+				"name": "+Up/-Down",
+				"data": {
+					"negative": true
+				}
+			},
+			{
+				"name": "+Backward/-Forward",
 				"data": {
 					"negative": true
 				}

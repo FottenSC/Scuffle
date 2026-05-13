@@ -38,7 +38,10 @@ def check_version(force_print=False):
                     while available_updates > 0:
                         index = available_updates - 1
                         repoTag = str(repoItem[index]['tag_name'])
-                        print(f"{repoTag.split('scuffle_VV_')[1]}:")
+                        if repoItem[index]['prerelease'] == True:
+                            print(f"{repoTag.split('scuffle_VV_')[1]} (Pre-Release):")
+                        else:
+                            print(f"{repoTag.split('scuffle_VV_')[1]}:")
                         print(repoItem[index]['body'])
                         available_updates -= 1
                     print("---------------------------------------------------------" * 2)
