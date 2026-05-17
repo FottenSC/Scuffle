@@ -963,6 +963,8 @@ class Cancel:
                                 goto = 0
                                 new_diff = 0
                             goto += new_diff if goto + new_diff <= len(new_bytes) - 1 else 0
+                            if goto < 0:
+                                goto = 0
                         updated_bytes += goto.to_bytes(2, byteorder='big', signed=True)
                         z += 3
             return updated_bytes
