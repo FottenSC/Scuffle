@@ -266,9 +266,13 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
     if type == 0x89: #constant
         if cls != None:
             found = False
+            found_type = False
             for types in value_types:
-                found_type = False
+                if found_type:
+                    break
                 for t in types:
+                    if found_type:
+                        break
                     if t["name"] == cls:
                         found_type = True
                         for k in t["values"]:
@@ -283,8 +287,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
                                     result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
                                     found = True
                                     break
-                    if found_type:
-                        break
+    
             if found == False:
                 result = f'{prefix}<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>{suffix}'
         
@@ -330,10 +333,13 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         sockets = [x for x in range(-32745, -32736)]
         if cls != None:
             found = False
-            for t in value_types:
-                for types in value_types:
-                    found_type = False
+            found_type = False
+            for types in value_types:
+                    if found_type:
+                        break
                     for t in types:
+                        if found_type:
+                            break
                         if t["name"] == cls:
                             found_type = True
                             for k in t["values"]:
@@ -348,8 +354,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
                                         result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
                                         found = True
                                         break
-                        if found_type:
-                            break
+                
             if found == False:
                 result = f'<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>'
 

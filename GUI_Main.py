@@ -18,9 +18,36 @@ import webbrowser
 import GUI_MoveViewer
 import GUI_MoveIdMeter
 import sys
+import os
+import subprocess
+from threading import Thread
 
 class GUI_Main(Tk):
     def __init__(self):
+
+        if not os.path.exists(f'./Data/Custom'):
+                dir = f'./Data/Custom'
+                empty_json = '[\n\n]'
+                os.mkdir(f'{dir}')
+                os.mkdir(f'{dir}/Scripts/')
+                os.mkdir(f'{dir}/Scripts/A5/')
+                os.mkdir(f'{dir}/Scripts/25/')
+                os.mkdir(f'{dir}/Value_Types/')
+                dir = f'./Data/Custom/Scripts'
+
+                with open(f'{dir}/A5/01.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{dir}/A5/0d.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{dir}/25/03.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{dir}/25/0d.json', 'w') as file:
+                    file.write(empty_json)
+                with open(f'{dir}/25/14.json', 'w') as file:
+                    file.write(empty_json)
+        
+        if not os.path.exists(f'./Backups'):
+            os.mkdir('./Backups')
         self.overlay = None
         self.hitbox = None
         self.stop_print = False
@@ -75,6 +102,7 @@ class GUI_Main(Tk):
 
         self.frame_config = ConfigReader.ConfigReader('frame_data_overlay')
         self.tools_menu = Menu(self.menu)
+        self.ext_tools_menu = Menu(self.menu)
         self.move_viewer = None
         self.tools_menu.add_command(label="Launch Move Editor", command=self.launch_move_viewer)
         self.bind('<Control-e>', lambda x: self.launch_move_viewer())
@@ -90,14 +118,17 @@ class GUI_Main(Tk):
         self.verbose_logging.set(self.frame_config.get_property('DisplaySettings', 'verbose_logging', True))
 
         self.tools_menu.add_checkbutton(label='Verbose logging: Log info for all moves', onvalue=True, offvalue=False, variable=self.verbose_logging, command=self.toggle_verbose)
-
         self.tools_menu.add_command(label="Dump all frame data to console", command=self.dump_frame_data)
+
+        self.ext_tools_menu.add_command(label="Launch Violent Vodka's Movelist Viewer", command=lambda : Thread(target=self.launch_VV_viewer).start())
+        self.ext_tools_menu.add_command(label="Launch Calculator", command=lambda : Thread(target=self.launch_calc).start())
 
         self.do_print_debug_values = BooleanVar()
         self.do_print_debug_values.set(False)
         #self.tools_menu.add_checkbutton(label='DEBUG: Print Every Frame (WARNING: CPU USAGE HIGH)', onvalue=True, offvalue=False, variable=self.do_print_debug_values)
 
         self.menu.add_cascade(label="Advanced Tools", menu=self.tools_menu)
+        self.menu.add_cascade(label='External Tools',menu=self.ext_tools_menu)
 
 
 
@@ -177,6 +208,20 @@ class GUI_Main(Tk):
     def write_to_error(self, string):
         self.stderr.write(string)
 
+    def launch_VV_viewer(self):
+        path = "./Data/Tools/VV_MovelistViewer/Movelist Viewer.exe"
+        if os.path.exists(path):
+            print('Launching VV Movelist Viewer')
+            process = subprocess.run([path],check=True, capture_output=True)
+            if process.returncode == 0:
+                print('Closed VV Movelist Viewer')
+        else:
+            print(f"'Movelist Viewer.exe' not found in ./Data/Tools/VV_MovelistViewer.")
+    
+    def launch_calc(self):
+        path = "calc.exe"
+        process = subprocess.run([path], check=True)
+    
     def launch_move_viewer(self):
         try:
             self.old_move_id = 0

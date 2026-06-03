@@ -43,31 +43,7 @@ class GUI_MoveViewer:
     ]
 
     def __init__(self, master,verbose=False):
-        if not os.path.exists(f'./Data/Custom'):
-                dir = f'./Data/Custom'
-                empty_json = '[\n\n]'
-                os.mkdir(f'{dir}')
-                os.mkdir(f'{dir}/Scripts/')
-                os.mkdir(f'{dir}/Scripts/A5/')
-                os.mkdir(f'{dir}/Scripts/25/')
-                os.mkdir(f'{dir}/Value_Types/')
-                dir = f'./Data/Custom/Scripts'
-
-                with open(f'{dir}/A5/01.json', 'w') as file:
-                    file.write(empty_json)
-                with open(f'{dir}/A5/0d.json', 'w') as file:
-                    file.write(empty_json)
-                with open(f'{dir}/25/03.json', 'w') as file:
-                    file.write(empty_json)
-                with open(f'{dir}/25/0d.json', 'w') as file:
-                    file.write(empty_json)
-                with open(f'{dir}/25/14.json', 'w') as file:
-                    file.write(empty_json)
-        
-        if not os.path.exists(f'./Backups'):
-            os.mkdir('./Backups')
-        
-            
+             
         self.master = master
         self.verbose = verbose
         self.backward_history = []

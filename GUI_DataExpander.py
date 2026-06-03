@@ -29,7 +29,7 @@ class GUI_DataExpander:
         #Add Moves (Mode 0)
         move_frame = Frame(master)
         val = StringVar()
-        val.set("0")
+        
         move_quantity = Spinbox(move_frame,from_=0, to=20, textvariable=val, width=6, validate='all')
 
         move_frame.grid(row=0, column=0)

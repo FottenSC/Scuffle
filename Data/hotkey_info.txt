@@ -38,8 +38,9 @@ Ctrl + Shift + = - decrease font size in scripting tab
 
 Ctrl + [ - decrease move id
 Ctrl + ] - increase move id
+
 Ctrl + Shift + [ - move backward in manually loaded move id history list
-Crtl + Shift + ] - move forward in manually loaded move id history list
+Ctrl + Shift + ] - move forward in manually loaded move id history list
 
 Alt + [ - decrease hitbox id
 Alt + ] - increase hitbox id
@@ -49,7 +50,8 @@ Alt + Shift + ] - increase modifier index
 
 Alt + X - Clear manually loaded move id history list
 
-Ctrl + , - copy move to clipboard
-Ctrl + . - copy hitbox to clipboard
+Ctrl + N - copy move to clipboard
+Ctrl + , - copy hitbox to clipboard
+Ctrl + . - copy modifier to clipboard
 Ctrl + / - copy scripting to clipboard
 ```
