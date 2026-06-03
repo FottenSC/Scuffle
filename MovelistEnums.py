@@ -20,6 +20,15 @@ def name_from_enum(cls, value, replace_char = " ", format = False, slice = False
     except:
         return value
 
+def get_flags(flag_cls:Flag, value):
+    flags = []
+    if value == 0x00:
+        return "None"
+    for flag in flag_cls:
+        if value & flag.value == flag.value:
+            flags.append(flag.name.replace('_',' '))
+    return ", ".join(flags)
+
 
 class BoolFlag(Enum):
     False_ = 0x00
@@ -784,10 +793,48 @@ class CharacterID(Enum):
     Evil_Kilik = 0x67
     Evil_Grøh = 0x68
     Boss_Azwel = 0x69
-    Conduit = 0x6a
+    Common = 0x6a
 
 
+class HitCore(Flag):
+    Head = 0x01
+    Chest = 0x04
+    Waist = 0x08
+    Right_Hand = 0x10
+    Left_Hand = 0x20
+    Right_Foot = 0x40
+    Left_Foot = 0x80
 
+class HitLimb(Flag):
+    Right_Shoulder = 0x01
+    Left_Shoulder = 0x02
+    Right_Forearm = 0x04
+    Left_Forearm = 0x08
+    Right_Thigh = 0x10
+    Left_Thigh = 0x20
+    Right_Knee = 0x40
+    Left_Knee = 0x80
+
+class HitMisc(Flag):
+    Right_Shin = 0x01
+    Left_Shin = 0x02
+    Big_Sphere = 0x40
+    Weapon_0 = 0x80
+
+class HitWeapon(Flag):
+    Weapon_1 = 0x01
+    Weapon_2 = 0x02
+    Weapon_3 = 0x04
+    Weapon_4 = 0x08
+    Weapon_5 = 0x10
+    Weapon_6 = 0x20
+    Weapon_7 = 0x40
+    Weapon_8 = 0x80
+
+class HitGeneral(Flag):
+    General_1 = 0x01
+    General_2 = 0x02
+    General_3 = 0x04
 
 
 

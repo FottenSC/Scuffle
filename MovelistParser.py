@@ -5,6 +5,7 @@ see HowTheMovelistBytesWork.md for a full description of how the movelist is par
 
 
 import struct
+from typing import Dict, List
 import AddressMap
 import MovelistEnums as mve
 from MovelistEnums import *
@@ -67,7 +68,7 @@ def decode_move_id(encoded_move_id, movelist):
         move_id += movelist.block_R_start
     return move_id
 
-def string_to_class(string, custom_types=None):
+def string_to_class(string, value_types=[]):
     conversion_table = {
         "BoolFlag": BoolFlag,
         "Button": Button,
@@ -102,9 +103,10 @@ def string_to_class(string, custom_types=None):
         "CharacterID": CharacterID
     }
     
-    for t in custom_types:
-        if t["name"] == string:
-            return string
+    for types in value_types:
+        for t in types:
+            if t["name"] == string:
+                return string
                 
     for s in conversion_table.keys():
         if s == string:
@@ -115,6 +117,7 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
     state_info = None
     argp = []
     param_out = []
+    script_group = ""
     if movelist.character_id != '000' and movelist.custom == True:
         for index_id in char_data:
             if "state" not in index_id:
@@ -133,11 +136,13 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
                 for i, idx in enumerate(index_id["state"]):
                     if index_id['state'][i] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                         state_info = index_id
+                        script_group = f'[{movelist.character_id}]'
                         found = True
                         break
             else:
                 if index_id['state'] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                     state_info = index_id
+                    script_group = f'[{movelist.character_id}]'
                     found = True
                     break
     if found == False:
@@ -158,11 +163,13 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
                 for i, idx in enumerate(index_id["state"]):
                     if index_id['state'][i] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                         state_info = index_id
+                        script_group = f'[Custom]'
                         found = True
                         break
             else:
                 if index_id['state'] == str(f"0x{state:04x}") and index_id["script_type"] == script_type:
                     state_info = index_id
+                    script_group = f'[Custom]'
                     found = True
                     break
         
@@ -230,19 +237,19 @@ def find_script_info(movelist, state, char_data, custom_data, data, script_type,
             if a["format_method"] == "format_value" and args_list != None:
                 if isinstance(a["index"],list):
                     try:
-                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist,params=params, **a["data"])} to {format_value(args_list[a["index"][1]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist,params=params, **a["data"])}'
+                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.value_types), movelist=movelist,params=params, **a["data"])} to {format_value(args_list[a["index"][1]], string_to_class(a["value_type"], movelist.value_types), movelist=movelist,params=params, **a["data"])}'
                     except:
-                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist,params=params, **a["data"])} to {format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist,params=params, **a["data"])}'
+                        val = f'{format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.value_types), movelist=movelist,params=params, **a["data"])} to {format_value(args_list[a["index"][0]], string_to_class(a["value_type"], movelist.value_types), movelist=movelist,params=params, **a["data"])}'
 
                 else:
-                    val = format_value(args_list[a["index"]], string_to_class(a["value_type"], movelist.custom_types), movelist=movelist,params=params, **a["data"])
+                    val = format_value(args_list[a["index"]], string_to_class(a["value_type"], movelist.value_types), movelist=movelist,params=params, **a["data"])
                 argp.append(f'{a["prefix"]}[{a["name"]}{val}]')
             elif a["format_method"] == "name_from_enum":
-                val = name_from_enum(string_to_class(a["value_type"], movelist.custom_types), state, **a["data"])
+                val = name_from_enum(string_to_class(a["value_type"], movelist.value_types), state, **a["data"])
                 argp.append(f'[{a["name"]}{val}]')
 
     if second_arg == -1:
-        return param_out
+        return [f'{script_group} {state_info["name"] if state_info != None else "UNDEFINED"}', param_out]
     
     return found, state_info, argp
     
@@ -255,27 +262,38 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
     result = 0
 
     # custom_type_dir = './Data/Types/'
-    custom_types = movelist.custom_types
+    value_types = movelist.value_types
     if type == 0x89: #constant
         if cls != None:
             found = False
-            for t in custom_types:
-                if t["name"] == cls:
-                    for k in t["values"]:
-                        if isinstance(k["input_value"],list):
-                            for v in k["input_value"]:
-                                if v == value:
+            for types in value_types:
+                found_type = False
+                for t in types:
+                    if t["name"] == cls:
+                        found_type = True
+                        for k in t["values"]:
+                            if isinstance(k["input_value"],list):
+                                for v in k["input_value"]:
+                                    if v == value:
+                                        result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                                        found = True
+                                        break
+                            else:
+                                if k["input_value"] == value:
                                     result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
                                     found = True
                                     break
-                        else:
-                            if k["input_value"] == value:
-                                result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
-                                found = True
-                                break
+                    if found_type:
+                        break
             if found == False:
                 result = f'{prefix}<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>{suffix}'
-                    
+        
+        elif value == 0x7fff:
+            if end:
+                result = f'∞'
+            else:
+                result = f'∞'           
+        
         else:
             if value == 0 and auto:
                 result = f'<b>Auto<b>'
@@ -312,20 +330,26 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         sockets = [x for x in range(-32745, -32736)]
         if cls != None:
             found = False
-            for t in custom_types:
-                if t["name"] == cls:
-                    for k in t["values"]:
-                        if isinstance(k["input_value"],list):
-                            for v in k["input_value"]:
-                                if v == value:
-                                    result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
-                                    found = True
-                                    break
-                        else:
-                            if k["input_value"] == value:
-                                result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
-                                found = True
-                                break
+            for t in value_types:
+                for types in value_types:
+                    found_type = False
+                    for t in types:
+                        if t["name"] == cls:
+                            found_type = True
+                            for k in t["values"]:
+                                if isinstance(k["input_value"],list):
+                                    for v in k["input_value"]:
+                                        if v == value:
+                                            result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                                            found = True
+                                            break
+                                else:
+                                    if k["input_value"] == value:
+                                        result = f'{prefix}<b>{k["output_value"]}<b>{suffix}'
+                                        found = True
+                                        break
+                        if found_type:
+                            break
             if found == False:
                 result = f'<b>{name_from_enum(cls, value, replace_char, format, slice, slice_index)}<b>'
 
@@ -401,7 +425,7 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
         if value & 0xf0 == 0xf0:
             index = value ^ 0xf0
             if params != [] and index < len(params):
-                result = f'<b>{params[index]}<b>'
+                result = f'<b>{params[index]} ({(value ^ 0xf0) + 1})<b>'
             else:
                 result = f'<b>input param {(value ^ 0xf0) + 1}<b>'
         elif value & 0x0100 == 0x0100:
@@ -553,6 +577,9 @@ class Move:
     def set_attacks(self, attacks):
         self.attacks:Attack|Throw = attacks
 
+    def set_modifiers(self, modifiers):
+        self.modifiers:AttackModifier = modifiers
+
     def get_weight_to_move_id(self, move_id):
         link = self.cancel.get_link_to_move_id(move_id)
         if link == None:
@@ -674,12 +701,12 @@ class Move:
             (0x36, 0x38, b2i, "???"),
             (0x38, 0x3C, lambda x, y: '{:04x}'.format(b4i(x, y)), "address of script information"),
 
-            (0x3C, 0x3E, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 1 index"),
-            (0x3E, 0x40, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 2 index"),
-            (0x40, 0x42, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 3 index"),
-            (0x42, 0x44, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 4 index"),
-            (0x44, 0x46, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 5 index"),
-            (0x46, 0x48, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "hitbox 6 index"),
+            (0x3C, 0x3E, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "attack index 1"),
+            (0x3E, 0x40, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "attack index 2"),
+            (0x40, 0x42, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "attack index 3"),
+            (0x42, 0x44, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "attack index 4"),
+            (0x44, 0x46, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "attack index 5"),
+            (0x46, 0x48, lambda x, y: b2i(x, y) if b2i(x,y) != 0xFFFF  else 'None', "attack index 6"),
         ]
         return self.bytes, guide
 
@@ -764,10 +791,15 @@ class Attack:
 
     def get_gui_guide(self):
         guide = [
-            (0x00, 0x02, b2i, "???"),
-            (0x02, 0x04, b2i, "hitbox width/hitbox... height(?)"),
+            (0x00, 0x01, lambda x, y: f'{get_flags(HitCore, b1i(x,y))}', "core hitboxes"),
+            (0x01, 0x02, lambda x, y: f'{get_flags(HitLimb, b1i(x,y))}', "limb hitboxes"),
+            (0x02, 0x03, lambda x, y: f'{get_flags(HitMisc, b1i(x,y))}', "misc hitboxes"),
+            (0x03, 0x04, lambda x, y: f'{get_flags(HitWeapon, b1i(x,y))}', "additional weapon hitboxes"),
 
-            (0x04, 0x08, b2i, "???"),
+            (0x04, 0x05, b1i, ""),
+            (0x05, 0x06, b1i, "Additional hitboxes"),
+            (0x06, 0x07, b1i, "Additional hitboxes"),
+            (0x07, 0x08, lambda x, y: f'{get_flags(HitGeneral, b1i(x,y))}', "general hitboxes"),
 
             (0x08, 0x0e, b2i, "physics on hit (pushback) [magnitude ; left|right ; up|down|forward|back]"),
             (0x0e, 0x14, b2i, "physics on hit (launch distance)"),
@@ -802,9 +834,9 @@ class Attack:
             (0x54, 0x56, b2i, "grounded hit effect"),
             (0x56, 0x58, b2i, "standing block hit effect"),
             (0x58, 0x5a, b2i, "crouching block hit effect"),
-            (0x5a, 0x5c, lambda x, y: f'{math.floor(bs2i(x, y)*100/240)}%' if bs2i(x,y) >= 0 else 'disabled' , "guard damage override (otherwise uses hit spark size and type calc)"),
+            (0x5a, 0x5c, lambda x, y: f'{math.floor(bs2i(x, y)*100/240)}%' if bs2i(x,y) >= 0 else 'disabled' , "guard damage override"),
             (0x5c, 0x5e, b2i, f"combo condition flag(s) [0x01 = counterhit, 0x08 = won't chain, 0x20 = jails on block]"),
-            (0x5e, 0x60, b2i, "ATK type and strength (Ex: 0x06 = medium horizontal attack, 0x1a = strong vertical attack, 0x31 = weak kick/throw)"),
+            (0x5e, 0x60, b2i, "ATK type and strength (Ex: 0x06 = medium horizontal, 0x1a = strong vertical, 0x31 = weak kick/throw)"),
             (0x60, 0x62, b2i, "same as above"),
 
             (0x62, 0x64, b2i, "hit spark size (contributes to guard damage)"),
@@ -843,16 +875,28 @@ class Throw:
         ]
         return self.bytes, guide
 
-class AttackResizer:
+class AttackModifier:
     LENGTH = 0x30
     def __init__(self, bytes):
         self.bytes = bytes
         self.modified_bytes = None
 
-        self.move_id = b2i(self.bytes, 0) #throw damage
-        self.hitbox_id = b2i(self.bytes, 4) #throw damage scaling
-        self.mystery_4 = b2i(self.bytes, 4) #unknown, usually 0x00
-
+        self.move_id = b4i(self.bytes, 0) #move id affected
+        self.hitbox_id = b4i(self.bytes, 4) #hitbox index affected by resizer
+        self.core_hit_override = b1i(self.bytes, 8) #resizer index
+        self.limb_hit_override = b1i(self.bytes, 9) #resizer index
+        self.misc_hit_override = b1i(self.bytes, 10) #resizer index
+        self.weapon_hit_override = b1i(self.bytes, 11) #resizer index
+        self.weapon2_hit_override = b1i(self.bytes, 13) #resizer index
+        self.weapon3_hit_override = b1i(self.bytes, 14) #resizer index
+        self.weapon_hit_override = b1i(self.bytes, 15) #resizer index
+        self.general_hit_override = b1i(self.bytes, 16) #resizer index
+        self.X_Offset = b4f(self.bytes, 20)
+        self.Y_Offset = b4f(self.bytes, 24)
+        self.Z_Offset = b4f(self.bytes, 28)
+        self.Scale_Multiplier = b4f(self.bytes, 40)
+        self.float_E = b4f(self.bytes, 44)
+        
 
     def get_modified_bytes(self):
         if self.modified_bytes == None:
@@ -862,9 +906,24 @@ class AttackResizer:
 
     def get_gui_guide(self):
         guide = [
-            (0x00, 0x02, b2i, "move id"),
-            (0x02, 0x04, bs2i, "damage scaling"),
-            (0x04, 0x06, b2i, "???"),
+            (0x00, 0x04, b4i, "move id"),
+            (0x04, 0x08, bs4i, "attack index"),
+            (0x08, 0x09, lambda x, y: f'{get_flags(HitCore, b1i(x,y))}', "core hit overrides"),
+            (0x09, 0x0a, lambda x, y: f'{get_flags(HitLimb, b1i(x,y))}', "limb hit overrides"),
+            (0x0a, 0x0b, lambda x, y: f'{get_flags(HitMisc, b1i(x,y))}', "misc hit overrides"),
+            (0x0b, 0x0c, lambda x, y: f'{get_flags(HitWeapon, b1i(x,y))}', "weapon hit overrides"),
+            (0x0c, 0x0d, b1i, ""),
+            (0x0d, 0x0e, b1i, "additional hit overrides"),
+            (0x0e, 0x0f, b1i, "additional hit overrides"),
+            (0x0f, 0x10, lambda x, y: f'{get_flags(HitGeneral, b1i(x,y))}', "general hit overrides"),
+            (0x10, 0x14, lambda x, y: f'{round(b4f(x, y), 4)}', "X offset"),
+            (0x14, 0x18, lambda x, y: f'{round(b4f(x, y), 4)}', "Y offset"),
+            (0x18, 0x1c, lambda x, y: f'{round(b4f(x, y), 4)}', "Z offset"),
+            (0x1c, 0x20, b4f, ""),
+            (0x20, 0x24, b4f, ""),
+            (0x24, 0x28, b4f, ""),
+            (0x28, 0x2c, lambda x, y: f'{round(b4f(x, y), 4)}', "scale multiplier"),
+            (0x2c, 0x30, b4f, ""),
         ]
         return self.bytes, guide
 
@@ -2086,7 +2145,8 @@ class Movelist:
         self.character_id = '000'
         self.bytes = raw_bytes
 
-        self.custom_types = self.xA5_data = self.xA5_char_data = self.xA5_custom_data = self.x25_data = self.x25_char_data = self.x25_custom_data = None
+        self.value_types = [] 
+        self.xA5_data = self.xA5_char_data = self.xA5_custom_data = self.x25_data = self.x25_char_data = self.x25_custom_data = None
         self.load_json()
         if '_movelist' in name:
             name.replace('_movelist','_Movelist')
@@ -2109,7 +2169,7 @@ class Movelist:
 
         move_block_start = 0x30
         self.length = b2i(raw_bytes, header_index_1x) - 1
-        self.id = b2i(raw_bytes, header_index_1y)
+        self.modifier_count = b2i(raw_bytes, header_index_1y)
         self.block_Q_start = b2i(raw_bytes, header_unknown_1c) #always zero???
         self.block_Q_length = b2i(raw_bytes, header_unknown_1e) #this offset is used to help determine the location for non attack moves such as stances and nuetral, they are marked as 3200+
 
@@ -2130,7 +2190,7 @@ class Movelist:
 
         move_block_bytes = raw_bytes[move_block_start: attack_block_start]
 
-        self.all_moves = []
+        self.all_moves: List[Move] = []
         self.last_attack = Attack(b"\x00"* 0x70) 
         counter = 0
         for i in range(0, len(move_block_bytes), Move.LENGTH):
@@ -2140,19 +2200,30 @@ class Movelist:
         #print(hex(i))
 
         attack_block_bytes = raw_bytes[attack_block_start: short_block_start]
-        self.all_attacks = []
+        self.all_attacks: List[Attack] = []
         for i in range(0, len(attack_block_bytes), Attack.LENGTH):
             attack = Attack(attack_block_bytes[i: i + Attack.LENGTH])
             self.all_attacks.append(attack)
 
         throw_block_bytes = raw_bytes[short_block_start: misc_block_start]
-        self.all_throws = []
+        self.all_throws: List[Throw] = []
         for i in range(0, len(throw_block_bytes), Throw.LENGTH):
             throw = Throw(throw_block_bytes[i: i + Throw.LENGTH])
             self.all_throws.append(throw)
 
-        for move in self.all_moves:
+        modifier_block_bytes = raw_bytes[misc_block_start : misc_block_start + (AttackModifier.LENGTH * self.modifier_count)]
+        self.all_modifiers: List[AttackModifier] = []
+        self.unused_modifiers = []
+        for i in range(0, len(modifier_block_bytes),AttackModifier.LENGTH):
+            modifier = AttackModifier(modifier_block_bytes[i: i + AttackModifier.LENGTH])
+            self.all_modifiers.append(modifier)
+            if modifier.bytes == b"\x00" * AttackModifier.LENGTH:
+                self.unused_modifiers.append(modifier)
+        
+
+        for i, move in enumerate(self.all_moves):
             attacks = []
+            modifiers = []
             for index in move.attack_indexes:
                 if index < len(self.all_attacks) and index & 0x1000 != 0x1000:
                     attacks.append(self.all_attacks[index])
@@ -2162,6 +2233,11 @@ class Movelist:
                        pass
                     else:
                         attacks.append(self.all_throws[index])
+
+            for modifier in self.all_modifiers:
+                if modifier.move_id == i:
+                    modifiers.append(modifier)
+            move.set_modifiers(modifiers)
             move.set_attacks(attacks)
 
 
@@ -2214,26 +2290,53 @@ class Movelist:
         #self.generate_modified_movelist_bytes()
 
     def load_json(self):
-        custom_type_dir = './Data/Types/'
-        self.custom_types = None
-        for _type in os.listdir(custom_type_dir):
-            type_path = os.path.join(custom_type_dir, _type)
-            if os.path.isfile(type_path) and os.path.splitext(type_path)[1] == '.json':
-                with open(type_path, 'r') as io_custom_type:
-                    if self.custom_types == None:
-                        self.custom_types = json.load(io_custom_type)
-                    else:
-                        self.custom_types += json.load(io_custom_type)
+        common_value_type_dir = './Data/Common/Value_Types/'
+        custom_value_type_dir = './Data/Custom/Value_Types/'
+        character_value_type_dir = f'./Data/Character/{self.character_id}/Value_Types/'
+        self.value_types = []
+        self.character_value_types = None
+        if self.character_id != '000':
+            for _type in os.listdir(character_value_type_dir):
+                type_path = os.path.join(character_value_type_dir, _type)
+                if os.path.isfile(type_path) and os.path.splitext(type_path)[1] == '.json':
+                    with open(type_path, 'r') as io_value_type:
+                        if self.character_value_types == None:
+                            self.character_value_types = json.load(io_value_type)
+                        else:
+                            self.character_value_types += json.load(io_value_type)
+        self.value_types.append(self.character_value_types if self.character_value_types != None else "")
         
-        self.custom_base_path = f'./Data/Scripts/Custom'
-        self.custom_A5_script_path = f'./Data/Scripts/Custom/A5'
-        self.custom_25_script_path = f'./Data/Scripts/Custom/25'
-        self.common_base_path = './Data/Scripts/Common'
-        self.common_A5_script_path = f'{self.common_base_path}/A5'
-        self.common_25_script_path = f'{self.common_base_path}/25'
-        self.character_base_path = f'./Data/Scripts/{self.character_id}'
-        self.character_A5_script_path = f'./Data/Scripts/{self.character_id}/A5'
-        self.character_25_script_path = f'./Data/Scripts/{self.character_id}/25'
+        self.custom_value_types = None
+        for _type in os.listdir(custom_value_type_dir):
+            type_path = os.path.join(custom_value_type_dir, _type)
+            if os.path.isfile(type_path) and os.path.splitext(type_path)[1] == '.json':
+                with open(type_path, 'r') as io_value_type:
+                    if self.custom_value_types == None:
+                        self.custom_value_types = json.load(io_value_type)
+                    else:
+                        self.custom_value_types += json.load(io_value_type)
+        self.value_types.append(self.custom_value_types if self.custom_value_types != None else "")
+        
+        self.common_value_types = None
+        for _type in os.listdir(common_value_type_dir):
+            type_path = os.path.join(common_value_type_dir, _type)
+            if os.path.isfile(type_path) and os.path.splitext(type_path)[1] == '.json':
+                with open(type_path, 'r') as io_value_type:
+                    if self.common_value_types == None:
+                        self.common_value_types = json.load(io_value_type)
+                    else:
+                        self.common_value_types += json.load(io_value_type)
+        self.value_types.append(self.common_value_types if self.common_value_types != None else "")
+
+        self.custom_base_path = f'./Data/Custom'
+        self.custom_A5_script_path = f'{self.custom_base_path}/Scripts/A5'
+        self.custom_25_script_path = f'{self.custom_base_path}/Scripts/25'
+        self.common_base_path = './Data/Common'
+        self.common_A5_script_path = f'{self.common_base_path}/Scripts/A5'
+        self.common_25_script_path = f'{self.common_base_path}/Scripts/25'
+        self.character_base_path = f'./Data/Character/{self.character_id}'
+        self.character_25_script_path = f'{self.character_base_path}/Scripts/25'
+        self.character_A5_script_path = f'{self.character_base_path}/Scripts/A5'
 
         self.xA5_data = None
         for file in os.listdir(self.common_A5_script_path):
@@ -2357,9 +2460,14 @@ class Movelist:
             next_throw = throw.get_modified_bytes()
             throws += next_throw
 
+        modifiers = b''
+        for modifier in self.all_modifiers:
+            next_modifier = modifier.get_modified_bytes()
+            modifiers += next_modifier
+
         #short = self.short_bytes
 
-        misc = self.misc_bytes
+        #misc = self.misc_bytes
 
         cancel_offsets = [0,]
         cancels = b''
@@ -2391,7 +2499,7 @@ class Movelist:
 
 
 
-        all_bytes =  header + moves + attacks + throws + misc + cancels
+        all_bytes =  header + moves + attacks + throws + modifiers + cancels
 
         #with open('test.out', 'wb') as fw:
             #fw.write(all_bytes)

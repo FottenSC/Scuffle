@@ -43,12 +43,15 @@ class GUI_MoveViewer:
     ]
 
     def __init__(self, master,verbose=False):
-        if not os.path.exists(f'./Data/Scripts/Custom'):
-                dir = f'./Data/Scripts/Custom'
+        if not os.path.exists(f'./Data/Custom'):
+                dir = f'./Data/Custom'
                 empty_json = '[\n\n]'
-                os.mkdir(dir)
-                os.mkdir(f'{dir}/A5/')
-                os.mkdir(f'{dir}/25/')
+                os.mkdir(f'{dir}')
+                os.mkdir(f'{dir}/Scripts/')
+                os.mkdir(f'{dir}/Scripts/A5/')
+                os.mkdir(f'{dir}/Scripts/25/')
+                os.mkdir(f'{dir}/Value_Types/')
+                dir = f'./Data/Custom/Scripts'
 
                 with open(f'{dir}/A5/01.json', 'w') as file:
                     file.write(empty_json)
@@ -197,8 +200,8 @@ class GUI_MoveViewer:
         self.next_load_button.grid(row=0,column=2)
         self.clear_history_button.grid(row=0,column=3)
         master.bind('<F5>', lambda x: self.load_moveid(self.move_id_textvar.get()))
-        master.bind('<Alt-[>', lambda x: self.load_moveid_from_history(x, 0))
-        master.bind('<Alt-]>', lambda x: self.load_moveid_from_history(x, 1))
+        master.bind('<Control-{>', lambda x: self.load_moveid_from_history(x, 0))
+        master.bind('<Control-}>', lambda x: self.load_moveid_from_history(x, 1))
         master.bind('<Alt-x>', lambda x: self.clear_all_history())
 
         next_move_id_button = Button(move_id_label_container, text=">", width = 1, command=lambda: self.next_move_id_command())
@@ -229,7 +232,7 @@ class GUI_MoveViewer:
         master.bind('<Control-b>', lambda x: self.auto_backup_save_var.set(not self.auto_backup_save_var.get()))
         
         move_frame.rowconfigure(0,weight=2)
-        hitbox_frame.rowconfigure(0,weight=2)
+        hitbox_frame.rowconfigure(1,weight=1)
         cancel_frame.rowconfigure(1,weight=2)
         cancel_frame.columnconfigure(1, weight=1)
         #cancel_frame.columnconfigure(1, weight=2)
@@ -242,8 +245,7 @@ class GUI_MoveViewer:
         hitbox_frame_header = Frame(loader_frame_hit)
         hitbox_frame_header.pack()
 
-        hitbox_frame_label = Label(hitbox_frame_header, text="Hitboxes", font=bold_label_font)
-        hitbox_frame_label.pack()
+       
 
         self.hitbox_index = 0
         self.hitboxes_data = []
@@ -254,26 +256,61 @@ class GUI_MoveViewer:
         self.hitbox_id_var = StringVar()
         self.hitbox_id_var.set('-')
 
-        hitbox_iterator_frame = Frame(hitbox_frame_header)
+        self.modifier_index_var = StringVar()
+        self.modifier_index_var.set('0/0')
+
+
+        hitbox_iterator_frame = Frame(hitbox_frame)
+        hitbox_frame_label = Label(hitbox_iterator_frame, text="Attack: ", font=bold_label_font)
         next_hitbox_button = Button(hitbox_iterator_frame, text=">", width=1, command=lambda: self.next_hitbox_command())
         prev_hitbox_button = Button(hitbox_iterator_frame, text="<", width=1, command=lambda: self.prev_hitbox_command())
         hitbox_label = Label(hitbox_iterator_frame, textvariable = self.hitbox_index_var)
-        hitbox_id_label = Label(hitbox_frame_header, textvariable=self.hitbox_id_var, font=bold_label_font)
+        hitbox_id_label = Label(hitbox_iterator_frame, textvariable=self.hitbox_id_var, font=bold_label_font, padding=[0,0,20,4])
 
+        hitbox_frame_label.grid(row=0, column=0, sticky=N+W)
+        prev_hitbox_button.grid(sticky=N+W, row=0, column=2)
+        hitbox_label.grid(sticky=N+E+W, row=0, column=3)
+        next_hitbox_button.grid(sticky=N, row = 0, column=4)
+        master.bind('<Alt-[>',lambda x: self.prev_hitbox_command())
+        master.bind('<Alt-]>',lambda x: self.next_hitbox_command())
+
+        modifier_iterator_frame = Frame(hitbox_frame, padding= [180,0,0,0])
+        hitbox_frame_label = Label(modifier_iterator_frame, text="Hitbox Modifier: ", font=bold_label_font)
+        next_modifier_button = Button(modifier_iterator_frame, text=">", width=1, command=lambda: self.next_modifier_command())
+        prev_modifier_button = Button(modifier_iterator_frame, text="<", width=1, command=lambda: self.prev_modifier_command())
+        modifier_label = Label(modifier_iterator_frame, textvariable = self.modifier_index_var)
+        
+        hitbox_frame_label.grid(row=0, column=0, sticky=N+W)
+        prev_modifier_button.grid(sticky=N, row=0, column=1)
+        modifier_label.grid(sticky=N+E+W, row=0, column=2)
+        next_modifier_button.grid(sticky=N, row = 0, column=3)
+        master.bind('<Alt-{>',lambda x: self.prev_modifier_command())
+        master.bind('<Alt-}>',lambda x: self.next_modifier_command())
+        
         #hitbox_iterator_frame.grid_columnconfigure(1, weight=1)
-        prev_hitbox_button.grid(sticky=N, row=0, column=0)
-        hitbox_label.grid(sticky=N+E+W, row=0, column=1)
-        next_hitbox_button.grid(sticky=N, row = 0, column=2)
-        master.bind('<Control-{>',lambda x: self.prev_hitbox_command())
-        master.bind('<Control-}>',lambda x: self.next_hitbox_command())
 
-        hitbox_id_label.pack()
-        hitbox_iterator_frame.pack()
+        hitbox_id_label.grid(row=0, column=1)
+        hitbox_iterator_frame.grid(row=0, column=1, pady=4)
+        modifier_iterator_frame.grid(row=0, column=2)
 
         self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 120), 40, True)
-        self.hitbox_pair.grid(sticky=N+W+E+S, row=0, column=1)
+        self.hitbox_pair.grid(sticky=N+W+E+S, row=1, column=1, rowspan=2)
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
+
+        self.modifier_pair = ScrolledTextPair(hitbox_frame, (18, 50), 40, True)
+        self.modifier_pair.grid(sticky=N+W+E+S, row=1, column=2, padx=6)
+        self.modifier_raw = self.modifier_pair.left
+        self.modifier_intr = self.modifier_pair.right
+
+        s.configure('Panel.TFrame', background= '#FFFFFF')
+        self.available_modifier_var = StringVar()
+        self.available_modifier_var.set('()')
+        available_modifier_lbl = Label(modifier_iterator_frame, textvariable= self.available_modifier_var, padding= [100,0,0,0])
+        modifier_add_new = Button(modifier_iterator_frame, text="+", command=lambda :self.assign_modifier(), width=4)
+        available_modifier_lbl.grid(row=0, column=4)
+        modifier_add_new.grid(row=0, column=5)
+        # m_label.grid()
 
         self.font_group = Frame(cancel_frame)
         self.font_group.grid(row=0,column=0)
@@ -283,6 +320,9 @@ class GUI_MoveViewer:
         Button(self.font_group, text="+", width=4, command=lambda: self.cancel_pair.change_font_size(2)).grid(row=0, column=3,sticky=E)
         master.bind('<Control-+>',lambda x: self.cancel_pair.change_font_size(-2))
         master.bind('<Control-=>',lambda x: self.cancel_pair.change_font_size(2))
+
+        self.script_descriptor = Label(self.font_group, text="")
+        self.script_descriptor.grid(row=0,column=4, padx=4)
 
 
 
@@ -317,14 +357,18 @@ class GUI_MoveViewer:
 
         clipboard_move_button = Button(loader_frame_clip, text="Copy Move to Clipboard", command=lambda: GUI_MoveViewer.copy_to_clipboard_and_strip(self.move_raw.get('1.0', END)))
         clipboard_move_button.grid(sticky=N + W + E, row=1, column=0)
-        master.bind('<Control-,>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.move_raw.get('1.0', END)))
+        master.bind('<Control-n>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.move_raw.get('1.0', END)))
 
         clipboard_hitbox_button = Button(loader_frame_clip, text="Copy Hitbox to Clipboard", command=lambda: GUI_MoveViewer.copy_to_clipboard_and_strip(self.hitbox_raw.get('1.0', END)))
         clipboard_hitbox_button.grid(sticky=N + W + E, row=2, column=0)
-        master.bind('<Control-.>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.hitbox_raw.get('1.0', END)))
+        master.bind('<Control-,>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.hitbox_raw.get('1.0', END)))
+        
+        clipboard_modifier_button = Button(loader_frame_clip, text="Copy Modifier to Clipboard", command=lambda: GUI_MoveViewer.copy_to_clipboard_and_strip(self.modifier_raw.get('1.0', END)))
+        clipboard_modifier_button.grid(sticky=N + W + E, row=3, column=0)
+        master.bind('<Control-.>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.modifier_raw.get('1.0', END)))
 
         clipboard_cancel_button = Button(loader_frame_clip, text="Copy Scripting to Clipboard", command=lambda: GUI_MoveViewer.copy_to_clipboard_and_strip(self.cancel_raw.get('1.0', END)))
-        clipboard_cancel_button.grid(sticky=N + W + E, row=3, column=0)
+        clipboard_cancel_button.grid(sticky=N + W + E, row=4, column=0)
         master.bind('<Control-/>',lambda x: GUI_MoveViewer.copy_to_clipboard_and_strip(self.cancel_raw.get('1.0', END)))
 
         tool_label = Label(loader_frame_tools, text="Tools", font=bold_label_font)
@@ -582,6 +626,15 @@ class GUI_MoveViewer:
                 else:
                     self.hitbox_pair.highlight_red()
 
+        modifier_successful = True
+        if self.modifier_index >=0:
+            if len(self.loaded_modifiers) > 0:
+                modifier = self.loaded_modifiers[self.modifier_index]
+                modifier_successful = self.text_entry_to_bytes(self.modifier_raw, modifier[2], MovelistParser.AttackModifier.LENGTH)
+            if modifier_successful:
+                self.modifier_pair.highlight_blue()
+            else:
+                self.modifier_pair.highlight_red()
 
         cancel = move.cancel
         cancel_successful = self.text_entry_to_bytes(self.cancel_raw, cancel, 0)
@@ -597,7 +650,7 @@ class GUI_MoveViewer:
             self.cancel_pair.highlight_red()
         time.sleep(1)
 
-        if move_successful and hitbox_successful and cancel_successful:
+        if move_successful and hitbox_successful and modifier_successful and cancel_successful:
             self.inject_movelist_dialog(False)
             time.sleep(3)
             
@@ -634,6 +687,7 @@ class GUI_MoveViewer:
             elif self.reload_on_save_var.get() == False:
                 self.move_pair.highlight_orange()
                 self.hitbox_pair.highlight_orange()
+                self.modifier_pair.highlight_orange()
                 self.cancel_pair.highlight_orange()
 
             self.save_move['state'] = NORMAL
@@ -734,26 +788,32 @@ class GUI_MoveViewer:
         try:
             self.movelist.character_id = id
             self.character_id_var.set(id)
-            if not os.path.exists(f'./Data/Scripts/{self.movelist.character_id}') and self.character_id_var.get() != '000':
-                character_dir = f'./Data/Scripts/{self.movelist.character_id}'
+            if not os.path.exists(f'./Data/Character/{self.movelist.character_id}') and self.character_id_var.get() != '000':
+                character_dir = f'./Data/Character/{self.movelist.character_id}'
                 empty_json = '[\n\n]'
                 os.mkdir(character_dir)
-                os.mkdir(f'{character_dir}/A5/')
-                os.mkdir(f'{character_dir}/25/')
+                os.mkdir(f'{character_dir}/Scripts/')
+                os.mkdir(f'{character_dir}/Scripts/A5/')
+                os.mkdir(f'{character_dir}/Scripts/25/')
+                os.mkdir(f'{character_dir}/Value_Types/')
 
-                with open(f'{character_dir}/A5/01.json', 'w') as file:
+                with open(f'{character_dir}/Scripts/A5/01.json', 'w') as file:
                     file.write(empty_json)
-                with open(f'{character_dir}/A5/0d.json', 'w') as file:
+                with open(f'{character_dir}/Scripts/A5/0d.json', 'w') as file:
                     file.write(empty_json)
-                with open(f'{character_dir}/25/03.json', 'w') as file:
+                with open(f'{character_dir}/Scripts/25/03.json', 'w') as file:
                     file.write(empty_json)
-                with open(f'{character_dir}/25/0d.json', 'w') as file:
+                with open(f'{character_dir}/Scripts/25/0d.json', 'w') as file:
                     file.write(empty_json)
-                with open(f'{character_dir}/25/14.json', 'w') as file:
+                with open(f'{character_dir}/Scripts/25/14.json', 'w') as file:
                     file.write(empty_json)
+                print(f'{time.strftime("[%I:%M:%S %p]")} Created Character JSON setup: ./Data/Character/{id}')
 
             if self.movelist != None:
                 self.movelist.load_json()
+            
+            if id != '000':
+                print(f'{time.strftime("[%I:%M:%S %p]")} Set Character ID: {id}')
 
                     
         except:
@@ -836,16 +896,25 @@ class GUI_MoveViewer:
             self.move_intr.insert(END, intr)
 
             self.hitbox_index = 0
+            self.modifier_index = 0
             self.hitboxes_data = []
+            self.modifiers_data = []
+            self.loaded_modifiers = []
 
             for i, attack in enumerate(move.attacks):
                 bytes, guide = attack.get_gui_guide()
                 raw, intr = self.apply_guide(bytes, guide)
                 self.hitboxes_data.append((raw, intr, move.attack_indexes[i]))
+
+            for i, modifier in enumerate(move.modifiers):
+                bytes, guide = modifier.get_gui_guide()
+                raw, intr = self.apply_guide(bytes, guide)
+                self.modifiers_data.append((raw, intr, move.modifiers[i]))
             self.load_hitbox()
 
             input_params = MovelistParser.find_script_info(self.movelist, encoded_id, self.movelist.x25_char_data, self.movelist.x25_custom_data, self.movelist.x25_data, "0d")
-            cancel_guide, goto_line_to_line = move.cancel.get_gui_guide(input_params)
+            self.script_descriptor.config(text=f'{input_params[0]}: {input_params[1]}')
+            cancel_guide, goto_line_to_line = move.cancel.get_gui_guide(input_params[1])
             #for bytes in cancel_guide:
 
             raw = ''
@@ -866,10 +935,12 @@ class GUI_MoveViewer:
             if manual:
                 self.move_pair.highlight_green()
                 self.hitbox_pair.highlight_green()
+                self.modifier_pair.highlight_green()
                 self.cancel_pair.highlight_green()
                 time.sleep(2)
             self.move_pair.highlight_gray()
             self.hitbox_pair.highlight_gray()
+            self.modifier_pair.highlight_gray()
             self.cancel_pair.highlight_gray()
             
 
@@ -906,22 +977,89 @@ class GUI_MoveViewer:
             self.hitbox_intr.delete(1.0, END)
             self.hitbox_intr.insert(END, self.hitboxes_data[i][1])
         self.update_hitbox_var()
+        self.loaded_modifiers = []
+        self.load_modifier()
+        self.available_modifier_var.set(f'({len(self.movelist.unused_modifiers)} unused)')
+        
+        self.hitbox_pair.highlight_gray()
+        self.modifier_pair.highlight_gray()
+        
 
     def update_hitbox_var(self):
-        self.hitbox_index_var.set('{}/{}'.format(self.hitbox_index + 1, len(self.hitboxes_data)))
+        self.hitbox_index_var.set('{}/{}'.format(self.hitbox_index + 1 if len(self.hitboxes_data) > 0 else 0, len(self.hitboxes_data)))
         if len(self.hitboxes_data) > 0:
             self.hitbox_id_var.set('{}'.format(self.hitboxes_data[self.hitbox_index][2]))
         else:
             self.hitbox_id_var.set('-')
+
+    def load_modifier(self):
+        j = self.modifier_index
+        self.loaded_modifiers = []
+        for i, modifier in enumerate(self.modifiers_data):
+                hitbox_id = modifier[2].hitbox_id
+                if hitbox_id == self.hitbox_index + 1:
+                    self.loaded_modifiers.append(modifier)
+        if len(self.loaded_modifiers) == 0:
+            self.modifier_raw.delete(1.0, END)
+            self.modifier_intr.delete(1.0, END)
+        elif j < len(self.loaded_modifiers):
+            self.modifier_raw.delete(1.0, END)
+            self.modifier_raw.insert(END, self.loaded_modifiers[j][0])
+
+            self.modifier_intr.delete(1.0, END)
+            self.modifier_intr.insert(END, self.loaded_modifiers[j][1])
+        self.modifier_index_var.set('{}/{}'.format(self.modifier_index + 1 if len(self.loaded_modifiers) > 0 else 0, len(self.loaded_modifiers)))
+        self.modifier_pair.highlight_gray()
+        
+
+    def next_modifier_command(self):
+        self.modifier_index += 1
+        if self.modifier_index >= len(self.loaded_modifiers):
+            self.modifier_index = 0
+        self.load_modifier()
+
+    def prev_modifier_command(self):
+        self.modifier_index -= 1
+        if self.modifier_index < 0:
+            self.modifier_index = 0
+        self.load_modifier()
+
+    def assign_modifier(self):
+        move = self.movelist.all_moves[int(self.move_id_textvar.get())]
+        move_id_bytes = int(self.move_id_textvar.get()).to_bytes(4, 'little')
+        modifier_bytes = move_id_bytes + (self.hitbox_index + 1).to_bytes(4, 'little') + b'\x00' * (MovelistParser.AttackModifier.LENGTH - 8)
+        if len(self.movelist.unused_modifiers) > 0:
+            new_modifier:MovelistParser.AttackModifier = self.movelist.unused_modifiers.pop(0)
+            new_modifier.bytes = modifier_bytes
+            new_modifier.move_id = int(self.move_id_textvar.get())
+            new_modifier.hitbox_id = self.hitbox_index + 1
+        else:
+            new_modifier = MovelistParser.AttackModifier(modifier_bytes)
+            self.movelist.all_modifiers.append(new_modifier)
+            self.movelist.modifier_count += 1
+            for i, move in enumerate(self.movelist.all_moves):
+                move.cancel_address += MovelistParser.AttackModifier.LENGTH
+            for cancel in self.movelist.all_cancels.items():
+                cancel[1].address += MovelistParser.AttackModifier.LENGTH
+        move.modifiers.append(new_modifier)
+        
+        self.save_move_bytes_command(self.do_fix_goto.get())
+        self.load_moveid(self.move_id_textvar.get())
+            
+
+    def add_empty_modifier(self):
+        pass
 
     def load_movelist_dialog(self):
         #Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
 
         filename = askopenfilename(initialdir = '{}/{}'.format(os.getcwd(), '/movelists'),filetypes=[('Header File', '*.khd *.sc6_movelist'),('All Files','*.*')])  # show an "Open" dialog box and return the path to the selected file
         self.load_movelist(filename)
-        print(f'{time.strftime("[%I:%M:%S %p]")} Loaded movelist:{filename}')
+        print(f'{time.strftime("[%I:%M:%S %p]")} Loaded movelist: {filename}')
         if self.move_id_textvar.get() != "-":
             self.save_move['state'] = NORMAL
+
+
 
     def save_movelist_dialog(self):
         filename = asksaveasfilename(defaultextension=".khd")
@@ -930,7 +1068,7 @@ class GUI_MoveViewer:
         else:
             with open(filename, 'wb') as fw:
                 fw.write(self.movelist.generate_modified_movelist_bytes())
-            print(f'{time.strftime("[%I:%M:%S %p]")} Saved movelist:{filename}')
+            print(f'{time.strftime("[%I:%M:%S %p]")} Saved movelist: {filename}')
 
     def inject_movelist_dialog(self,log=False):
         self.log_injected.set(log)
