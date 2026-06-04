@@ -840,7 +840,7 @@ class Attack:
             (0x56, 0x58, b2i, "standing block hit effect"),
             (0x58, 0x5a, b2i, "crouching block hit effect"),
             (0x5a, 0x5c, lambda x, y: f'{math.floor(bs2i(x, y)*100/240)}%' if bs2i(x,y) >= 0 else 'disabled' , "guard damage override"),
-            (0x5c, 0x5e, lambda x, y: f'{get_flags(ComboCondition, b2i(x,y),"")}', f"combo condition flags"),
+            (0x5c, 0x5e, lambda x, y: f'{get_flags(ComboCondition, b2i(x,y))}', f"combo condition flags"),
             (0x5e, 0x60,  lambda x, y: f'{get_strength(b2i(x,y))} {get_flags(ATKStrength, b2i(x,y))}', "ATK type + strength"),
             (0x60, 0x62, b2i, "same as above"),
 
