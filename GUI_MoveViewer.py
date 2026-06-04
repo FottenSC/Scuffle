@@ -296,7 +296,7 @@ class GUI_MoveViewer:
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
 
-        self.modifier_pair = ScrolledTextPair(hitbox_frame, (12, 80), 40, True)
+        self.modifier_pair = ScrolledTextPair(hitbox_frame, (12, 70), 40, True)
         self.modifier_pair.grid(sticky=N+W+E+S, row=1, column=2, padx=6)
         self.modifier_raw = self.modifier_pair.left
         self.modifier_intr = self.modifier_pair.right
@@ -336,7 +336,7 @@ class GUI_MoveViewer:
         self.find_entry.bind('<Return>', lambda x: self.find("next"))
         master.bind('<F3>', lambda x: self.find("next"))
         master.bind('<Shift-F3>', lambda x: self.find("prev"))
-        self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 103), 40, add_canvas=True)
+        self.cancel_pair = ScrolledTextPair(cancel_frame, (70, 90), 40, add_canvas=True)
         self.cancel_pair.grid(sticky=N+W+E+S, row = 1, column = 0, columnspan=8)
 
         self.cancel_raw = self.cancel_pair.left

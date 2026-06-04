@@ -20,24 +20,34 @@ def name_from_enum(cls, value, replace_char = " ", format = False, slice = False
     except:
         return value
 
-def get_flags(flag_cls:Flag, value, replace_char = ' '):
+def get_flags(flag_cls:Flag, value, replace_char = ' ', mode = 0, default= "None"):
     flags = []
+    
     if value == 0x00:
         return "None"
+     
     for flag in flag_cls:
-        if value & flag.value == flag.value:
-            flags.append(flag.name.replace('_', replace_char))
-    return ", ".join(flags)
+        if mode == 0:
+            if value & flag.value == flag.value:
+                flags.append(flag.name.replace('_', replace_char))
+        if mode == 1:
+            if (value >> 4) & flag.value == flag.value:
+                flags.append(flag.name.replace('_', replace_char))
+    if len(flags) > 0:
+        return ", ".join(flags)
+    if (value >> 4) | 0x00 == 0x00:
+        return default
+
 
 def get_strength(value):
-    light = [0, 1, 2, 3, 4]
-    medium = [5, 6, 7, 8, 9]
+    light = [1, 2, 3, 4, 5]
+    medium = [6, 7, 8, 9]
     strong = [10, 11, 12, 13, 14, 15]
-    if value in light:
+    if value & 0x0f in light:
         return 'Light'
-    elif value in medium:
+    elif value & 0x0f in medium:
         return 'Medium'
-    elif value in strong:
+    elif value & 0x0f in strong:
         return 'Strong'
 
 
@@ -857,9 +867,8 @@ class ComboCondition(Flag):
     Jail = 0x20
 
 class ATKStrength(Flag):
-    Horizontal = 0x00
-    Vertical = 0x10
-    Weaponless = 0x30
+    Vertical = 0x01
+    Weaponless = 0x03
 
 
 
