@@ -5,7 +5,7 @@ Backups/
 build/
 dist/
 dist/SCUFFLE/
-Data/Scripts/Custom/
+Data/Custom/
 wheels/
 *.egg-info
 .vscode/

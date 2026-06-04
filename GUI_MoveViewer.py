@@ -160,9 +160,9 @@ class GUI_MoveViewer:
         hitbox_frame = Frame(self.display_frame)
         cancel_frame = Frame(self.main_window)
 
-        self.display_frame.add(move_frame, text='Move')
-        self.display_frame.add(hitbox_frame, text='Hitbox')
-        self.display_frame.add(cancel_frame, text = 'Scripting')
+        self.display_frame.add(move_frame, text='Move', sticky=N+W+E+S)
+        self.display_frame.add(hitbox_frame, text='Hitbox', sticky=N+W+E+S)
+        self.display_frame.add(cancel_frame, text = 'Scripting', sticky=N+W+E+S)
     
         move_id_entry_container = Frame(loader_frame_bot)
         move_id_entry_container.grid(row=0, column=0)
@@ -272,13 +272,13 @@ class GUI_MoveViewer:
         master.bind('<Alt-[>',lambda x: self.prev_hitbox_command())
         master.bind('<Alt-]>',lambda x: self.next_hitbox_command())
 
-        modifier_iterator_frame = Frame(hitbox_frame, padding= [180,0,0,0])
-        hitbox_frame_label = Label(modifier_iterator_frame, text="Hitbox Modifier: ", font=bold_label_font)
+        modifier_iterator_frame = Frame(hitbox_frame, padding= [40,0,0,0])
+        modifier_frame_label = Label(modifier_iterator_frame, text="Hitbox Modifier: ", font=bold_label_font)
         next_modifier_button = Button(modifier_iterator_frame, text=">", width=1, command=lambda: self.next_modifier_command())
         prev_modifier_button = Button(modifier_iterator_frame, text="<", width=1, command=lambda: self.prev_modifier_command())
         modifier_label = Label(modifier_iterator_frame, textvariable = self.modifier_index_var)
         
-        hitbox_frame_label.grid(row=0, column=0, sticky=N+W)
+        modifier_frame_label.grid(row=0, column=0, sticky=N+W)
         prev_modifier_button.grid(sticky=N, row=0, column=1)
         modifier_label.grid(sticky=N+E+W, row=0, column=2)
         next_modifier_button.grid(sticky=N, row = 0, column=3)
@@ -291,12 +291,12 @@ class GUI_MoveViewer:
         hitbox_iterator_frame.grid(row=0, column=1, pady=4)
         modifier_iterator_frame.grid(row=0, column=2)
 
-        self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 120), 40, True)
-        self.hitbox_pair.grid(sticky=N+W+E+S, row=1, column=1, rowspan=2)
+        self.hitbox_pair = ScrolledTextPair(hitbox_frame, (18, 80), 40, True)
+        self.hitbox_pair.grid(sticky=N+W+E+S, row=1, column=1, rowspan=1)
         self.hitbox_raw = self.hitbox_pair.left
         self.hitbox_intr = self.hitbox_pair.right
 
-        self.modifier_pair = ScrolledTextPair(hitbox_frame, (18, 50), 40, True)
+        self.modifier_pair = ScrolledTextPair(hitbox_frame, (12, 80), 40, True)
         self.modifier_pair.grid(sticky=N+W+E+S, row=1, column=2, padx=6)
         self.modifier_raw = self.modifier_pair.left
         self.modifier_intr = self.modifier_pair.right
@@ -304,10 +304,11 @@ class GUI_MoveViewer:
         s.configure('Panel.TFrame', background= '#FFFFFF')
         self.available_modifier_var = StringVar()
         self.available_modifier_var.set('()')
-        available_modifier_lbl = Label(modifier_iterator_frame, textvariable= self.available_modifier_var, padding= [100,0,0,0])
-        modifier_add_new = Button(modifier_iterator_frame, text="+", command=lambda :self.assign_modifier(), width=4)
+        self.move_btn_var = StringVar(value=f"+ modifier to {self.move_id_textvar.get()}, attack {self.hitbox_index + 1}")
+        available_modifier_lbl = Label(modifier_iterator_frame, textvariable= self.available_modifier_var, padding= [98,0,0,0])
+        modifier_add_new = Button(modifier_iterator_frame, textvariable=self.move_btn_var, command=lambda :self.assign_modifier(), width=30)
         available_modifier_lbl.grid(row=0, column=4)
-        modifier_add_new.grid(row=0, column=5)
+        modifier_add_new.grid(row=0, column=5, sticky=N+E)
         # m_label.grid()
 
         self.font_group = Frame(cancel_frame)
@@ -978,6 +979,7 @@ class GUI_MoveViewer:
         self.loaded_modifiers = []
         self.load_modifier()
         self.available_modifier_var.set(f'({len(self.movelist.unused_modifiers)} unused)')
+        self.move_btn_var.set(f"+ modifier to {self.move_id_textvar.get()}, attack {self.hitbox_index + 1}")
         
         self.hitbox_pair.highlight_gray()
         self.modifier_pair.highlight_gray()

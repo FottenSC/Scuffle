@@ -20,14 +20,26 @@ def name_from_enum(cls, value, replace_char = " ", format = False, slice = False
     except:
         return value
 
-def get_flags(flag_cls:Flag, value):
+def get_flags(flag_cls:Flag, value, replace_char = ' '):
     flags = []
     if value == 0x00:
         return "None"
     for flag in flag_cls:
         if value & flag.value == flag.value:
-            flags.append(flag.name.replace('_',' '))
+            flags.append(flag.name.replace('_', replace_char))
     return ", ".join(flags)
+
+def get_strength(value):
+    light = [0, 1, 2, 3, 4]
+    medium = [5, 6, 7, 8, 9]
+    strong = [10, 11, 12, 13, 14, 15]
+    if value in light:
+        return 'Light'
+    elif value in medium:
+        return 'Medium'
+    elif value in strong:
+        return 'Strong'
+
 
 
 class BoolFlag(Enum):
@@ -835,6 +847,19 @@ class HitGeneral(Flag):
     General_1 = 0x01
     General_2 = 0x02
     General_3 = 0x04
+
+class ComboCondition(Flag):
+    Counter = 0x01
+    _ = 0x02
+    __ = 0x04
+    No_Chain = 0x08
+    ___ = 0x10
+    Jail = 0x20
+
+class ATKStrength(Flag):
+    Horizontal = 0x00
+    Vertical = 0x10
+    Weaponless = 0x30
 
 
 
