@@ -3,40 +3,88 @@
         "name": "ATKStrength",
         "values": [
             {
-                "input_value": [1, 2, 3, 4, 5],
-                "output_value": "Weak Horizontal"
+                "input_value": [1, 2],
+                "output_value": "Extremely Weak Horizontal Attack"
             },
             {
-                "input_value": [6, 7, 8, 9, 10],
-                "output_value": "Medium Horizontal"
+                "input_value": 3,
+                "output_value": "Very Weak Horizontal Attack"
             },
             {
-                "input_value": [11, 12, 13, 14, 15],
-                "output_value": "Strong Horizontal"
+                "input_value": [4, 5],
+                "output_value": "Weak Horizontal Attack"
             },
             {
-                "input_value": [17, 18, 19, 20, 21],
-                "output_value": "Weak Vertical"
+                "input_value": [6, 7, 8, 9],
+                "output_value": "Medium Strength Horizontal Attack"
             },
             {
-                "input_value": [22, 23, 24, 25, 26],
-                "output_value": "Medium Vertical"
+                "input_value": [10, 11],
+                "output_value": "Strong Horizontal Attack"
             },
             {
-                "input_value": [27, 28, 29, 30, 31],
-                "output_value": "Strong Vertical"
+                "input_value": [12, 13],
+                "output_value": "Very Strong Horizontal Attack"
             },
             {
-                "input_value": [49, 50, 51, 52, 53],
-                "output_value": "Weak Kick/Throw"
+                "input_value": [14, 15],
+                "output_value": "Extremely Strong Horizontal Attack"
             },
             {
-                "input_value": [54, 55, 56, 57, 58],
-                "output_value": "Medium Kick/Throw"
+                "input_value": [17, 18],
+                "output_value": "Extremely Weak Vertical Attack"
             },
             {
-                "input_value": [59, 60, 61, 62, 63],
-                "output_value": "Strong Kick/Throw"
+                "input_value": 19,
+                "output_value": " Very Weak Vertical Attack"
+            },
+            {
+                "input_value": [20, 21],
+                "output_value": "Weak Vertical Attack"
+            },
+            {
+                "input_value": [22, 23, 24, 25],
+                "output_value": "Medium Strength Vertical Attack"
+            },
+            {
+                "input_value": [26, 27],
+                "output_value": "Strong Vertical Attack"
+            },
+            {
+                "input_value": [28, 29],
+                "output_value": "Very Strong Vertical Attack"
+            },
+            {
+                "input_value": [30, 31],
+                "output_value": "Extremely Strong Vertical Attack"
+            },
+            {
+                "input_value": [49, 50],
+                "output_value": "Extremely Weak Weaponless Attack"
+            },
+            {
+                "input_value": 51,
+                "output_value": "Very Weak Weaponless Attack"
+            },
+            {
+                "input_value": [52, 53],
+                "output_value": "Weak Weaponless Attack"
+            },
+            {
+                "input_value": [54, 55, 56, 57],
+                "output_value": "Medium Weaponless Attack"
+            },
+            {
+                "input_value": [58, 59],
+                "output_value": "Strong Weaponless Attack"
+            },
+            {
+                "input_value": [60, 61],
+                "output_value": "Very Strong Weaponless Attack"
+            },
+            {
+                "input_value": [62, 63],
+                "output_value": "Extremely Strong Weaponless Attack"
             }
         ]
 

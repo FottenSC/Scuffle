@@ -674,7 +674,7 @@ class GUI_MoveViewer:
                 
                 with open('./Backups/KHD_backup_latest.khd', 'wb') as fw:
                     fw.write(self.movelist.generate_modified_movelist_bytes())
-                    print(f'{time.strftime("[%I:%M:%S %p]")} Saved backups: {count+1} Max Count: {max_count}')
+                    print(f'{time.strftime("[%I:%M:%S %p]")} Saved backups: {count+1} | Max Count: {max_count}')
 
 
             if self.do_fix_goto.get() == False:

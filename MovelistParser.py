@@ -260,9 +260,10 @@ def format_value(bytes, cls=None, auto = False, decode = False, movelist = None,
     value_f_b = bs1i(bytes,2)
     type = int(bytes[0])
     result = 0
+    value_types = movelist.value_types
+        
 
     # custom_type_dir = './Data/Types/'
-    value_types = movelist.value_types
     if type == 0x89: #constant
         if cls != None:
             found = False
@@ -816,7 +817,7 @@ class Attack:
 
             (0x32, 0x33, b1i, "hit level (high/low/unblockable/etc.)"),
             (0x33, 0x34, b1i, "???"),
-            (0x34, 0x36, b2i, "hit spark type (contributes to guard damage)"),
+            (0x34, 0x36, b2i, "hit type (contributes to guard damage)"),
             (0x36, 0x38, b2i, "begin active frames (startup)"),
             (0x38, 0x3A, b2i, "end active frames"),
             
@@ -840,8 +841,8 @@ class Attack:
             (0x56, 0x58, b2i, "standing block hit effect"),
             (0x58, 0x5a, b2i, "crouching block hit effect"),
             (0x5a, 0x5c, lambda x, y: f'{math.floor(bs2i(x, y)*100/240)}%' if bs2i(x,y) >= 0 else 'disabled' , "guard damage override"),
-            (0x5c, 0x5e, lambda x, y: f'{get_flags(ComboCondition, b2i(x,y))}', f"combo condition flags"),
-            (0x5e, 0x60,  lambda x, y: f'{get_strength(b2i(x,y))} {get_flags(ATKStrength, b2i(x,y),mode=1, default="Horizontal")}', "ATK type + strength"),
+            (0x5c, 0x5e, lambda x, y: f'{get_flags(ComboConditions, b2i(x,y))}', f"combo condition flags"),
+            (0x5e, 0x60,  lambda x, y: f'{get_strength(b2i(x,y))} Attack', "ATK type + strength"),
             (0x60, 0x62, b2i, "same as above"),
 
             (0x62, 0x64, b2i, "hit spark size (contributes to guard damage)"),
@@ -1029,6 +1030,8 @@ class Cancel:
                             goto += new_diff if goto + new_diff <= len(new_bytes) - 1 else 0
                             if goto < 0:
                                 goto = 0
+                            if goto >= len(new_bytes) - 1:
+                                goto = len(new_bytes) - 1 
                         updated_bytes += goto.to_bytes(2, byteorder='big', signed=True)
                         z += 3
             return updated_bytes
@@ -2415,6 +2418,7 @@ class Movelist:
                             self.x25_char_data = json.load(x25_char_script)
                         else:
                             self.x25_char_data += json.load(x25_char_script)
+        return self.value_types
 
     def parse_cancel_bytes_to_end(self, bytes):
         i = 0

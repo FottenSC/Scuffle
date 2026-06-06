@@ -1,0 +1,48 @@
+[
+    {
+        "name": "CharacterValue",
+        "values": [
+            {
+                "input_value": 0,
+                "output_value": "Soul Gauge"
+            },
+            {
+                "input_value": 2,
+                "output_value": "Guard Gauge"
+            },
+            {
+                "input_value": 3,
+                "output_value": "Hits recieved after stun"
+            },
+            {
+                "input_value": 6,
+                "output_value": "Wintry Reflection Count"
+            },
+            {
+                "input_value": 7,
+                "output_value": "Guard Break Voiceline"
+            },
+            {
+                "input_value": 9,
+                "output_value": "Ring Out Voiceline"
+            },
+            {
+                "input_value": 10,
+                "output_value": "Soul Charge"
+            },
+            {
+                "input_value": 11,
+                "output_value": "Moonlit Reflection Count"
+            },
+            {
+                "input_value": 12,
+                "output_value": "Vernal Reflection Count"
+            },
+            {
+                "input_value": 13,
+                "output_value": "RI LH"
+            }
+        ]
+
+    }
+]

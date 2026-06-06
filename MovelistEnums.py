@@ -1,4 +1,5 @@
 from enum import Enum, Flag
+import MovelistParser
 
 
 def enum_has_value(cls, value):
@@ -31,24 +32,47 @@ def get_flags(flag_cls:Flag, value, replace_char = ' ', mode = 0, default= "None
             if value & flag.value == flag.value:
                 flags.append(flag.name.replace('_', replace_char))
         if mode == 1:
-            if (value >> 4) & flag.value == flag.value:
+            if value & flag.value == flag.value:
                 flags.append(flag.name.replace('_', replace_char))
     if len(flags) > 0:
         return ", ".join(flags)
-    if (value >> 4) | 0x00 == 0x00:
+    if value | 0x00 == 0x00:
         return default
 
-
 def get_strength(value):
-    light = [1, 2, 3, 4, 5]
+    output = ""
+    strength_value = value & 0x0f
+    type_value = value >> 4
+    weak = [1, 2, 3, 4, 5]
     medium = [6, 7, 8, 9]
     strong = [10, 11, 12, 13, 14, 15]
-    if value & 0x0f in light:
-        return 'Light'
-    elif value & 0x0f in medium:
-        return 'Medium'
-    elif value & 0x0f in strong:
-        return 'Strong'
+    if strength_value in weak:
+        if strength_value < weak[int((len(weak) - 1) / 2)]:
+            output = 'Extremely Weak'
+        elif strength_value == weak[int((len(weak) - 1) / 2)]:
+            output = 'Very Weak'
+        elif strength_value > weak[int((len(weak) - 1) / 2)]:
+            output = 'Weak'
+
+    elif strength_value & 0x0f in medium:
+        output = 'Medium Strength'
+    
+    elif strength_value & 0x0f in strong:
+        if strength_value < strong[int((len(strong) - 1) / 2)]:
+            output = 'Strong'
+        elif strength_value == strong[int((len(strong) - 1) / 2)]:
+            output = 'Very Strong'
+        elif strength_value > strong[int((len(strong) - 1) / 2)]:
+            output = 'Extremely Strong'
+
+    if type_value == 0x00:
+        output += ' Horizontal'
+    elif type_value == 0x01:
+        output += ' Vertical'
+    elif type_value == 0x03:
+        output += ' Weaponless'
+    
+    return output
 
 
 
@@ -343,8 +367,12 @@ class InputType(Enum):
 
 class ComboConditions(Flag):
     Counter_Hit = 0x01
-    Prevent_Chain = 0x08
-    Jail_on_Block = 0x20
+    Flag_0x02 = 0x02
+    Flag_0x04 = 0x04
+    No_Chain = 0x08
+    Jail_OB = 0x20
+    Flag_0x40 = 0x40
+    Flag_0x80 = 0x80
 
 class ReturnState(Enum):
     STANDING = 0xc8
@@ -858,17 +886,6 @@ class HitGeneral(Flag):
     General_2 = 0x02
     General_3 = 0x04
 
-class ComboCondition(Flag):
-    Counter = 0x01
-    _ = 0x02
-    __ = 0x04
-    No_Chain = 0x08
-    ___ = 0x10
-    Jail = 0x20
-
-class ATKStrength(Flag):
-    Vertical = 0x01
-    Weaponless = 0x03
 
 
 
